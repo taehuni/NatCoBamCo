@@ -1643,7 +1643,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6eb3ac170e7dd04daf3c2353feea354, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
-  health: 999
+  health: 20
   moveSpeed: 3
   attackRange: 2
   attackDamage: 10

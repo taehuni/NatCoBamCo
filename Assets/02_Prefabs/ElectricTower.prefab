@@ -47,6 +47,7 @@ GameObject:
   - component: {fileID: 216560323487879410}
   - component: {fileID: 3841751019800861297}
   - component: {fileID: 5155592133442511555}
+  - component: {fileID: 975306794337795514}
   m_Layer: 7
   m_Name: ElectricTower
   m_TagString: Building
@@ -219,6 +220,21 @@ MonoBehaviour:
   maxlevel: 4
   paralyzeDuration: 2
   paralyzeStackIncrease: 10
+--- !u!114 &975306794337795514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3113098753654139490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5eba2b3a16b963f43bfc15ef426f55c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DamageableBuilding
+  hp: 100
+  maxHp: 100
+  defensePower: 0
 --- !u!1 &3795116346468430017
 GameObject:
   m_ObjectHideFlags: 0

@@ -10,6 +10,7 @@ public class EnemyAI : MonoBehaviour
     public float attackDamage = 10f;
     public float attackCooldown = 1.5f;
     private float lastAttackTime;
+    private LayerMask enemyLayer;
 
     private NavMeshAgent agent;
     private Core core;
