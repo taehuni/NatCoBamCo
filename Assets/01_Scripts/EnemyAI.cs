@@ -10,7 +10,6 @@ public class EnemyAI : MonoBehaviour
     public float attackDamage = 10f;
     public float attackCooldown = 1.5f;
     private float lastAttackTime;
-    private LayerMask enemyLayer;
 
     private NavMeshAgent agent;
     private Core core;
@@ -24,6 +23,7 @@ public class EnemyAI : MonoBehaviour
     private bool isSlowed; //감속 상태인지 여부
     private float slowEndTime; //감속 상태 끝나는 시간
     private float currentSlowPower; //감속 상태에서 현재 감속력
+    private Collider coreCollider;
 
 
     void Start()
@@ -31,6 +31,11 @@ public class EnemyAI : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         if (agent != null) agent.speed = moveSpeed;
         core = FindObjectOfType<Core>();
+        if (core != null)
+        {
+            coreCollider = core.GetComponentInChildren<Collider>();
+        }
+
     }
 
     void Update()
@@ -119,11 +124,26 @@ public class EnemyAI : MonoBehaviour
         // 3. 없으면 코어를 향해 이동하거나 공격
         else if (core != null)
         {
-            if (agent != null && agent.enabled) agent.isStopped = false;
-            float distance = Vector3.Distance(transform.position, core.transform.position);
+
+            float distance;
+
+            if (coreCollider != null)
+            {
+                Vector3 closestPoint = coreCollider.ClosestPoint(transform.position);
+                distance = Vector3.Distance(transform.position, closestPoint);
+            }
+            else
+            {
+                distance = Vector3.Distance(transform.position, core.transform.position);
+            }
 
             if (distance <= attackRange)
             {
+                if (agent != null && agent.enabled)
+                {
+                    agent.isStopped = true;
+                }
+
                 if (Time.time >= lastAttackTime + attackCooldown)
                 {
                     core.GetDamage(attackDamage);
@@ -134,6 +154,7 @@ public class EnemyAI : MonoBehaviour
             {
                 if (agent != null && agent.enabled)
                 {
+                    agent.isStopped = false;
                     agent.SetDestination(core.transform.position);
                 }
             }
