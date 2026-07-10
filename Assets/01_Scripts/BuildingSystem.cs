@@ -5,6 +5,7 @@ public class BuildingSystem : MonoBehaviour
     public Camera mainCam;
     public GameObject wallPrefab; //벽 소재
     public GameObject towerPrefab; //타워 소재
+    public GameObject electricTowerPrefab; //전기타워 소재
     private GameObject currentBuildingPrefab; //현재 건조할 건축
     private GameObject previewBuilding; //미리보기 temp
     public float buildDistance = 10f; //건조 범위
@@ -209,6 +210,11 @@ public class BuildingSystem : MonoBehaviour
         {
             SelectBuilding(towerPrefab);
         }
+
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            SelectBuilding(electricTowerPrefab);
+        }
     }
 
     //선택함수
@@ -268,6 +274,14 @@ public class BuildingSystem : MonoBehaviour
         for (int i = 0; i < colliders.Length; i++)
         {
             colliders[i].enabled = false;
+        }
+
+        //전기 타워 미리보기 때 기능 비활성화
+        ElectricTower[] electricTowers = previewBuilding.GetComponentsInChildren<ElectricTower>();
+
+        for (int i = 0; i < electricTowers.Length; i++)
+        {
+            electricTowers[i].enabled = false;
         }
     }
 
