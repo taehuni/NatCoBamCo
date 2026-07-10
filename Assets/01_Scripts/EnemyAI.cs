@@ -4,26 +4,37 @@ using UnityEngine.AI;
 public class EnemyAI : MonoBehaviour
 {
     [Header("적군 설정")]
-    public int health = 30;
+    public float health = 30;
     public float moveSpeed = 3f;
     public float attackRange = 2f;
     public float attackDamage = 10f;
     public float attackCooldown = 1.5f;
     private float lastAttackTime;
+    public float defensePower = 10; //현재의 방어력
+    public float defenseConstant = 100f;
 
     private NavMeshAgent agent;
     private Core core;
 
     [Header("전기 타워 관한 변수")]
-    public int curParalyzeStack; //현재 마비 stack 수
-    public int maxParalyzeStack = 100; //마비상태 들어가려면 필요한 미비 stack 수
-    public float paralyzeDefensePower = 1f; //보스,엘리트 적 미비 저항력
+    public float curParalyzeStack; //현재 마비 stack 수
+    public float maxParalyzeStack = 100; //마비상태 들어가려면 필요한 미비 stack 수
+    public float paralyzeDefensePower = 0.1f; //보스,엘리트 적 미비 저항력(0 ~ 1)
     private float paralyzeEndTime; //마비 상태 끝나는 시간
     private bool isParalyzed; //마비 상태인지 여부
     private bool isSlowed; //감속 상태인지 여부
     private float slowEndTime; //감속 상태 끝나는 시간
     private float currentSlowPower; //감속 상태에서 현재 감속력
     private Collider coreCollider;
+    private bool isDefenseReduced; //방어력 감소 상태
+    private float defenseReductionEndTime; //방어력 감소 종료 시간
+    private float originalDefensePower; //원래 방어력
+    private float currentDefenseReduceAmount;
+
+    // [Header("다른 타워 % 방어력 감소할 때 사용")]
+    // private bool isDamageReductionReduced;
+    // private float damageReductionReduceAmount;
+    // private float damageReductionReduceEndTime;
 
 
     void Start()
@@ -35,6 +46,7 @@ public class EnemyAI : MonoBehaviour
         {
             coreCollider = core.GetComponentInChildren<Collider>();
         }
+        originalDefensePower = defensePower;
 
     }
 
@@ -46,6 +58,7 @@ public class EnemyAI : MonoBehaviour
         }
 
         HandleSlowState(); //감속 상태 처리
+        HandleDefenseReductionState();
         EnemyDafaultLogic();
     }
 
@@ -63,6 +76,21 @@ public class EnemyAI : MonoBehaviour
             currentSlowPower = 0f; //감속력 초기화
 
             ResetSpeed();
+        }
+    }
+
+    void HandleDefenseReductionState()
+    {
+        if (!isDefenseReduced)
+        {
+            return;
+        }
+
+        if (Time.time >= defenseReductionEndTime)
+        {
+            isDefenseReduced = false;
+            currentDefenseReduceAmount = 0;
+            defensePower = originalDefensePower;
         }
     }
 
@@ -162,17 +190,18 @@ public class EnemyAI : MonoBehaviour
     }
 
     //마비 상태 stack 증가
-    public void AddParalyzeStack(int amount, float duration)
+    public void AddParalyzeStack(float amount, float duration)
     {
         if (isParalyzed)
         {
             return;
         }
 
-        curParalyzeStack += amount;
+        curParalyzeStack += amount * (1f - paralyzeDefensePower);
 
         if (curParalyzeStack >= maxParalyzeStack)
         {
+            //Debug.Log(gameObject.name + " 가 마비상태 들어가다");
             curParalyzeStack = maxParalyzeStack;
             //마비상태 들어가기
             EnterParalyze(duration);
@@ -193,10 +222,35 @@ public class EnemyAI : MonoBehaviour
     }
 
     //다매지 받기
+    public void TakeDamage(int defaultDamage, float ignoreDefenseRate)
+    {
+        //根据防御力计算减防比例
+        float damageReduction = defensePower / (defensePower + defenseConstant);
+        // if (isDamageReductionReduced)
+        // {
+        //     damageReduction -= damageReductionReduceAmount;
+        // }
+        damageReduction -= ignoreDefenseRate; //방어 무시 비율 无视防御比例
+        damageReduction = Mathf.Clamp(damageReduction, 0f, 0.9f); //min 0, max 0.9
+
+        //最终伤害计算
+        float finalDamage = defaultDamage * (1f - damageReduction);
+        finalDamage = Mathf.Max(finalDamage, 1f);
+        finalDamage = RoundToTwoDecimals(finalDamage);
+
+        health -= finalDamage;
+        if (health <= 0) Destroy(gameObject);
+    }
+
     public void TakeDamage(int defaultDamage)
     {
-        health -= defaultDamage;
-        if (health <= 0) Destroy(gameObject);
+        TakeDamage(defaultDamage, 0f);
+    }
+
+    //소수점 뒤에 2자리 저장
+    float RoundToTwoDecimals(float value)
+    {
+        return Mathf.Round(value * 100f) / 100f;
     }
 
     //속도 감소
@@ -213,10 +267,26 @@ public class EnemyAI : MonoBehaviour
         {
             currentSlowPower = coldPower; //현재 감속력 업데이트
             agent.speed = moveSpeed * (1f - currentSlowPower); //감속력 적용
+            //Debug.Log(gameObject.name + "가 감속 상태 들어가다");
             slowEndTime = Time.time + coldTime; //감속 상태 끝나는 시간 업데이트
         }
     }
 
+    //DefensePower 감소 
+    public void ReduceDefensePower(float amount, float duration)
+    {
+
+        if (amount < currentDefenseReduceAmount)
+        {
+            return;
+        }
+
+        currentDefenseReduceAmount = amount;
+        isDefenseReduced = true;
+        defenseReductionEndTime = Time.time + duration;
+
+        defensePower = originalDefensePower * (1f - amount);
+    }
 
     //속도 회복
     void ResetSpeed()

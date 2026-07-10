@@ -8,7 +8,7 @@ public class ElectricBullet : MonoBehaviour
     private int damage; //伤害 / 데미지
     private float coldPower; //减速效果 / 감속 효과
     private float coldTime; //减速持续时间 / 감속 지속 시간
-    private int paralyzeStackIncrease; //麻痹叠加层数 / 마비 스택 증가량
+    private float paralyzeStackIncrease; //麻痹叠加层数 / 마비 스택 증가량
     private float paralyzeDuration; //麻痹时间 / 마비 지속 시간
     private int maxTargets; //弹射数量 / 연쇄 공격 가능한 최대 대상 수
     private int hitCount; //当前弹射次数 / 현재 명중한 횟수
@@ -17,6 +17,9 @@ public class ElectricBullet : MonoBehaviour
     private List<EnemyAI> hitEnemies = new List<EnemyAI>(); //弹射攻击敌人记录列表 / 이미 명중한 적을 기록하는 리스트
     private bool hasHit; //确保碰撞和距离检测只触发一次HitTarget的判断条件 / 충돌 검사와 거리 검사가 HitTarget을 중복 호출하지 않도록 막는 조건
 
+    private bool hasDefenseReduction;//是否减防
+    private float defenseReductionAmount;//减防强度
+    private float defenseReductionDuration;//减防时间
     public float moveSpeed = 20f; //炮弹速度 / 포탄 이동 속도
     public float hitDistance = 0.2f;
 
@@ -40,10 +43,13 @@ public class ElectricBullet : MonoBehaviour
     int bulletDamage,
     float bulletColdPower,
     float bulletColdTime,
-    int bulletParalyzeStackIncrease,
+    float bulletParalyzeStackIncrease,
     float bulletParalyzeDuration,
     int maxTargets,
-    LayerMask enemyLayer)
+    LayerMask enemyLayer,
+    bool hasDefenseReduction,
+    float defenseReduceAmount,
+    float defenseReduceTime)
     {
         target = targetEnemy;
         damage = bulletDamage;
@@ -53,6 +59,9 @@ public class ElectricBullet : MonoBehaviour
         paralyzeDuration = bulletParalyzeDuration;
         this.maxTargets = maxTargets;
         this.enemyLayer = enemyLayer;
+        this.hasDefenseReduction = hasDefenseReduction;
+        this.defenseReductionAmount = defenseReduceAmount;
+        this.defenseReductionDuration = defenseReduceTime;
         Debug.Log("Bullet Init Target: " + targetEnemy.name);
     }
 
@@ -64,10 +73,15 @@ public class ElectricBullet : MonoBehaviour
         }
         hasHit = true;
 
+
         target.TakeDamage(damage); //造成伤害 / 데미지 적용
         target.SetSpeedDown(coldPower, coldTime); //减速 / 감속 적용
         target.AddParalyzeStack(paralyzeStackIncrease, paralyzeDuration); //叠加麻痹层数 / 마비 스택 추가
-
+        //如果有减防效果
+        if (hasDefenseReduction)
+        {
+            target.ReduceDefensePower(defenseReductionAmount, defenseReductionDuration);
+        }
         hitEnemies.Add(target); //将当前目标加到被弹射攻击的敌人的列表，用来记录被攻击过的敌人 / 현재 타겟을 이미 명중한 적 리스트에 추가
         hitCount++; //现在弹射数增加 / 현재 명중 횟수 증가
 

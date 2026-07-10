@@ -16,7 +16,10 @@ public class ElectricTower : MonoBehaviour
     public int level = 1; //防御塔等级 / 방어 타워 레벨
     public int maxlevel = 4; //最大等级 / 최대 레벨
     public float paralyzeDuration = 2f; //麻痹持续时间 / 마비 지속 시간
-    public int paralyzeStackIncrease = 10; //麻痹叠加层数 / 마비 스택 증가량
+    public float paralyzeStackIncrease = 10; //麻痹叠加层数 / 마비 스택 증가량
+    public bool hasDefenseReduction; //是否减防
+    public float defenseReduceAmount = 0.2f; //减防强度
+    public float defenseReduceTime = 3f; //减防时间
     private float nextAttackTime; //下次攻击时间 / 다음 공격 가능 시간
     private List<EnemyAI> enemiesInRange = new List<EnemyAI>(); //在攻击范围内的敌人 / 공격 범위 안에 있는 적 목록
 
@@ -50,7 +53,7 @@ public class ElectricTower : MonoBehaviour
                 enemiesInRange.RemoveAt(i);
             }
             else
-            {   
+            {
                 float distance = Vector3.Distance(transform.position, enemiesInRange[i].transform.position);
 
                 //如果敌人移动到攻击范围之外就从列表中删除
@@ -120,7 +123,7 @@ public class ElectricTower : MonoBehaviour
         //拿到炮弹上的ElectricBullet组件
         //생성된 포탄에서 ElectricBullet 컴포넌트를 가져옴
         ElectricBullet bullet = bulletObject.GetComponent<ElectricBullet>();
-        
+
         //如果炮弹不为空
         //포탄 컴포넌트가 있으면
         if (bullet != null)
@@ -135,7 +138,10 @@ public class ElectricTower : MonoBehaviour
                 paralyzeStackIncrease,
                 paralyzeDuration,
                 maxTargets,
-                enemyLayer
+                enemyLayer,
+                hasDefenseReduction,
+                defenseReduceAmount,
+                defenseReduceTime
             );
         }
 
@@ -150,6 +156,10 @@ public class ElectricTower : MonoBehaviour
             return;
         }
         level++;
+        if (level >= maxlevel)
+        {
+            hasDefenseReduction = true;
+        }
         damage += 2;
         attackRange += 2f;
         attackInterval -= 0.1f;

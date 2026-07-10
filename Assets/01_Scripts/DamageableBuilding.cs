@@ -5,6 +5,7 @@ public class DamageableBuilding : MonoBehaviour
     public float hp = 100f;
     public float maxHp = 100f;
     public int defensePower = 0;
+    //public float repairTime;  수리 시간
 
     public void GetDamage(float damage)
     {
@@ -23,7 +24,8 @@ public class DamageableBuilding : MonoBehaviour
         }
     }
 
-    public void Heal(float healAmount)
+    //기본 수리 함수
+    public void Repair(float healAmount)
     {
         if (hp == maxHp)
         {
@@ -39,6 +41,7 @@ public class DamageableBuilding : MonoBehaviour
         }
 
         //자원 소모 추가해야 함
+        //수리 진도는 Silder으로 표현
 
     }
 }
