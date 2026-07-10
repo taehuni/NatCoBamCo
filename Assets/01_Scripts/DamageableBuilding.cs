@@ -22,4 +22,23 @@ public class DamageableBuilding : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
+    public void Heal(float healAmount)
+    {
+        if (hp == maxHp)
+        {
+            return;
+        }
+        else
+        {
+            hp += healAmount;
+            if (hp > maxHp)
+            {
+                hp = maxHp;
+            }
+        }
+
+        //자원 소모 추가해야 함
+
+    }
 }

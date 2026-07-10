@@ -36,8 +36,8 @@ public class PlayerController : MonoBehaviour
         transform.rotation = Quaternion.Euler(0f, cameraY, 0f);
 
         //상하좌우 이동 받기
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
 
         //카메라에 방향 가져와 앞,우
         Vector3 forward = mainCam.transform.forward;
