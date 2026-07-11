@@ -1,3 +1,4 @@
+using System.Xml.Serialization;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -12,7 +13,13 @@ public class EnemyAI : MonoBehaviour
     private float lastAttackTime;
     public float defensePower = 10; //현재의 방어력
     public float defenseConstant = 100f;
-
+    public enum EnemyType //적의 유형 Enum
+    {
+        Normal,
+        Elite,
+        Boss
+    }
+    public EnemyType enemyType; //적의 유형
     private NavMeshAgent agent;
     private Core core;
 
@@ -222,14 +229,11 @@ public class EnemyAI : MonoBehaviour
     }
 
     //다매지 받기
-    public void TakeDamage(int defaultDamage, float ignoreDefenseRate)
+    public void TakeDamage(float defaultDamage, float ignoreDefenseRate)
     {
         //根据防御力计算减防比例
-        float damageReduction = defensePower / (defensePower + defenseConstant);
-        // if (isDamageReductionReduced)
-        // {
-        //     damageReduction -= damageReductionReduceAmount;
-        // }
+        float damageReduction = GetCurrentDamageReduction();
+
         damageReduction -= ignoreDefenseRate; //방어 무시 비율 无视防御比例
         damageReduction = Mathf.Clamp(damageReduction, 0f, 0.9f); //min 0, max 0.9
 
@@ -237,14 +241,30 @@ public class EnemyAI : MonoBehaviour
         float finalDamage = defaultDamage * (1f - damageReduction);
         finalDamage = Mathf.Max(finalDamage, 1f);
         finalDamage = RoundToTwoDecimals(finalDamage);
-
+        Debug.Log("FinalDamage = " + finalDamage);
         health -= finalDamage;
-        if (health <= 0) Destroy(gameObject);
+        if (health <= 0) Dead();
     }
 
-    public void TakeDamage(int defaultDamage)
+    public void TakeDamage(float defaultDamage)
     {
         TakeDamage(defaultDamage, 0f);
+    }
+
+    //방어 비례 계산 함수
+    public float GetCurrentDamageReduction()
+    {
+        float damageReduction = defensePower / (defensePower + defenseConstant);
+
+        // 以后如果有真正的百分比减防 debuff，就放这里
+        // if (isDamageReductionReduced)
+        // {
+        //     damageReduction -= damageReductionReduceAmount;
+        // }
+
+        damageReduction = Mathf.Clamp(damageReduction, 0f, 0.9f);
+
+        return damageReduction;
     }
 
     //소수점 뒤에 2자리 저장
@@ -295,5 +315,11 @@ public class EnemyAI : MonoBehaviour
         {
             agent.speed = moveSpeed;
         }
+    }
+
+    public void Dead()
+    {
+        Destroy(gameObject);
+        //나중에 사망 animation 추가
     }
 }

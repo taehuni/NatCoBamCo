@@ -12,10 +12,10 @@ GameObject:
   - component: {fileID: 8461962720982861188}
   - component: {fileID: 7322341208292437262}
   - component: {fileID: 1614361508817768016}
-  - component: {fileID: -9035373253765539730}
   - component: {fileID: 4818917295057993205}
+  - component: {fileID: -6943534666670884342}
   m_Layer: 0
-  m_Name: Bullet
+  m_Name: SniperBullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -69,7 +69,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c7a7db192b02ad648a53b8d7f0ed874b, type: 2}
+  - {fileID: 2100000, guid: fe7b43af2aab88e4798742e4018685ba, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -116,19 +116,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &-9035373253765539730
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1724198029846644923}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 73ae0db175975c04bbd7aab80b4be562, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: "Assembly-CSharp::\uC804\uAE30\uD0C0\uC6CC\uD3EC\uD0C4"
-  moveSpeed: 20
 --- !u!54 &4818917295057993205
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -156,3 +143,17 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &-6943534666670884342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1724198029846644923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11c7bbe0a2ec6974fa4bb30b19e1a0b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SniperBullet
+  hitDistance: 0.2
+  moveSpeed: 20
