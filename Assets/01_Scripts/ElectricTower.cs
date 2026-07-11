@@ -30,9 +30,12 @@ public class ElectricTower : MonoBehaviour
     {
         if (Time.time >= nextAttackTime)
         {
-            Attack();
+            bool attacked = Attack();
 
-            nextAttackTime = Time.time + attackInterval;
+            if (attacked)
+            {
+                nextAttackTime = Time.time + attackInterval;
+            }
         }
     }
 
@@ -99,11 +102,11 @@ public class ElectricTower : MonoBehaviour
         return enemiesInRange[0];
     }
 
-    void Attack()
+    bool Attack()
     {
         if (bulletPrefab == null || firePoint == null)
         {
-            return;
+            return false;
         }
 
         //更新搜索到的敌人列表
@@ -114,7 +117,7 @@ public class ElectricTower : MonoBehaviour
 
         if (targetEnemy == null) //如果没有目标就不攻击 / 타겟이 없으면 공격하지 않음
         {
-            return;
+            return false;
         }
 
         //在开火位置生成炮弹
@@ -123,7 +126,7 @@ public class ElectricTower : MonoBehaviour
         //拿到炮弹上的ElectricBullet组件
         //생성된 포탄에서 ElectricBullet 컴포넌트를 가져옴
         ElectricBullet bullet = bulletObject.GetComponent<ElectricBullet>();
-
+        
         //如果炮弹不为空
         //포탄 컴포넌트가 있으면
         if (bullet != null)
@@ -143,7 +146,11 @@ public class ElectricTower : MonoBehaviour
                 defenseReduceAmount,
                 defenseReduceTime
             );
+            return true;
         }
+        
+        Destroy(bulletObject);
+        return false;
 
     }
 
