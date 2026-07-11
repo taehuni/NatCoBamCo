@@ -19,7 +19,7 @@ public class PlayerShoot : MonoBehaviour
 
     // 사격 관련
     private float nextFireTime;
-    private int burstShotsRemaining;
+    private bool isBursting;
     private bool switchModeAfterBurst;
 
     public bool isPrecisionMode;             // 정밀 사격 상태
@@ -60,7 +60,7 @@ public class PlayerShoot : MonoBehaviour
         (buildingSystem.isBuildMode || buildingSystem.isRemoveMode))
         {
             return;
-        }   
+        }
 
         UpdatePrecisionMode();
         HandleFireInput();
@@ -73,10 +73,9 @@ public class PlayerShoot : MonoBehaviour
         {
             Debug.Log("V키가 눌렸습니다. 현재 모드: " + currentWeapon.curFireMode);
 
-            if (currentWeapon.curFireMode == Weapon.FireMode.Burst && burstShotsRemaining > 0)
+            if (currentWeapon.curFireMode == Weapon.FireMode.Burst && isBursting)
             {
                 switchModeAfterBurst = true;
-                Debug.Log("Burst 발사 대기 중, 사격 후 변경 예약됨");
             }
             else
             {
@@ -141,21 +140,38 @@ public class PlayerShoot : MonoBehaviour
 
     void HandleBurstFire()
     {
-        if (Input.GetMouseButtonDown(0) && burstShotsRemaining == 0)
+        if (Input.GetMouseButtonDown(0) && !isBursting && Time.time >= nextFireTime)
         {
-            burstShotsRemaining = currentWeapon.burstCount;
+            StartCoroutine(BurstFire());
         }
+    }
 
-        if (burstShotsRemaining > 0 && TryFireOneShot())
+    IEnumerator BurstFire()
+    {
+        isBursting = true;
+
+        for (int i = 0; i < currentWeapon.burstCount; i++)
         {
-            burstShotsRemaining--;
+            FireOneShot();
 
-            if (burstShotsRemaining == 0 && switchModeAfterBurst)
+            if (i < currentWeapon.burstCount - 1)
             {
-                currentWeapon.SwitchFireMode();
-                switchModeAfterBurst = false;
+                yield return new WaitForSeconds(currentWeapon.fireInterval);
             }
+
         }
+
+        nextFireTime = Time.time + currentWeapon.fireInterval;
+
+        if (switchModeAfterBurst)
+        {
+            currentWeapon.SwitchFireMode();
+            switchModeAfterBurst = false;
+        }
+        
+        isBursting = false;
+
+
     }
 
     // 데미지 로직이 포함된 Shoot 함수
