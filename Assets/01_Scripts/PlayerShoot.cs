@@ -168,13 +168,13 @@ public class PlayerShoot : MonoBehaviour
             currentWeapon.SwitchFireMode();
             switchModeAfterBurst = false;
         }
-        
+
         isBursting = false;
 
 
     }
 
-    // 데미지 로직이 포함된 Shoot 함수
+    // 데미지 로직이 포함된 Shoot 함수 
     void Shoot(Vector3 viewportPoint)
     {
         Ray ray = mainCam.ViewportPointToRay(viewportPoint);
