@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using static UnityEngine.GraphicsBuffer;
 
 public class FlameTower : MonoBehaviour
 {
@@ -22,6 +23,9 @@ public class FlameTower : MonoBehaviour
     public float cooldown = 3f;
 
     private bool isAttacking = false;
+
+    [Header("능력")]
+    public float executionPer = 0.1f; //현재 10% 이하 처형. 기본값을 0으로 두고 이후 수치를 올리는 것으로 조정 가능.
 
     void Update()
     {
@@ -84,7 +88,6 @@ public class FlameTower : MonoBehaviour
             RotateToTarget(target);
 
             DealDamage();
-
             yield return new WaitForSeconds(damageInterval);
 
             timer += damageInterval;
@@ -128,12 +131,43 @@ public class FlameTower : MonoBehaviour
         foreach (Collider col in enemies)
         {
             EnemyAI enemy = col.GetComponentInParent<EnemyAI>();
-
             if (enemy != null)
             {
-                enemy.TakeDamage(damagePerTick);
+                float hpPercent = (float)enemy.health / enemy.maxHp;
+
+                if (hpPercent <= executionPer)
+                {
+                    Debug.Log("처형");
+                    enemy.Dead();
+                }
+                else
+                {
+                    enemy.TakeDamage(damagePerTick);
+                }
             }
         }
+    }
+
+    //후에 추가될 업그레이드 기능
+    void UpgradeDamage(int damage)
+    {
+        this.damagePerTick += damage;
+    }
+
+    void UpgradeDelay(float delay)
+    {
+        cooldown -= delay; //후에 %형식으로 조정 예정
+    }
+
+    void UpgradeRange(float length, float width)
+    {
+        flameLength += length;
+        flameWidth += width;
+    }
+
+    void UpgradeExcute(float per)
+    {
+        executionPer += per;
     }
 
     // 디버그용 기즈모
