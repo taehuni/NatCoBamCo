@@ -8,6 +8,8 @@ public class Tower : MonoBehaviour
     public LayerMask enemyLayer;
 
     private float nextAttackTime;
+    private EnemyAI currentTarget;
+
 
     void Start()
     {
@@ -26,6 +28,7 @@ public class Tower : MonoBehaviour
 
     void Attack()
     {
+
         //원형 범위에 enemy layer 있는 놈이 찾아
         Collider[] enemies = Physics.OverlapSphere(transform.position, attackRange, enemyLayer);
         //없으면 동작이 안해
@@ -37,7 +40,7 @@ public class Tower : MonoBehaviour
         Collider target = enemies[0];
 
         EnemyAI enemy = target.GetComponentInParent<EnemyAI>();
-
+        currentTarget = enemy;
         if (enemy != null)
         {
             enemy.TakeDamage(damage);
@@ -45,4 +48,29 @@ public class Tower : MonoBehaviour
 
     }
 
+    //후에 추가될 업그레이드 기능
+    void UpgradeDamage(int damage)
+    {
+        this.damage += damage;
+    }
+
+    void UpgradeDelay(float delay)
+    {
+        nextAttackTime -= delay; //후에 %형식으로 조정 예정
+    }
+
+    //기즈모 그리기
+    private void OnDrawGizmos()
+    {
+        // 공격 범위
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, attackRange);
+
+        // 현재 타겟
+        if (currentTarget != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(transform.position, currentTarget.transform.position);
+        }
+    }
 }

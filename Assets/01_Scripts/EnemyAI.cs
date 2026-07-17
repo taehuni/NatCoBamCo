@@ -5,6 +5,7 @@ using UnityEngine.AI;
 public class EnemyAI : MonoBehaviour
 {
     [Header("적군 설정")]
+    public float maxHp = 30;
     public float health = 30;
     public float moveSpeed = 3f;
     public float attackRange = 2f;
@@ -46,6 +47,7 @@ public class EnemyAI : MonoBehaviour
 
     void Start()
     {
+        health = maxHp;
         agent = GetComponent<NavMeshAgent>();
         if (agent != null) agent.speed = moveSpeed;
         core = FindObjectOfType<Core>();
