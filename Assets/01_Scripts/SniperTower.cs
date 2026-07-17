@@ -18,10 +18,23 @@ public class SniperTower : MonoBehaviour
     public LayerMask enemyLayer; // 敌人图层 / 적 레이어
     public GameObject bulletPrefab; // 子弹预制体 / 탄환 프리팹
     public Transform firePoint; // 发射位置 / 발사 위치
+    public float rotateSpeed = 180f;
     private List<EnemyAI> enemiesInRange = new List<EnemyAI>(); // 在攻击范围内的敌人 / 공격 범위 안에 있는 적 목록
-
+    private EnemyAI targetEnemy;
     void Update()
     {
+        // 更新当前攻击范围内的敌人列表
+        // 현재 공격 범위 안의 적 목록 갱신
+        UpdateEnemiesInRange();
+
+        // 获取最先进入攻击范围的敌人作为目标
+        // 가장 먼저 공격 범위에 들어온 적을 타겟으로 사용
+        targetEnemy = GetFirstEnteredEnemy();
+
+        if (targetEnemy != null)
+        {
+            LookAtEnemy(targetEnemy);
+        }
         // 如果当前时间到达下一次攻击时间，就尝试攻击
         // 현재 시간이 다음 공격 가능 시간에 도달하면 공격을 시도
         if (Time.time >= nextAttackTime)
@@ -45,14 +58,6 @@ public class SniperTower : MonoBehaviour
         {
             return false;
         }
-
-        // 更新当前攻击范围内的敌人列表
-        // 현재 공격 범위 안의 적 목록 갱신
-        UpdateEnemiesInRange();
-
-        // 获取最先进入攻击范围的敌人作为目标
-        // 가장 먼저 공격 범위에 들어온 적을 타겟으로 사용
-        EnemyAI targetEnemy = GetFirstEnteredEnemy();
 
         // 没有目标就不攻击
         // 타겟이 없으면 공격하지 않음
@@ -86,7 +91,8 @@ public class SniperTower : MonoBehaviour
 
             return true;
         }
-
+        
+        Destroy(bulletObject);
         return false;
     }
 
@@ -166,6 +172,26 @@ public class SniperTower : MonoBehaviour
         bossDamageBonusRate += 0.05f;
         criticalChance += 0.05f;
         criticalMultiplier += 0.25f;
+    }
+
+    void LookAtEnemy(EnemyAI targetEnemy)
+    {
+        if (targetEnemy == null)
+        {
+            return;
+        }
+
+        Vector3 direction = targetEnemy.transform.position - transform.position;
+
+        direction.y = 0f;
+
+        if (direction != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation,
+             targetRotation, rotateSpeed * Time.deltaTime);
+        }
+
     }
 
     void OnDrawGizmosSelected()
