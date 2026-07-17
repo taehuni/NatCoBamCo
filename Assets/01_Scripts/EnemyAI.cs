@@ -11,18 +11,29 @@ public class EnemyAI : MonoBehaviour
     public float attackRange = 2f;
     public float attackDamage = 10f;
     public float attackCooldown = 1.5f;
-    private float lastAttackTime;
+
     public float defensePower = 10; //현재의 방어력
     public float defenseConstant = 100f;
-    public enum EnemyType //적의 유형 Enum
+    private NavMeshAgent agent;
+    public enum EnemyGrade //적의 등급 유형 Enum
     {
-        Normal,
-        Elite,
+        Normal, //일반
+        Elite, //엘리트
         Boss
     }
-    public EnemyType enemyType; //적의 유형
-    private NavMeshAgent agent;
-    private Core core;
+    public EnemyGrade enemyGrade; //적의 속성 유형
+
+    public enum EnemyClass
+    {
+        Standard, //기본
+        Fast, //고속
+        Tank, //탱크
+        Ranged //원거리
+    }
+    public EnemyClass enemyClass;
+    public float detectRange; //우성 공격 대상 감지 범위
+
+
 
     [Header("전기 타워 관한 변수")]
     public float curParalyzeStack; //현재 마비 stack 수
@@ -33,7 +44,6 @@ public class EnemyAI : MonoBehaviour
     private bool isSlowed; //감속 상태인지 여부
     private float slowEndTime; //감속 상태 끝나는 시간
     private float currentSlowPower; //감속 상태에서 현재 감속력
-    private Collider coreCollider;
     private bool isDefenseReduced; //방어력 감소 상태
     private float defenseReductionEndTime; //방어력 감소 종료 시간
     private float originalDefensePower; //원래 방어력
@@ -49,13 +59,8 @@ public class EnemyAI : MonoBehaviour
     {
         health = maxHp;
         agent = GetComponent<NavMeshAgent>();
-        if (agent != null) agent.speed = moveSpeed;
-        core = FindObjectOfType<Core>();
-        if (core != null)
-        {
-            coreCollider = core.GetComponentInChildren<Collider>();
-        }
         originalDefensePower = defensePower;
+
 
     }
 
@@ -68,7 +73,6 @@ public class EnemyAI : MonoBehaviour
 
         HandleSlowState(); //감속 상태 처리
         HandleDefenseReductionState();
-        EnemyDafaultLogic();
     }
 
     //감속 상태 처리
@@ -126,77 +130,12 @@ public class EnemyAI : MonoBehaviour
         return true;
     }
 
-    //적의 기본 로직: 건축물 공격, 없으면 코어 공격
-    public void EnemyDafaultLogic()
+    //마비상태 return
+    public bool IsParalyzed()
     {
-        // 1. 공격 범위 내에 BuildingObject가 있는지 탐지
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange);
-        DamageableBuilding targetBuilding = null;
-
-        foreach (var hit in hitColliders)
-        {
-            DamageableBuilding building = hit.GetComponentInParent<DamageableBuilding>();
-
-            //주변 에 건축물이 있으면 그걸 타겟으로 설정하고 break
-            if (building != null)
-            {
-                targetBuilding = building;
-                break;
-            }
-        }
-        // 2. 건축물이 있으면 공격
-        if (targetBuilding != null)
-        {
-            if (agent != null && agent.enabled)
-            {
-                agent.isStopped = true;
-            }
-
-            if (Time.time >= lastAttackTime + attackCooldown)
-            {
-                targetBuilding.GetDamage(attackDamage);
-                lastAttackTime = Time.time;
-            }
-        }
-        // 3. 없으면 코어를 향해 이동하거나 공격
-        else if (core != null)
-        {
-
-            float distance;
-
-            if (coreCollider != null)
-            {
-                Vector3 closestPoint = coreCollider.ClosestPoint(transform.position);
-                distance = Vector3.Distance(transform.position, closestPoint);
-            }
-            else
-            {
-                distance = Vector3.Distance(transform.position, core.transform.position);
-            }
-
-            if (distance <= attackRange)
-            {
-                if (agent != null && agent.enabled)
-                {
-                    agent.isStopped = true;
-                }
-
-                if (Time.time >= lastAttackTime + attackCooldown)
-                {
-                    core.GetDamage(attackDamage);
-                    lastAttackTime = Time.time;
-                }
-            }
-            else
-            {
-                if (agent != null && agent.enabled)
-                {
-                    agent.isStopped = false;
-                    agent.SetDestination(core.transform.position);
-                }
-            }
-        }
+        return isParalyzed;
     }
+
 
     //마비 상태 stack 증가
     public void AddParalyzeStack(float amount, float duration)

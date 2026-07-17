@@ -43,21 +43,21 @@ public class SniperBullet : MonoBehaviour
 
         // 如果目标是精英怪，增加伤害
         // 타겟이 Elite라면 추가 데미지 적용
-        if (targetEnemy.enemyType == EnemyAI.EnemyType.Elite)
+        if (targetEnemy.enemyGrade == EnemyAI.EnemyGrade.Elite)
         {
             finalDamage *= (1 + eliteDamageBonusRate);
         }
 
         // 如果目标是 Boss，增加伤害
         // 타겟이 Boss라면 추가 데미지 적용
-        if (targetEnemy.enemyType == EnemyAI.EnemyType.Boss)
-        {
-            finalDamage *= (1 + bossDamageBonusRate);
-        }
+        // if (targetEnemy.enemyGrade == EnemyAI.EnemyGrade.Boss)
+        // {
+        //     finalDamage *= (1 + bossDamageBonusRate);
+        // }
 
         // 如果目标是普通怪，有概率触发处决
         // 타겟이 일반 몬스터라면 확률적으로 처형 발동
-        if (targetEnemy.enemyType == EnemyAI.EnemyType.Normal)
+        if (targetEnemy.enemyGrade == EnemyAI.EnemyGrade.Normal)
         {
             if (Random.value <= executeChance)
             {
@@ -125,7 +125,7 @@ public class SniperBullet : MonoBehaviour
         }
     }
 
-    private void OggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         // 当前函数名不是 Unity 的触发函数名，如果要使用触发器，需要改成 OnTriggerEnter
         // 현재 함수명은 Unity의 트리거 함수명이 아님, 트리거를 사용하려면 OnTriggerEnter로 변경 필요
