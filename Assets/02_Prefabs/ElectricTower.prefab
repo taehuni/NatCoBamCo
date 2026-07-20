@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1291844081791564756}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: FirePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -47,7 +47,7 @@ GameObject:
   - component: {fileID: 216560323487879410}
   - component: {fileID: 5155592133442511555}
   - component: {fileID: 975306794337795514}
-  m_Layer: 7
+  m_Layer: 12
   m_Name: ElectricTower
   m_TagString: Building
   m_Icon: {fileID: 0}
@@ -207,6 +207,7 @@ MonoBehaviour:
   hasDefenseReduction: 0
   defenseReduceAmount: 0.2
   defenseReduceTime: 3
+  rotateSpeed: 180
 --- !u!114 &975306794337795514
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -234,7 +235,7 @@ GameObject:
   - component: {fileID: 4994115353803278436}
   - component: {fileID: 6555798402819097695}
   - component: {fileID: 8912079683806392760}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Cylinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}

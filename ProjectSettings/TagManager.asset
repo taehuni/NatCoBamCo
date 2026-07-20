@@ -17,12 +17,12 @@ TagManager:
   - Water
   - UI
   - Wall
-  - PlayerBuilding
+  - 
   - Enemy
   - Player
   - Core
-  - 
-  - 
+  - PlayerWall
+  - PlayerTower
   - 
   - 
   - 

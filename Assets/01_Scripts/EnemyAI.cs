@@ -1,190 +1,168 @@
-using System.Xml.Serialization;
 using UnityEngine;
-using UnityEngine.AI;
 
+[RequireComponent(typeof(EnemyHealth))]
+[RequireComponent(typeof(EnemyDefense))]
+[RequireComponent(typeof(EnemyStatusEffects))]
+[RequireComponent(typeof(EnemyDeathHandler))]
+[RequireComponent(typeof(EnemyClassTraits))]
 public class EnemyAI : MonoBehaviour
 {
-    [Header("적군 설정")]
-    public float maxHp = 30;
-    public float health = 30;
+    [Header("Base Data / 기본 데이터")]
+    public float maxHp = 30f;
+    public float health = 30f;
     public float moveSpeed = 3f;
     public float attackRange = 2f;
     public float attackDamage = 10f;
     public float attackCooldown = 1.5f;
+    public float detectRange = 8f;
+    public float blockedPathSearchRange = 20f;
+    public float loseTargetRange = 12f;
 
-    public float defensePower = 10; //현재의 방어력
+    [Header("Defense Data / 방어 데이터")]
+    public float defensePower = 10f;
     public float defenseConstant = 100f;
-    private NavMeshAgent agent;
-    public enum EnemyGrade //적의 등급 유형 Enum
+
+    [Header("Fast Enemy Trait / 고속 적 특성")]
+    public float dodgeChance = 0.15f;
+
+    [Header("Tank Enemy Trait / 탱크 적 특성")]
+    public float explosionRange = 3f;
+    public float explosionDamage = 20f;
+    public LayerMask explosionTargetLayer;
+
+    [Header("Enemy Grade / 적 등급")]
+    public EnemyGrade enemyGrade;
+
+    public enum EnemyGrade
     {
-        Normal, //일반
-        Elite, //엘리트
+        Normal,
+        Elite,
         Boss
     }
-    public EnemyGrade enemyGrade; //적의 속성 유형
+
+    [Header("Enemy Class / 적 종류")]
+    public EnemyClass enemyClass;
 
     public enum EnemyClass
     {
-        Standard, //기본
-        Fast, //고속
-        Tank, //탱크
-        Ranged //원거리
+        Standard,
+        Fast,
+        Tank,
+        Ranged
     }
-    public EnemyClass enemyClass;
-    public float detectRange; //우성 공격 대상 감지 범위
 
+    [Header("Electric Tower Status Data / 전기 타워 상태 데이터")]
+    public float curParalyzeStack;
+    public float maxParalyzeStack = 100f;
+    public float paralyzeDefensePower = 0.1f;
 
+    private EnemyHealth enemyHealth;
+    private EnemyDefense enemyDefense;
+    private EnemyStatusEffects statusEffects;
+    private EnemyDeathHandler deathHandler;
+    private EnemyClassTraits classTraits;
 
-    [Header("전기 타워 관한 변수")]
-    public float curParalyzeStack; //현재 마비 stack 수
-    public float maxParalyzeStack = 100; //마비상태 들어가려면 필요한 미비 stack 수
-    public float paralyzeDefensePower = 0.1f; //보스,엘리트 적 미비 저항력(0 ~ 1)
-    private float paralyzeEndTime; //마비 상태 끝나는 시간
-    private bool isParalyzed; //마비 상태인지 여부
-    private bool isSlowed; //감속 상태인지 여부
-    private float slowEndTime; //감속 상태 끝나는 시간
-    private float currentSlowPower; //감속 상태에서 현재 감속력
-    private bool isDefenseReduced; //방어력 감소 상태
-    private float defenseReductionEndTime; //방어력 감소 종료 시간
-    private float originalDefensePower; //원래 방어력
-    private float currentDefenseReduceAmount;
+    public EnemyHealth Health
+    {
+        get { return enemyHealth; }
+    }
 
-    // [Header("다른 타워 % 방어력 감소할 때 사용")]
-    // private bool isDamageReductionReduced;
-    // private float damageReductionReduceAmount;
-    // private float damageReductionReduceEndTime;
+    public EnemyDefense Defense
+    {
+        get { return enemyDefense; }
+    }
 
+    public EnemyStatusEffects StatusEffects
+    {
+        get { return statusEffects; }
+    }
+
+    public EnemyDeathHandler DeathHandler
+    {
+        get { return deathHandler; }
+    }
+
+    public EnemyClassTraits ClassTraits
+    {
+        get { return classTraits; }
+    }
+
+    void Awake()
+    {
+        enemyHealth = GetOrAddComponent<EnemyHealth>();
+        enemyDefense = GetOrAddComponent<EnemyDefense>();
+        statusEffects = GetOrAddComponent<EnemyStatusEffects>();
+        deathHandler = GetOrAddComponent<EnemyDeathHandler>();
+        classTraits = GetOrAddComponent<EnemyClassTraits>();
+
+        enemyHealth.Initialize(this);
+        enemyDefense.Initialize(this);
+        statusEffects.Initialize(this);
+        deathHandler.Initialize(this);
+        classTraits.Initialize(this);
+    }
 
     void Start()
     {
-        health = maxHp;
-        agent = GetComponent<NavMeshAgent>();
-        originalDefensePower = defensePower;
+        ResetRuntimeData();
+    }
 
+    // 敌人生成后初始化当前运行数据
+    // 적이 생성된 뒤 현재 실행 데이터를 초기화
+    public void ResetRuntimeData()
+    {
+        if (enemyHealth != null)
+        {
+            enemyHealth.ResetHealth();
+        }
 
+        if (enemyDefense != null)
+        {
+            enemyDefense.ResetDefenseData();
+        }
     }
 
     void Update()
     {
-        if (HandleParalyzeState())
-        {
-            return; //마비 상태면 이동, 공격 못함
-        }
-
-        HandleSlowState(); //감속 상태 처리
-        HandleDefenseReductionState();
-    }
-
-    //감속 상태 처리
-    void HandleSlowState()
-    {
-        if (!isSlowed)
+        if (statusEffects != null && statusEffects.TickParalyzeState())
         {
             return;
         }
 
-        if (Time.time >= slowEndTime)
+        if (statusEffects != null)
         {
-            isSlowed = false;
-            currentSlowPower = 0f; //감속력 초기화
+            statusEffects.TickSlowState();
+        }
 
-            ResetSpeed();
+        if (enemyDefense != null)
+        {
+            enemyDefense.Tick();
         }
     }
 
-    void HandleDefenseReductionState()
-    {
-        if (!isDefenseReduced)
-        {
-            return;
-        }
-
-        if (Time.time >= defenseReductionEndTime)
-        {
-            isDefenseReduced = false;
-            currentDefenseReduceAmount = 0;
-            defensePower = originalDefensePower;
-        }
-    }
-
-    //마비 상태 판단
-    bool HandleParalyzeState()
-    {
-        if (!isParalyzed)
-        {
-            return false;
-        }
-
-        if (Time.time >= paralyzeEndTime)
-        {
-            isParalyzed = false;
-
-            if (agent != null && agent.enabled)
-            {
-                agent.isStopped = false;
-            }
-
-            return false;
-        }
-
-        return true;
-    }
-
-    //마비상태 return
-    public bool IsParalyzed()
-    {
-        return isParalyzed;
-    }
-
-
-    //마비 상태 stack 증가
-    public void AddParalyzeStack(float amount, float duration)
-    {
-        if (isParalyzed)
-        {
-            return;
-        }
-
-        curParalyzeStack += amount * (1f - paralyzeDefensePower);
-
-        if (curParalyzeStack >= maxParalyzeStack)
-        {
-            //Debug.Log(gameObject.name + " 가 마비상태 들어가다");
-            curParalyzeStack = maxParalyzeStack;
-            //마비상태 들어가기
-            EnterParalyze(duration);
-        }
-    }
-
-    //마비 상태 들어가기
-    void EnterParalyze(float duration)
-    {
-        isParalyzed = true;
-        curParalyzeStack = 0;
-        paralyzeEndTime = Time.time + duration;
-
-        if (agent != null && agent.enabled)
-        {
-            agent.isStopped = true;
-        }
-    }
-
-    //다매지 받기
+    // 外部脚本统一调用这个函数造成伤害
+    // 외부 스크립트는 이 함수를 통해 데미지를 줌(대미지, 방어력 무시율)
     public void TakeDamage(float defaultDamage, float ignoreDefenseRate)
     {
-        //根据防御力计算减防比例
-        float damageReduction = GetCurrentDamageReduction();
+        if (classTraits != null && classTraits.ShouldIgnoreIncomingDamage())
+        {
+            //대미지 회피할 때 특수 UI?Anim?Effect?
+            return;
+        }
 
-        damageReduction -= ignoreDefenseRate; //방어 무시 비율 无视防御比例
-        damageReduction = Mathf.Clamp(damageReduction, 0f, 0.9f); //min 0, max 0.9
+        float finalDamage = defaultDamage;
 
-        //最终伤害计算
-        float finalDamage = defaultDamage * (1f - damageReduction);
-        finalDamage = Mathf.Max(finalDamage, 1f);
-        finalDamage = RoundToTwoDecimals(finalDamage);
-        Debug.Log("FinalDamage = " + finalDamage);
-        health -= finalDamage;
-        if (health <= 0) Dead();
+        if (enemyDefense != null)
+        {
+            finalDamage = enemyDefense.CalculateFinalDamage(defaultDamage, ignoreDefenseRate);
+        }
+
+        //Debug.Log("FinalDamage = " + finalDamage);
+
+        if (enemyHealth != null)
+        {
+            enemyHealth.TakeFinalDamage(finalDamage);
+        }
     }
 
     public void TakeDamage(float defaultDamage)
@@ -192,75 +170,88 @@ public class EnemyAI : MonoBehaviour
         TakeDamage(defaultDamage, 0f);
     }
 
-    //방어 비례 계산 함수
-    public float GetCurrentDamageReduction()
+    // 电塔调用：减速
+    // 전기 타워 호출: 감속
+    public void SetSpeedDown(float slowPower, float slowTime)
     {
-        float damageReduction = defensePower / (defensePower + defenseConstant);
-
-        // 以后如果有真正的百分比减防 debuff，就放这里
-        // if (isDamageReductionReduced)
-        // {
-        //     damageReduction -= damageReductionReduceAmount;
-        // }
-
-        damageReduction = Mathf.Clamp(damageReduction, 0f, 0.9f);
-
-        return damageReduction;
-    }
-
-    //소수점 뒤에 2자리 저장
-    float RoundToTwoDecimals(float value)
-    {
-        return Mathf.Round(value * 100f) / 100f;
-    }
-
-    //속도 감소
-    public void SetSpeedDown(float coldPower, float coldTime)
-    {
-        if (agent == null || !agent.enabled)
+        if (statusEffects == null)
         {
             return;
         }
 
-        isSlowed = true;
-
-        if (coldPower >= currentSlowPower) //새로운 감속력이 현재 감속력보다 크면
-        {
-            currentSlowPower = coldPower; //현재 감속력 업데이트
-            agent.speed = moveSpeed * (1f - currentSlowPower); //감속력 적용
-            //Debug.Log(gameObject.name + "가 감속 상태 들어가다");
-            slowEndTime = Time.time + coldTime; //감속 상태 끝나는 시간 업데이트
-        }
+        statusEffects.SetSpeedDown(slowPower, slowTime);
     }
 
-    //DefensePower 감소 
+    // 电塔调用：麻痹层数
+    // 전기 타워 호출: 마비 스택
+    public void AddParalyzeStack(float amount, float duration)
+    {
+        if (statusEffects == null)
+        {
+            return;
+        }
+
+        statusEffects.AddParalyzeStack(amount, duration);
+    }
+
+    public bool IsParalyzed()
+    {
+        if (statusEffects == null)
+        {
+            return false;
+        }
+
+        return statusEffects.IsParalyzed;
+    }
+
+    // 电塔调用：固定减少 defensePower
+    // 전기 타워 호출: defensePower 고정 감소
     public void ReduceDefensePower(float amount, float duration)
     {
-
-        if (amount < currentDefenseReduceAmount)
+        if (enemyDefense == null)
         {
             return;
         }
 
-        currentDefenseReduceAmount = amount;
-        isDefenseReduced = true;
-        defenseReductionEndTime = Time.time + duration;
-
-        defensePower = originalDefensePower * (1f - amount);
+        enemyDefense.ReduceDefensePower(amount, duration);
     }
 
-    //속도 회복
-    void ResetSpeed()
+    public float GetCurrentDamageReduction()
     {
-        if (agent != null && agent.enabled)
+        if (enemyDefense == null)
         {
-            agent.speed = moveSpeed;
+            return 0f;
         }
+
+        return enemyDefense.GetCurrentDamageReduction();
     }
 
     public void Dead()
     {
-        Destroy(gameObject);
-        //나중에 사망 animation 추가
+        if (deathHandler == null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        deathHandler.Die();
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, attackRange);
+    }
+
+    T GetOrAddComponent<T>() where T : Component
+    {
+        T component = GetComponent<T>();
+
+        if (component == null)
+        {
+            component = gameObject.AddComponent<T>();
+        }
+
+        return component;
     }
 }
