@@ -20,18 +20,35 @@ public class ElectricTower : MonoBehaviour
     public bool hasDefenseReduction; //是否减防
     public float defenseReduceAmount = 0.2f; //减防强度
     public float defenseReduceTime = 3f; //减防时间
+    public float rotateSpeed = 180f;
     private float nextAttackTime; //下次攻击时间 / 다음 공격 가능 시간
     private List<EnemyAI> enemiesInRange = new List<EnemyAI>(); //在攻击范围内的敌人 / 공격 범위 안에 있는 적 목록
-
+    private EnemyAI targetEnemy;
 
     //每帧检查是否到达攻击时间
     //매 프레임 공격 시간이 되었는지 확인
     void Update()
     {
+        // 更新当前攻击范围内的敌人列表
+        // 현재 공격 범위 안의 적 목록 갱신
+        UpdateEnemiesInRange();
+
+        // 获取最先进入攻击范围的敌人作为目标
+        // 가장 먼저 공격 범위에 들어온 적을 타겟으로 사용
+        targetEnemy = GetFirstEnteredEnemy();
+
+        if (targetEnemy != null)
+        {
+            LookAtEnemy(targetEnemy);
+        }
+        // 如果当前时间到达下一次攻击时间，就尝试攻击
+        // 현재 시간이 다음 공격 가능 시간에 도달하면 공격을 시도
         if (Time.time >= nextAttackTime)
         {
             bool attacked = Attack();
 
+            // 只有真正发射成功后，才进入攻击冷却
+            // 실제로 공격에 성공했을 때만 공격 쿨타임 적용
             if (attacked)
             {
                 nextAttackTime = Time.time + attackInterval;
@@ -109,16 +126,12 @@ public class ElectricTower : MonoBehaviour
             return false;
         }
 
-        //更新搜索到的敌人列表
-        //현재 공격 범위 안의 적 리스트 갱신
-        UpdateEnemiesInRange();
-
-        EnemyAI targetEnemy = GetFirstEnteredEnemy(); //把最先进入攻击范围的敌人拿过来当做目标 / 가장 먼저 공격 범위에 들어온 적을 타겟으로 사용
 
         if (targetEnemy == null) //如果没有目标就不攻击 / 타겟이 없으면 공격하지 않음
         {
             return false;
         }
+
 
         //在开火位置生成炮弹
         //발사 위치에서 포탄 생성
@@ -126,7 +139,7 @@ public class ElectricTower : MonoBehaviour
         //拿到炮弹上的ElectricBullet组件
         //생성된 포탄에서 ElectricBullet 컴포넌트를 가져옴
         ElectricBullet bullet = bulletObject.GetComponent<ElectricBullet>();
-        
+
         //如果炮弹不为空
         //포탄 컴포넌트가 있으면
         if (bullet != null)
@@ -148,7 +161,7 @@ public class ElectricTower : MonoBehaviour
             );
             return true;
         }
-        
+
         Destroy(bulletObject);
         return false;
 
@@ -179,6 +192,26 @@ public class ElectricTower : MonoBehaviour
         }
         paralyzeDuration += 0.2f;
         paralyzeStackIncrease += 5;
+    }
+
+    void LookAtEnemy(EnemyAI targetEnemy)
+    {
+        if (targetEnemy == null)
+        {
+            return;
+        }
+
+        Vector3 direction = targetEnemy.transform.position - transform.position;
+
+        direction.y = 0f;
+
+        if (direction != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation,
+             targetRotation, rotateSpeed * Time.deltaTime);
+        }
+
     }
 
 

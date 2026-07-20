@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 1796706151583066343}
   - component: {fileID: 6208253241604335749}
   - component: {fileID: 6090294365334769938}
-  m_Layer: 7
+  m_Layer: 12
   m_Name: SniperTower
   m_TagString: Building
   m_Icon: {fileID: 0}
@@ -188,6 +188,7 @@ MonoBehaviour:
     m_Bits: 256
   bulletPrefab: {fileID: 1724198029846644923, guid: e020adf48ab967548870b405cf4e4db0, type: 3}
   firePoint: {fileID: 4390650246223315923}
+  rotateSpeed: 180
 --- !u!1 &595535921009377038
 GameObject:
   m_ObjectHideFlags: 0
@@ -200,7 +201,7 @@ GameObject:
   - component: {fileID: 565898247490433359}
   - component: {fileID: 3328662010645007573}
   - component: {fileID: 2670777841531435823}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Cylinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
