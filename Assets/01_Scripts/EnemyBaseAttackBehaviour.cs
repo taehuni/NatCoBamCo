@@ -343,7 +343,7 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
 
         DamageableBuilding blockingBuilding = pathBlockHandler.FindBuildingBlockingPath(
             pathChoice.lastReachablePoint,
-            pathChoice.destination,
+            pathChoice.destination, 
             buildingLayer,
             blockedPointSearchRange,
             blockedPathForwardSearchRange

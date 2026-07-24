@@ -2,6 +2,7 @@ using UnityEngine;
 
 public static class EnemyTargetUtility
 {
+    //我离目标表面多远？
     public static float GetDistanceToTarget(Vector3 sourcePoint, GameObject target)
     {
         if (target == null)
@@ -38,6 +39,7 @@ public static class EnemyTargetUtility
         return Vector3.Distance(sourcePoint, target.transform.position);
     }
 
+    //目标表面离我最近的点在哪里？
     public static Vector3 GetClosestPointToTarget(Vector3 sourcePoint, GameObject target)
     {
         if (target == null)
@@ -71,6 +73,7 @@ public static class EnemyTargetUtility
         return closestPoint;
     }
 
+    //目标整体有多大？
     public static bool TryGetTargetBounds(GameObject target, out Bounds bounds)
     {
         bounds = new Bounds(target.transform.position, Vector3.zero);
