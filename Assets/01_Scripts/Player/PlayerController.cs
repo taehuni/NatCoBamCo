@@ -1,7 +1,10 @@
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
-{   
+{
+    [Header("플레이어 체력")]
+    public int maxHp = 100;
+    public int curHp;
     [Header("플레이어 이동")]
     public float moveSpeed = 5f; //이동 속도
     [Header("플레이어 점프")]
@@ -20,12 +23,14 @@ public class PlayerController : MonoBehaviour
         playerShoot = GetComponent<PlayerShoot>();
         controller = GetComponent<CharacterController>(); //자기의 CharacterController가져와
         mainCam = Camera.main; //메인 카메라 가져와
+        curHp = maxHp;
     }
 
     void Update()
     {
         PlayerRun();
         PlayerMoveAndRotate();
+
     }
 
     //플레이어 이동 + 회전
@@ -83,5 +88,17 @@ public class PlayerController : MonoBehaviour
         {
             moveSpeed = 5f;
         }
+    }
+
+    public void Heal(int amount)
+    {
+        curHp += amount;
+
+        if (curHp > maxHp)
+            curHp = maxHp;
+
+        //이후 기능이 추가된다면 아래에 해당 기능 추가.
+        // 체력 UI 갱신 
+        // 힐 이펙트
     }
 }
