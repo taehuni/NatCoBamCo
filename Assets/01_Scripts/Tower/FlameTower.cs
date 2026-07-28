@@ -131,9 +131,9 @@ public class FlameTower : MonoBehaviour
         foreach (Collider col in enemies)
         {
             EnemyAI enemy = col.GetComponentInParent<EnemyAI>();
-            if (enemy != null)
+            if (enemy != null && enemy.Health != null && enemy.Health.maxHp > 0f)
             {
-                float hpPercent = (float)enemy.health / enemy.maxHp;
+                float hpPercent = enemy.Health.health / enemy.Health.maxHp;
 
                 if (hpPercent <= executionPer)
                 {

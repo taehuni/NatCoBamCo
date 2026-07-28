@@ -136,54 +136,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &28201092
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 28201090}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &28201093
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 28201090}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &28201094
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 28201090}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &28201095
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 28201090}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!114 &28201096
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -215,7 +167,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -233,6 +185,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -19.27
@@ -273,6 +249,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -301,6 +305,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -312,6 +320,14 @@ PrefabInstance:
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_StoppingDistance
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
@@ -326,18 +342,6 @@ PrefabInstance:
       addedObject: {fileID: 2121321505}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2121321516}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2121321515}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2121321514}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2121321513}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 2121321512}
   m_SourcePrefab: {fileID: 100100000, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
 --- !u!1001 &68543404
@@ -348,6 +352,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -29.28
@@ -388,6 +416,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -416,6 +472,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -428,6 +488,14 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
       value: Standard (17)
@@ -439,18 +507,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1317972665}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1317972664}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1317972663}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1317972662}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1317972661}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1317972660}
@@ -726,6 +782,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
+  blockedPathSearchRange: 0
 --- !u!114 &111107900
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -738,6 +795,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
+  detectRange: 0
+  loseTargetRange: 0
 --- !u!114 &111107901
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -750,6 +809,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
+  attackRange: 0
+  attackDamage: 0
+  attackCooldown: 0
 --- !u!114 &111107902
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -762,6 +824,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
+  moveSpeed: 0
 --- !u!1001 &154520395
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -770,6 +833,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -19.27
@@ -810,6 +897,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -838,6 +953,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -850,6 +969,14 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
       value: Standard (5)
@@ -861,18 +988,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1443003271}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1443003270}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1443003269}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1443003268}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1443003267}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1443003266}
@@ -1295,54 +1410,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &315643370
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 315643368}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &315643371
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 315643368}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &315643372
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 315643368}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &315643373
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 315643368}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!114 &315643374
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1374,7 +1441,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -1401,54 +1468,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &315719527
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 315719525}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &315719528
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 315719525}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &315719529
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 315719525}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &315719530
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 315719525}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!114 &315719531
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1480,7 +1499,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -1610,6 +1629,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -29.28
@@ -1650,6 +1693,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -1678,6 +1749,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -1690,6 +1765,14 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
       value: Standard (16)
@@ -1701,18 +1784,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 691114952}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 691114951}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 691114950}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 691114949}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 691114948}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 691114947}
@@ -1799,54 +1870,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &362194574
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 362194572}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &362194575
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 362194572}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &362194576
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 362194572}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &362194577
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 362194572}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!114 &362194578
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1878,7 +1901,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -1927,6 +1950,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -25.99
@@ -1967,6 +2014,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -1995,6 +2070,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -2007,6 +2086,14 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
       value: Standard (13)
@@ -2018,18 +2105,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 622474189}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 622474188}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 622474187}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 622474186}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 622474185}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 622474184}
@@ -2553,54 +2628,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &583597716
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 583597714}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &583597717
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 583597714}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &583597718
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 583597714}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &583597719
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 583597714}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!114 &583597720
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2632,7 +2659,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -2659,54 +2686,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &622474185
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 622474183}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &622474186
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 622474183}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &622474187
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 622474183}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &622474188
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 622474183}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!114 &622474189
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2738,7 +2717,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -3012,54 +2991,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &691114948
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 691114946}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &691114949
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 691114946}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &691114950
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 691114946}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &691114951
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 691114946}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!114 &691114952
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3091,7 +3022,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -3109,6 +3040,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -29.28
@@ -3149,6 +3104,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -3177,6 +3160,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -3189,6 +3176,14 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
       value: Standard (19)
@@ -3200,18 +3195,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1735264044}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1735264043}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1735264042}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1735264041}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1735264040}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1735264039}
@@ -3348,54 +3331,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &781744212
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 781744210}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &781744213
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 781744210}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &781744214
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 781744210}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &781744215
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 781744210}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!114 &781744216
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3427,7 +3362,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -3445,6 +3380,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -19.27
@@ -3485,6 +3444,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -3513,6 +3500,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -3525,6 +3516,14 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
       value: Standard (3)
@@ -3536,18 +3535,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1939552166}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1939552177}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1939552176}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1939552175}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1939552174}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1939552173}
@@ -3569,54 +3556,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &844776863
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 844776861}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &844776864
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 844776861}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &844776865
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 844776861}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &844776866
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 844776861}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!114 &844776867
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3648,7 +3587,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -3741,6 +3680,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -29.28
@@ -3781,6 +3744,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -3809,6 +3800,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -3821,6 +3816,14 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
       value: Standard (18)
@@ -3832,18 +3835,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 844776867}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 844776866}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 844776865}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 844776864}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 844776863}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 844776862}
@@ -4021,6 +4012,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -25.99
@@ -4061,6 +4076,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -4089,6 +4132,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -4101,6 +4148,14 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
       value: Standard (11)
@@ -4112,18 +4167,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 315719531}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 315719530}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 315719529}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 315719528}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 315719527}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 315719526}
@@ -4421,6 +4464,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -25.99
@@ -4461,6 +4528,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -4489,6 +4584,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -4501,6 +4600,14 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
       value: Standard (12)
@@ -4512,18 +4619,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 781744216}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 781744215}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 781744214}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 781744213}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 781744212}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 781744211}
@@ -4748,6 +4843,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -23.28
@@ -4788,6 +4907,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -4816,6 +4963,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -4828,6 +4979,14 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
       value: Standard (6)
@@ -4839,18 +4998,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2137444235}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2137444234}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2137444233}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2137444232}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2137444231}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2137444230}
@@ -5051,54 +5198,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &1198288771
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1198288769}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &1198288772
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1198288769}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &1198288773
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1198288769}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &1198288774
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1198288769}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!114 &1198288775
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5130,7 +5229,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -5210,6 +5309,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
+  blockedPathSearchRange: 0
 --- !u!114 &1248521381
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5222,6 +5322,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
+  detectRange: 0
+  loseTargetRange: 0
 --- !u!114 &1248521382
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5234,6 +5336,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
+  attackRange: 0
+  attackDamage: 0
+  attackCooldown: 0
 --- !u!114 &1248521383
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5246,6 +5351,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
+  moveSpeed: 0
 --- !u!1 &1290229694
 GameObject:
   m_ObjectHideFlags: 0
@@ -5375,54 +5481,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &1317972661
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1317972659}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &1317972662
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1317972659}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &1317972663
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1317972659}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &1317972664
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1317972659}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!114 &1317972665
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5454,7 +5512,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -5534,6 +5592,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
+  blockedPathSearchRange: 0
 --- !u!114 &1338703099
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5546,6 +5605,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
+  detectRange: 0
+  loseTargetRange: 0
 --- !u!114 &1338703100
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5558,6 +5619,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
+  attackRange: 0
+  attackDamage: 0
+  attackCooldown: 0
 --- !u!114 &1338703101
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5570,6 +5634,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
+  moveSpeed: 0
 --- !u!1001 &1354179386
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5578,6 +5643,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -23.28
@@ -5618,6 +5707,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -5646,6 +5763,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -5657,6 +5778,14 @@ PrefabInstance:
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_StoppingDistance
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
@@ -5671,18 +5800,6 @@ PrefabInstance:
       addedObject: {fileID: 28201096}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 28201095}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 28201094}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 28201093}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 28201092}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 28201091}
   m_SourcePrefab: {fileID: 100100000, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
 --- !u!1001 &1436641079
@@ -5693,6 +5810,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -23.28
@@ -5733,6 +5874,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -5761,6 +5930,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -5773,6 +5946,14 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
       value: Standard (10)
@@ -5784,18 +5965,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 583597720}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 583597719}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 583597718}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 583597717}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 583597716}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 583597715}
@@ -5817,54 +5986,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &1443003267
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1443003265}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &1443003268
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1443003265}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &1443003269
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1443003265}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &1443003270
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1443003265}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!114 &1443003271
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5896,7 +6017,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -5914,6 +6035,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -19.27
@@ -5954,6 +6099,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -5982,6 +6155,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -5994,6 +6171,14 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
       value: Standard (4)
@@ -6005,18 +6190,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2075217082}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2075217093}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2075217092}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2075217091}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2075217090}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2075217089}
@@ -6038,54 +6211,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &1468210579
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1468210577}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &1468210580
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1468210577}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &1468210581
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1468210577}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &1468210582
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1468210577}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!114 &1468210583
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6117,7 +6242,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -6144,54 +6269,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &1516827215
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1516827213}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &1516827216
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1516827213}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &1516827217
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1516827213}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &1516827218
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1516827213}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!114 &1516827219
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6223,7 +6300,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -6241,6 +6318,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -29.28
@@ -6281,6 +6382,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -6309,6 +6438,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -6320,6 +6453,14 @@ PrefabInstance:
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_StoppingDistance
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
@@ -6334,18 +6475,6 @@ PrefabInstance:
       addedObject: {fileID: 362194578}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 362194577}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 362194576}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 362194575}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 362194574}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 362194573}
   m_SourcePrefab: {fileID: 100100000, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
 --- !u!1001 &1561502409
@@ -6356,6 +6485,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -25.99
@@ -6396,6 +6549,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -6424,6 +6605,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -6436,6 +6621,14 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
       value: Standard (14)
@@ -6447,18 +6640,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1198288775}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1198288774}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1198288773}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1198288772}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1198288771}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1198288770}
@@ -6499,7 +6680,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -6521,54 +6702,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &1630930140
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1630930131}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &1630930141
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1630930131}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &1630930142
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1630930131}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &1630930143
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1630930131}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!1001 &1636488976
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6577,6 +6710,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -25.99
@@ -6617,6 +6774,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -6645,6 +6830,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -6657,6 +6846,14 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
       value: Standard (15)
@@ -6668,18 +6865,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 315643374}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 315643373}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 315643372}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 315643371}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 315643370}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 315643369}
@@ -6776,54 +6961,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &1735264040
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1735264038}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &1735264041
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1735264038}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &1735264042
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1735264038}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &1735264043
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1735264038}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!114 &1735264044
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6855,7 +6992,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -6927,6 +7064,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 919ebdbb44cc2cd409042e6367c43347, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  maxHp: 100
+  curHp: 0
   moveSpeed: 5
   jumpForce: 7
   gravity: -20
@@ -7118,6 +7257,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -23.28
@@ -7158,6 +7321,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -7186,6 +7377,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -7197,6 +7392,14 @@ PrefabInstance:
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_StoppingDistance
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
@@ -7211,18 +7414,6 @@ PrefabInstance:
       addedObject: {fileID: 1468210583}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1468210582}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1468210581}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1468210580}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1468210579}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 1468210578}
   m_SourcePrefab: {fileID: 100100000, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
 --- !u!1001 &1869589015
@@ -7233,6 +7424,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -19.27
@@ -7273,6 +7488,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -7301,6 +7544,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -7313,6 +7560,14 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
       value: Standard (2)
@@ -7324,18 +7579,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1630930132}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1630930143}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1630930142}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1630930141}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1630930140}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1630930139}
@@ -7566,7 +7809,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -7588,54 +7831,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &1939552174
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1939552165}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &1939552175
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1939552165}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &1939552176
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1939552165}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &1939552177
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1939552165}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!1 &1967769473
 GameObject:
   m_ObjectHideFlags: 0
@@ -7851,6 +8046,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -23.28
@@ -7891,6 +8110,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -7919,6 +8166,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -7931,6 +8182,14 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
       value: Standard (7)
@@ -7942,18 +8201,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1516827219}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1516827218}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1516827217}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1516827216}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1516827215}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1516827214}
@@ -8051,7 +8298,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -8073,54 +8320,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &2075217090
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2075217081}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &2075217091
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2075217081}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &2075217092
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2075217081}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &2075217093
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2075217081}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!1001 &2081117433
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8129,6 +8328,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionDamage
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892627666412697262, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: explosionTargetLayer.m_Bits
+      value: 6144
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2795986314790003049, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: attackCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 3124844006354908152, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -8.07
@@ -8169,6 +8392,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxParalyzeStack
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3260827129855568175, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: paralyzeDefensePower
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: maxHp
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125357721360375583, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: health
+      value: 999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defensePower
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598989816982351089, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: defenseConstant
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6535178113652196340, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6958767504877682859, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: maxHp
       value: 999
@@ -8197,6 +8448,10 @@ PrefabInstance:
       propertyPath: explosionTargetLayer.m_Bits
       value: 7680
       objectReference: {fileID: 0}
+    - target: {fileID: 7387488905635961760, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: blockedPathSearchRange
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8117591507669881419, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Radius
       value: 0.5
@@ -8209,6 +8464,14 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: detectRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8301664956543172695, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+      propertyPath: loseTargetRange
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       propertyPath: m_Name
       value: Standard
@@ -8220,18 +8483,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2081117435}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2081117446}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2081117445}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2081117444}
-    - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2081117443}
     - targetCorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2081117442}
@@ -8272,7 +8523,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -8294,54 +8545,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &2081117443
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2081117434}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &2081117444
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2081117434}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &2081117445
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2081117434}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &2081117446
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2081117434}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!1001 &2094129998
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8565,7 +8768,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -8587,54 +8790,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &2121321513
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2121321504}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &2121321514
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2121321504}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &2121321515
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2121321504}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &2121321516
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2121321504}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!1 &2137444229 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
@@ -8652,54 +8807,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07aced2750a342a7b55a02f9c433b9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingAttackSlotManager
---- !u!114 &2137444231
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2137444229}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fbe19826ee4306bd6a493e68e41b76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPathBlockHandler
---- !u!114 &2137444232
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2137444229}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9961fd73794645ada8393178f98d4e86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTargetSelector
---- !u!114 &2137444233
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2137444229}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de68a185b2d4ca29d780da47f1ce963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
---- !u!114 &2137444234
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2137444229}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de210d1a0a14d2981f351546faccead, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
 --- !u!114 &2137444235
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8731,7 +8838,7 @@ MonoBehaviour:
     m_Bits: 6144
   buildingAttackBlockLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8000
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
