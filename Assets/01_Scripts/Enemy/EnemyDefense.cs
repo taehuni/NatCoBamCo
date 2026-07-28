@@ -1,43 +1,35 @@
 using UnityEngine;
 
-// 防御模块：负责防御减伤公式、无视防御、固定减防 Debuff、恢复防御力。
-// 방어 모듈: 방어 감소 공식, 방어 무시, 고정 방어력 감소 디버프, 방어력 복구를 담당함.
+// 敌人防御模块：负责防御力、减伤公式、无视防御、固定减防 Debuff。
+// 적 방어 모듈: 방어력, 피해 감소 공식, 방어 무시, 고정 방어력 감소 디버프를 담당한다.
+// 它只负责“伤害应该被减到多少”，不直接扣血。
+// 이 모듈은 "피해가 얼마로 줄어드는지"만 계산하고, 체력은 직접 깎지 않는다.
+
+// 防御模块：负责防御力、减伤公式、无视防御、固定减防 Debuff。
 public class EnemyDefense : MonoBehaviour
 {
-    private EnemyAI enemyAI;
+    [Header("Defense Data / 방어 데이터")]
+    public float defensePower;
+    public float defenseConstant;
 
-    // 当前是否处于防御力被减少的状态。
-    // 현재 방어력이 감소된 상태인지 여부.
     private bool isDefenseReduced;
-    // 防御力减少效果结束的时间点。
-    // 방어력 감소 효과가 끝나는 시간.
     private float defenseReductionEndTime;
-    // 出生/初始化时记录的原始防御力，用于 Debuff 结束后恢复。
-    // 생성/초기화 시 기록한 원래 방어력. 디버프 종료 후 복구에 사용.
     private float originalDefensePower;
-    // 当前正在生效的减防强度，用来判断新的弱减防是否应该被忽略。
-    // 현재 적용 중인 방어력 감소 강도. 더 약한 새 디버프를 무시할 때 사용.
     private float currentDefenseReduceAmount;
 
-    // 保存 EnemyAI 引用，防御模块通过它读取和修改 defensePower 等基础数据。
-    // EnemyAI 참조를 저장하고, 이 모듈은 이를 통해 defensePower 같은 기본 데이터를 읽고 수정함.
     public void Initialize(EnemyAI enemyAI)
     {
-        this.enemyAI = enemyAI;
+        // 目前防御模块不需要反向引用 EnemyAI，保留入口是为了以后扩展。
+        // 현재 방어 모듈은 EnemyAI 참조가 필요 없지만, 이후 확장을 위해 입구를 남겨둔다.
     }
 
-    // 出生时记录原始防御力
-    // 생성될 때 원래 방어력을 기록
     public void ResetDefenseData()
     {
-        if (enemyAI == null)
-        {
-            return;
-        }
-
-        // 记录原始防御力，防御力 debuff 结束后会恢复到这个值
-        // 원래 방어력을 저장하고, 방어력 감소가 끝나면 이 값으로 복구
-        originalDefensePower = enemyAI.defensePower;
+        // 记录初始防御力。之后减防结束时，会恢复到这个值。
+        // 초기 방어력을 기록한다. 방어력 감소가 끝나면 이 값으로 되돌린다.
+        originalDefensePower = defensePower;
+        // 当前正在生效的减防强度，0 表示没有减防。
+        // 현재 적용 중인 방어력 감소량이다. 0이면 감소 효과가 없다.
         currentDefenseReduceAmount = 0f;
         isDefenseReduced = false;
         defenseReductionEndTime = 0f;
@@ -45,105 +37,98 @@ public class EnemyDefense : MonoBehaviour
 
     public void Tick()
     {
-        // 每帧检查减防 Debuff 是否到期。
-        // 매 프레임 방어력 감소 디버프가 끝났는지 확인함.
+        // 每帧检查固定减防 Debuff 是否到期。
+        // 매 프레임 고정 방어력 감소 디버프가 끝났는지 확인한다.
         HandleDefenseReductionState();
     }
 
-    // 根据当前防御力计算减伤比例
-    // 현재 방어력으로 피해 감소율 계산
     public float GetCurrentDamageReduction()
     {
-        if (enemyAI == null)
+        // 防御力或者防御常数不合法时，直接认为没有减伤。
+        // 방어력 또는 방어 상수가 유효하지 않으면 피해 감소가 없다고 본다.
+        if (defensePower <= 0f || defenseConstant <= 0f)
         {
             return 0f;
         }
 
-        // 防御公式：防御越高减伤越高，但增长会越来越慢。
-        // 방어 공식: 방어력이 높을수록 피해 감소율이 높지만, 증가 속도는 점점 느려짐.
-        float damageReduction = enemyAI.defensePower / (enemyAI.defensePower + enemyAI.defenseConstant);
-        // 限制减伤比例，最低 0%，最高 90%，避免敌人完全不掉血。
-        // 피해 감소율을 0%~90%로 제한해서 적이 완전히 데미지를 안 받는 상황을 방지함.
+        // 减伤公式：防御力越高，减伤越高，但增长会逐渐变慢。
+        // 피해 감소 공식: 방어력이 높을수록 감소율이 높지만, 증가 속도는 점점 느려진다.
+        float damageReduction = defensePower / (defensePower + defenseConstant);
+        // 限制在 0% 到 90% 之间，避免出现负减伤或者完全打不动。
+        // 0%~90% 사이로 제한해서 음수 감소율이나 거의 무적 상태를 막는다.
         damageReduction = Mathf.Clamp(damageReduction, 0f, 0.9f);
 
         return damageReduction;
     }
 
-    // 计算最终伤害：基础伤害 -> 防御减伤 -> 无视防御 -> 最低伤害
-    // 최종 데미지 계산: 기본 데미지 -> 방어 감소 -> 방어 무시 -> 최소 데미지
     public float CalculateFinalDamage(float defaultDamage, float ignoreDefenseRate)
     {
+        // 先根据当前 defensePower 算出基础减伤比例。
+        // 먼저 현재 defensePower를 기준으로 기본 피해 감소율을 계산한다.
         float damageReduction = GetCurrentDamageReduction();
 
-        // 无视防御率直接减少当前减伤比例，例如 0.3 表示少算 30% 减伤。
-        // 방어 무시율은 현재 피해 감소율을 직접 줄임. 예: 0.3이면 피해 감소율을 30% 줄임.
+        // ignoreDefenseRate 是“无视防御比例”，例如 0.3 就是少算 30% 减伤。
+        // ignoreDefenseRate는 "방어 무시 비율"이다. 예: 0.3이면 피해 감소율을 30% 덜 적용한다.
         damageReduction -= ignoreDefenseRate;
-        // 再次限制范围，避免无视防御后变成负减伤或超过上限。
-        // 방어 무시 적용 후에도 범위를 제한해서 음수 감소율이나 상한 초과를 방지함.
         damageReduction = Mathf.Clamp(damageReduction, 0f, 0.9f);
 
         // 最终伤害 = 原始伤害 * 没有被减掉的比例。
-        // 최종 데미지 = 기본 데미지 * 감소되지 않은 비율.
+        // 최종 피해 = 원래 피해 * 감소되지 않은 비율.
         float finalDamage = defaultDamage * (1f - damageReduction);
-        // 最低伤害保护，避免防御太高导致完全不掉血。
-        // 최소 데미지 보정. 방어력이 너무 높아도 완전히 0 데미지가 되지 않게 함.
+        // 保底 1 点伤害，避免防御太高时完全不掉血。
+        // 최소 1 피해를 보장해서 방어력이 높아도 완전히 피해가 0이 되지 않게 한다.
         finalDamage = Mathf.Max(finalDamage, 1f);
 
         return RoundToTwoDecimals(finalDamage);
     }
 
-    // 固定减少 defensePower 的比例，例如 amount = 0.2 表示防御力变成 80%
-    // defensePower를 비율로 감소시킴. 예: amount = 0.2면 방어력이 80%가 됨
     public void ReduceDefensePower(float amount, float duration)
     {
-        if (enemyAI == null)
-        {
-            return;
-        }
-
-        // 如果新减防比当前减防弱，就不覆盖，避免弱效果刷新强效果。
-        // 새 방어력 감소가 현재 효과보다 약하면 덮어쓰지 않음. 약한 효과가 강한 효과를 갱신하는 것을 방지.
+        // 如果新减防比当前减防弱，就不覆盖，避免低级效果刷新高级效果。
+        // 새 방어 감소 효과가 현재 효과보다 약하면 덮어쓰지 않는다.
         if (amount < currentDefenseReduceAmount)
         {
             return;
         }
 
-        // 记录当前减防强度和结束时间。
-        // 현재 방어력 감소 강도와 종료 시간을 기록.
+        // amount 是百分比，例如 0.2 表示把防御力降低 20%。
+        // amount는 비율이다. 예: 0.2는 방어력을 20% 낮춘다는 뜻이다.
         currentDefenseReduceAmount = amount;
         isDefenseReduced = true;
         defenseReductionEndTime = Time.time + duration;
 
-        // 固定按原始防御力计算，避免多次减防在当前防御力基础上反复叠乘。
-        // 현재 방어력이 아니라 원래 방어력을 기준으로 계산해서 여러 번 적용될 때 계속 중첩 곱셈되는 것을 방지.
-        enemyAI.defensePower = originalDefensePower * (1f - amount);
+        // 固定减防：直接修改当前 defensePower。
+        // 고정 방어력 감소: 현재 defensePower 값을 직접 낮춘다.
+        defensePower = originalDefensePower * (1f - amount);
     }
 
     void HandleDefenseReductionState()
     {
-        if (enemyAI == null || !isDefenseReduced)
+        // 没有减防状态时不需要继续判断。
+        // 방어력 감소 상태가 아니면 더 이상 검사하지 않는다.
+        if (!isDefenseReduced)
         {
             return;
         }
 
+        // 时间还没到，减防继续生效。
+        // 시간이 아직 끝나지 않았으면 방어력 감소가 계속 유지된다.
         if (Time.time < defenseReductionEndTime)
         {
             return;
         }
 
-        // 持续时间结束，清空状态并恢复原始防御力。
-        // 지속 시간이 끝나면 상태를 초기화하고 원래 방어력으로 복구.
+        // 时间结束，清空减防状态，并恢复原始防御力。
+        // 시간이 끝나면 감소 상태를 초기화하고 원래 방어력으로 복구한다.
         isDefenseReduced = false;
         currentDefenseReduceAmount = 0f;
-        enemyAI.defensePower = originalDefensePower;
+        defensePower = originalDefensePower;
     }
 
-    // 保留最终伤害小数点 2 位。
-    // 최종 데미지를 소수점 둘째 자리까지 반올림.
     float RoundToTwoDecimals(float value)
     {
-        // 先乘 100，再四舍五入，再除以 100。
-        // 먼저 100을 곱하고 반올림한 뒤 다시 100으로 나눔.
+        // 先放大 100 倍再四舍五入，最后除回去，就能保留两位小数。
+        // 100배 키운 뒤 반올림하고 다시 나누면 소수 둘째 자리까지 남길 수 있다.
         return Mathf.Round(value * 100f) / 100f;
     }
 }

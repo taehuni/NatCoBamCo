@@ -1,40 +1,26 @@
 using UnityEngine;
 
-// 敌人的总入口脚本：保存敌人基础数据，并把生命、防御、状态、死亡、特性这些模块连接起来。
-// 적의 메인 입구 스크립트: 기본 데이터를 보관하고 체력, 방어, 상태 이상, 사망, 특성 모듈을 연결함.
+// 敌人总入口脚本：负责把 EnemyHealth、EnemyDefense、EnemyMovement 等模块连接起来。
+// 적의 메인 입구 스크립트: EnemyHealth, EnemyDefense, EnemyMovement 같은 모듈들을 서로 연결한다.
+// 外部脚本优先通过 EnemyAI 调用常用功能，这样外部不用关心敌人内部到底拆成了多少个组件。
+// 외부 스크립트는 되도록 EnemyAI를 통해 공통 기능을 호출한다. 그러면 내부 컴포넌트 구조를 몰라도 된다.
+
+// 敌人的总入口脚本。
+// EnemyAI itself no longer stores enemy data directly.
+// It only connects modules together and provides module access entries such as enemyAI.Health.
 [RequireComponent(typeof(EnemyHealth))]
 [RequireComponent(typeof(EnemyDefense))]
 [RequireComponent(typeof(EnemyStatusEffects))]
 [RequireComponent(typeof(EnemyDeathHandler))]
 [RequireComponent(typeof(EnemyClassTraits))]
+[RequireComponent(typeof(EnemyMovement))]
+[RequireComponent(typeof(EnemyAttack))]
+[RequireComponent(typeof(EnemyTargetSelector))]
+[RequireComponent(typeof(EnemyPathBlockHandler))]
 public class EnemyAI : MonoBehaviour
 {
-    [Header("Base Data / 기본 데이터")]
-    public float maxHp = 30f;
-    public float health = 30f;
-    public float moveSpeed = 3f;
-    public float attackRange = 2f;
-    public float attackDamage = 10f;
-    public float attackCooldown = 1.5f;
-    public float detectRange = 8f;
-    public float blockedPathSearchRange = 20f;
-    public float loseTargetRange = 12f;
-
-    [Header("Defense Data / 방어 데이터")]
-    public float defensePower = 10f;
-    public float defenseConstant = 100f;
-
-    [Header("Fast Enemy Trait / 고속 적 특성")]
-    public float dodgeChance = 0.15f;
-
-    [Header("Tank Enemy Trait / 탱크 적 특성")]
-    public float explosionRange = 3f;
-    public float explosionDamage = 20f;
-    public LayerMask explosionTargetLayer;
-
-    [Header("Enemy Grade / 적 등급")]
-    public EnemyGrade enemyGrade;
-
+    // 敌人等级：普通、精英、Boss。主要给掉落、技能、特殊增伤等系统判断用。
+    // 적 등급: 일반, 엘리트, 보스. 드롭, 스킬, 특수 추가 피해 판단에 사용한다.
     public enum EnemyGrade
     {
         Normal,
@@ -42,9 +28,8 @@ public class EnemyAI : MonoBehaviour
         Boss
     }
 
-    [Header("Enemy Class / 적 종류")]
-    public EnemyClass enemyClass;
-
+    // 敌人种类：决定敌人的行为倾向，例如高速型优先玩家、坦克型优先墙。
+    // 적 종류: 행동 성향을 결정한다. 예: Fast는 플레이어 우선, Tank는 벽 우선.
     public enum EnemyClass
     {
         Standard,
@@ -53,143 +38,233 @@ public class EnemyAI : MonoBehaviour
         Ranged
     }
 
-    [Header("Electric Tower Status Data / 전기 타워 상태 데이터")]
-    public float curParalyzeStack;
-    public float maxParalyzeStack = 100f;
-    public float paralyzeDefensePower = 0.1f;
-
     private EnemyHealth enemyHealth;
     private EnemyDefense enemyDefense;
     private EnemyStatusEffects statusEffects;
     private EnemyDeathHandler deathHandler;
     private EnemyClassTraits classTraits;
+    private EnemyMovement movement;
+    private EnemyAttack enemyAttack;
+    private EnemyTargetSelector targetSelector;
+    private EnemyPathBlockHandler pathBlockHandler;
 
-    // 对外提供 EnemyHealth 的只读入口，外部可以拿到生命模块，但不能直接替换 enemyHealth 引用。
-    // 외부에 EnemyHealth 읽기 전용 입구를 제공. 외부에서 체력 모듈은 가져올 수 있지만 enemyHealth 참조를 바꿀 수는 없음.
+    // 下面这些大写属性是“模块访问入口”。
+    // 아래 대문자로 시작하는 속성들은 "모듈 접근 입구"다.
+    // 例如 enemyAI.Health 得到的是挂在同一个敌人身上的 EnemyHealth 组件引用。
+    // 예를 들어 enemyAI.Health는 같은 적 오브젝트에 붙어 있는 EnemyHealth 컴포넌트 참조를 돌려준다.
+    // 如果缓存为空，就重新 GetComponent 一次，避免因为初始化顺序导致空引用。
+    // 캐시가 비어 있으면 GetComponent로 다시 찾는다. 초기화 순서 문제로 null이 되는 것을 줄이기 위해서다.
     public EnemyHealth Health
     {
-        get { return enemyHealth; }
+        get
+        {
+            if (enemyHealth == null)
+            {
+                enemyHealth = GetComponent<EnemyHealth>();
+            }
+
+            return enemyHealth;
+        }
     }
 
-    // 对外提供 EnemyDefense 的只读入口，防御力修改应通过 EnemyDefense 的函数完成。
-    // 외부에 EnemyDefense 읽기 전용 입구를 제공. 방어력 변경은 EnemyDefense 함수로 처리해야 함.
     public EnemyDefense Defense
     {
-        get { return enemyDefense; }
+        get
+        {
+            if (enemyDefense == null)
+            {
+                enemyDefense = GetComponent<EnemyDefense>();
+            }
+
+            return enemyDefense;
+        }
     }
 
-    // 对外提供状态异常模块入口，例如减速、麻痹状态。
-    // 감속, 마비 같은 상태 이상 모듈 입구를 제공.
     public EnemyStatusEffects StatusEffects
     {
-        get { return statusEffects; }
+        get
+        {
+            if (statusEffects == null)
+            {
+                statusEffects = GetComponent<EnemyStatusEffects>();
+            }
+
+            return statusEffects;
+        }
     }
 
-    // 对外提供死亡处理模块入口，例如坦克自爆、销毁对象。
-    // 사망 처리 모듈 입구를 제공. 예: 탱크 자폭, 오브젝트 제거.
     public EnemyDeathHandler DeathHandler
     {
-        get { return deathHandler; }
+        get
+        {
+            if (deathHandler == null)
+            {
+                deathHandler = GetComponent<EnemyDeathHandler>();
+            }
+
+            return deathHandler;
+        }
     }
 
-    // 对外提供敌人类型特性模块入口，例如高速敌人闪避。
-    // 적 종류 특성 모듈 입구를 제공. 예: 고속 적 회피.
     public EnemyClassTraits ClassTraits
     {
-        get { return classTraits; }
+        get
+        {
+            if (classTraits == null)
+            {
+                classTraits = GetComponent<EnemyClassTraits>();
+            }
+
+            return classTraits;
+        }
+    }
+
+    public EnemyMovement Movement
+    {
+        get
+        {
+            if (movement == null)
+            {
+                movement = GetComponent<EnemyMovement>();
+            }
+
+            return movement;
+        }
+    }
+
+    public EnemyAttack AttackModule
+    {
+        get
+        {
+            if (enemyAttack == null)
+            {
+                enemyAttack = GetComponent<EnemyAttack>();
+            }
+
+            return enemyAttack;
+        }
+    }
+
+    public EnemyTargetSelector TargetSelector
+    {
+        get
+        {
+            if (targetSelector == null)
+            {
+                targetSelector = GetComponent<EnemyTargetSelector>();
+            }
+
+            return targetSelector;
+        }
+    }
+
+    public EnemyPathBlockHandler PathBlockHandler
+    {
+        get
+        {
+            if (pathBlockHandler == null)
+            {
+                pathBlockHandler = GetComponent<EnemyPathBlockHandler>();
+            }
+
+            return pathBlockHandler;
+        }
     }
 
     void Awake()
     {
-        // 获取或自动添加各个功能组件，保证敌人身上一定有这些模块。
-        // 각 기능 컴포넌트를 가져오거나 자동으로 추가해서 적에게 필요한 모듈이 반드시 존재하게 함.
+        // Awake 阶段把需要的模块全部拿到；如果没挂，就自动添加。
+        // Awake 단계에서 필요한 모듈을 모두 가져온다. 없으면 자동으로 추가한다.
+        // 这样敌人 prefab 漏挂某个模块时，基础逻辑不会直接崩掉。
+        // 이렇게 하면 적 프리팹에 모듈 하나가 빠져도 기본 로직이 바로 깨지는 것을 줄일 수 있다.
         enemyHealth = GetOrAddComponent<EnemyHealth>();
         enemyDefense = GetOrAddComponent<EnemyDefense>();
         statusEffects = GetOrAddComponent<EnemyStatusEffects>();
         deathHandler = GetOrAddComponent<EnemyDeathHandler>();
         classTraits = GetOrAddComponent<EnemyClassTraits>();
+        movement = GetOrAddComponent<EnemyMovement>();
+        enemyAttack = GetOrAddComponent<EnemyAttack>();
+        targetSelector = GetOrAddComponent<EnemyTargetSelector>();
+        pathBlockHandler = GetOrAddComponent<EnemyPathBlockHandler>();
 
-        // 把 EnemyAI 自己传给各模块，让模块可以读取敌人的基础数据。
-        // EnemyAI 자기 자신을 각 모듈에 전달해서 모듈이 적의 기본 데이터를 읽을 수 있게 함.
+        // 把 EnemyAI 自己传给每个模块，让模块可以在需要时反向访问敌人总入口。
+        // EnemyAI 자신을 각 모듈에 넘겨서, 모듈이 필요할 때 메인 입구를 다시 참조할 수 있게 한다.
         enemyHealth.Initialize(this);
         enemyDefense.Initialize(this);
         statusEffects.Initialize(this);
         deathHandler.Initialize(this);
         classTraits.Initialize(this);
+        movement.Initialize(this);
+        enemyAttack.Initialize(this, movement);
     }
 
     void Start()
     {
+        // Start 阶段重置运行时数据，例如当前血量、防御 Debuff 状态。
+        // Start 단계에서 현재 체력, 방어력 디버프 상태 같은 런타임 데이터를 초기화한다.
         ResetRuntimeData();
     }
 
-    // 敌人生成后初始化当前运行数据
-    // 적이 생성된 뒤 현재 실행 데이터를 초기화
     public void ResetRuntimeData()
     {
-        if (enemyHealth != null)
+        // 血量模块自己负责把当前血量恢复到最大血量。
+        // 체력 모듈이 현재 체력을 최대 체력으로 복구한다.
+        if (Health != null)
         {
-            enemyHealth.ResetHealth();
+            Health.ResetHealth();
         }
 
-        if (enemyDefense != null)
+        // 防御模块自己负责记录原始防御力，并清空减防状态。
+        // 방어 모듈이 원래 방어력을 기록하고 방어력 감소 상태를 초기화한다.
+        if (Defense != null)
         {
-            enemyDefense.ResetDefenseData();
+            Defense.ResetDefenseData();
         }
     }
 
     void Update()
     {
-        // 麻痹期间直接 return，阻止后续状态逻辑继续执行。
-        // 마비 중이면 바로 return 해서 이후 상태 로직이 실행되지 않게 함.
-        if (statusEffects != null && statusEffects.TickParalyzeState())
+        // 麻痹状态优先级最高：如果敌人正在麻痹，当前帧后续状态逻辑直接不走。
+        // 마비 상태의 우선순위가 가장 높다. 마비 중이면 이번 프레임의 나머지 상태 처리를 건너뛴다.
+        if (StatusEffects != null && StatusEffects.TickParalyzeState())
         {
             return;
         }
 
-        // 每帧检查减速是否到期，到期后恢复速度。
-        // 매 프레임 감속 시간이 끝났는지 확인하고, 끝났으면 속도를 복구함.
-        if (statusEffects != null)
+        // 减速和减防是持续时间型状态，每帧检查是否到期。
+        // 감속과 방어력 감소는 지속시간이 있는 상태라서 매 프레임 만료 여부를 확인한다.
+        if (StatusEffects != null)
         {
-            statusEffects.TickSlowState();
+            StatusEffects.TickSlowState();
         }
 
-        // 每帧检查防御力减少效果是否到期，到期后恢复原始防御力。
-        // 매 프레임 방어력 감소 효과가 끝났는지 확인하고, 끝났으면 원래 방어력으로 복구함.
-        if (enemyDefense != null)
+        if (Defense != null)
         {
-            enemyDefense.Tick();
+            Defense.Tick();
         }
     }
 
-    // 外部脚本统一调用这个函数造成伤害
-    // 외부 스크립트는 이 함수를 통해 데미지를 줌(대미지, 방어력 무시율)
     public void TakeDamage(float defaultDamage, float ignoreDefenseRate)
     {
-        // 先判断敌人特性是否让本次伤害无效，例如高速敌人的闪避。
-        // 먼저 적 특성으로 이번 데미지를 무시할지 판단. 예: 고속 적의 회피.
-        if (classTraits != null && classTraits.ShouldIgnoreIncomingDamage())
+        // 受伤统一入口：外部只需要调用 EnemyAI.TakeDamage。
+        // 피해 통합 입구: 외부는 EnemyAI.TakeDamage만 호출하면 된다.
+        // 内部顺序是：先判断特性闪避，再计算防御减伤，最后交给血量模块扣血。
+        // 내부 순서: 특성 회피 판단 -> 방어 감소 계산 -> 체력 모듈에서 체력 감소.
+        if (ClassTraits != null && ClassTraits.ShouldIgnoreIncomingDamage())
         {
-            //대미지 회피할 때 특수 UI?Anim?Effect?
-            // 闪避成功时可以在这里添加 UI、动画或特效。
-            // 회피 성공 시 여기서 UI, 애니메이션, 이펙트를 추가할 수 있음.
             return;
         }
 
         float finalDamage = defaultDamage;
 
-        // 如果有防御模块，就让防御模块计算最终伤害。
-        // 방어 모듈이 있으면 방어 모듈이 최종 데미지를 계산함.
-        if (enemyDefense != null)
+        if (Defense != null)
         {
-            finalDamage = enemyDefense.CalculateFinalDamage(defaultDamage, ignoreDefenseRate);
+            finalDamage = Defense.CalculateFinalDamage(defaultDamage, ignoreDefenseRate);
         }
 
-        //Debug.Log("FinalDamage = " + finalDamage);
-
-        if (enemyHealth != null)
+        if (Health != null)
         {
-            enemyHealth.TakeFinalDamage(finalDamage);
+            Health.TakeFinalDamage(finalDamage);
         }
     }
 
@@ -198,91 +273,94 @@ public class EnemyAI : MonoBehaviour
         TakeDamage(defaultDamage, 0f);
     }
 
-    // 电塔调用：减速
-    // 전기 타워 호출: 감속
     public void SetSpeedDown(float slowPower, float slowTime)
     {
-        if (statusEffects == null)
+        // 减速入口：真正的减速数据和计时逻辑放在 EnemyStatusEffects。
+        // 감속 입구: 실제 감속 데이터와 시간 처리는 EnemyStatusEffects에서 담당한다.
+        if (StatusEffects == null)
         {
             return;
         }
 
-        statusEffects.SetSpeedDown(slowPower, slowTime);
+        StatusEffects.SetSpeedDown(slowPower, slowTime);
     }
 
-    // 电塔调用：麻痹层数
-    // 전기 타워 호출: 마비 스택
     public void AddParalyzeStack(float amount, float duration)
     {
-        if (statusEffects == null)
+        // 麻痹入口：外部只告诉敌人“增加多少麻痹值”和“麻痹多久”。
+        // 마비 입구: 외부는 적에게 "마비 수치를 얼마나 추가할지"와 "얼마나 지속할지"만 알려준다.
+        if (StatusEffects == null)
         {
             return;
         }
 
-        statusEffects.AddParalyzeStack(amount, duration);
+        StatusEffects.AddParalyzeStack(amount, duration);
     }
 
     public bool IsParalyzed()
     {
-        if (statusEffects == null)
+        if (StatusEffects == null)
         {
             return false;
         }
 
-        return statusEffects.IsParalyzed;
+        return StatusEffects.IsParalyzed;
     }
 
-    // 电塔调用：固定减少 defensePower
-    // 전기 타워 호출: defensePower 고정 감소
     public void ReduceDefensePower(float amount, float duration)
     {
-        if (enemyDefense == null)
+        // 固定减防入口：真正修改 defensePower 的逻辑交给 EnemyDefense。
+        // 고정 방어력 감소 입구: 실제 defensePower 변경 로직은 EnemyDefense가 담당한다.
+        if (Defense == null)
         {
             return;
         }
 
-        enemyDefense.ReduceDefensePower(amount, duration);
+        Defense.ReduceDefensePower(amount, duration);
     }
 
     public float GetCurrentDamageReduction()
     {
-        if (enemyDefense == null)
+        if (Defense == null)
         {
             return 0f;
         }
 
-        return enemyDefense.GetCurrentDamageReduction();
+        return Defense.GetCurrentDamageReduction();
     }
 
     public void Dead()
     {
-        // 如果死亡模块不存在，就直接销毁，避免因为缺组件导致敌人无法消失。
-        // 사망 모듈이 없으면 바로 제거해서 컴포넌트 누락 때문에 적이 사라지지 않는 문제를 방지함.
-        if (deathHandler == null)
+        // 死亡统一入口：死亡特效、自爆、销毁对象都交给 EnemyDeathHandler。
+        // 사망 통합 입구: 사망 효과, 자폭, 오브젝트 제거는 EnemyDeathHandler가 담당한다.
+        if (DeathHandler == null)
         {
             Destroy(gameObject);
             return;
         }
 
-        deathHandler.Die();
+        DeathHandler.Die();
     }
 
     void OnDrawGizmosSelected()
     {
-        // 在 Scene 视图中显示敌人的攻击范围，方便测试。
-        // Scene 뷰에서 적의 공격 범위를 표시해서 테스트하기 쉽게 함.
+        EnemyAttack attackModule = AttackModule;
+
+        if (attackModule == null)
+        {
+            return;
+        }
+
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+        Gizmos.DrawWireSphere(transform.position, attackModule.attackRange);
     }
 
-    // 泛型工具函数：如果身上已有 T 组件就拿到它，没有就自动添加一个。
-    // 제네릭 유틸 함수: T 컴포넌트가 있으면 가져오고, 없으면 자동으로 추가함.
     T GetOrAddComponent<T>() where T : Component
     {
+        // 泛型工具函数：先找同类型组件，找不到就自动添加。
+        // 제네릭 도구 함수: 같은 타입의 컴포넌트를 먼저 찾고, 없으면 자동으로 추가한다.
         T component = GetComponent<T>();
 
-        // GetComponent 找不到时返回 null，这时用 AddComponent 添加脚本组件。
-        // GetComponent가 찾지 못하면 null을 반환하므로 AddComponent로 스크립트 컴포넌트를 추가함.
         if (component == null)
         {
             component = gameObject.AddComponent<T>();

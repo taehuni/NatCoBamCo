@@ -134,7 +134,7 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
             {
                 float distance = EnemyTargetUtility.GetDistanceToTarget(transform.position, priorityTarget);
 
-                if (distance > enemyAI.loseTargetRange)
+                if (distance > targetSelector.loseTargetRange)
                 {
                     ClearPriorityTarget();
                 }
@@ -150,7 +150,7 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
             playerLayer,
             wallLayer,
             towerLayer,
-            enemyAI.detectRange,
+            targetSelector.detectRange,
             buildingMovePointSampleRange
         );
 
@@ -276,7 +276,7 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
 
         float distance = EnemyTargetUtility.GetDistanceToTarget(transform.position, target);
 
-        if (distance <= enemyAI.attackRange)
+        if (distance <= attack.attackRange)
         {
             // 玩家受伤逻辑以后再加
             // 플레이어 피해 로직은 나중에 추가
@@ -318,7 +318,7 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
 
         float distance = GetDistanceToCore();
 
-        if (distance <= enemyAI.attackRange)
+        if (distance <= attack.attackRange)
         {
             attack.AttackCore(core);
             return;
@@ -450,7 +450,7 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
     float GetBuildingAttackReach()
     {
         float agentRadius = movement == null ? 0f : movement.Radius;
-        return enemyAI.attackRange + agentRadius;
+        return attack.attackRange + agentRadius;
     }
 
     // 判断建筑是否已经进入敌人前方攻击盒子

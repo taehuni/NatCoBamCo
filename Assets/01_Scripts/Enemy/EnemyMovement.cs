@@ -2,10 +2,18 @@ using UnityEngine;
 using UnityEngine.AI;
 
 // 敌人移动模块：统一封装 NavMeshAgent 的移动、停止、转向、路径计算。
+// 적 이동 모듈: NavMeshAgent의 이동, 정지, 회전, 경로 계산을 통합해서 감싼다.
+// 其他脚本不直接操作 NavMeshAgent，优先通过 EnemyMovement 调用，结构会更清晰。
+// 다른 스크립트는 NavMeshAgent를 직접 조작하기보다 EnemyMovement를 통해 호출하는 것이 구조적으로 더 명확하다.
+
+// 敌人移动模块：统一封装 NavMeshAgent 的移动、停止、转向、路径计算。
 // 적 이동 모듈: NavMeshAgent의 이동, 정지, 회전, 경로 계산을 한곳에 모아 관리함.
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyMovement : MonoBehaviour
 {
+    [Header("Movement Data / 이동 데이터")]
+    public float moveSpeed;
+
     private NavMeshAgent agent;
     private float defaultStoppingDistance;
 
@@ -68,12 +76,12 @@ public class EnemyMovement : MonoBehaviour
     // 이동 데이터 초기화: 기본 속도 동기화, 기본 정지 거리 기록, 회피 우선순위와 자동 회전 설정.
     public void Initialize(EnemyAI enemyAI)
     {
-        if (enemyAI == null || Agent == null)
+        if (Agent == null)
         {
             return;
         }
 
-        Agent.speed = enemyAI.moveSpeed;
+        Agent.speed = moveSpeed;
         defaultStoppingDistance = Agent.stoppingDistance;
         // 障碍避让优先级，数值越小优先级越高。随机化可以减少敌人完全重叠排队。
         // 장애물 회피 우선순위. 숫자가 작을수록 우선순위가 높음. 랜덤화하면 적들이 완전히 겹치는 현상을 줄일 수 있음.

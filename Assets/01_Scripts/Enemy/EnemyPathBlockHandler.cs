@@ -1,10 +1,18 @@
 using UnityEngine;
 using UnityEngine.AI;
 
+// 敌人路径堵塞处理模块：负责判断路径是否完整，以及在路径不完整时寻找堵路建筑。
+// 적 경로 막힘 처리 모듈: 경로가 완전한지 판단하고, 경로가 막혔을 때 막고 있는 건물을 찾는다.
+// 它只负责“路径分析”，不负责真正移动或者攻击。
+// 이 모듈은 "경로 분석"만 담당하고, 실제 이동이나 공격은 담당하지 않는다.
+
 // 路径堵塞处理模块：负责判断路径是否完整、选择最佳路径点、寻找堵路建筑。
 // 경로 막힘 처리 모듈: 경로 완성 여부 판단, 최적 경로 지점 선택, 길을 막는 건물 찾기를 담당함.
 public class EnemyPathBlockHandler : MonoBehaviour
 {
+    [Header("Path Block Data / 경로 막힘 데이터")]
+    public float blockedPathSearchRange;
+
     // 一次寻路结果的数据包。
     // 한 번의 길찾기 결과를 담는 데이터 패키지.
     public struct PathChoice
@@ -290,8 +298,9 @@ public class EnemyPathBlockHandler : MonoBehaviour
         EnemyMovement movement,
         float targetPathPointExtraDistance)
     {
+        float enemyAttackRange = enemyAI == null || enemyAI.AttackModule == null ? 0f : enemyAI.AttackModule.attackRange;
         Vector3 targetCenter = target.transform.position; // 默认目标中心 / 기본 목표 중심
-        float targetRadius = enemyAI.attackRange + targetPathPointExtraDistance; // 默认候选点半径 / 기본 후보 지점 반지름
+        float targetRadius = enemyAttackRange + targetPathPointExtraDistance; // 默认候选点半径 / 기본 후보 지점 반지름
 
         Bounds bounds; // 临时变量，用来保存目标整体范围 / 목표 전체 범위를 저장하는 임시 변수
 
@@ -303,7 +312,7 @@ public class EnemyPathBlockHandler : MonoBehaviour
             float horizontalSize = Mathf.Max(bounds.extents.x, bounds.extents.z); // 取水平最长边的半长 / 수평 방향에서 가장 긴 반쪽 길이
             // 候选点半径 = 目标中心到边缘的大概距离 + 敌人需要站在外面的距离 + 额外容错距离
             // 후보 지점 반지름 = 목표 중심에서 가장자리까지의 대략적인 거리 + 적이 바깥에 서기 위한 거리 + 추가 여유 거리
-            targetRadius = horizontalSize + Mathf.Max(enemyAI.attackRange * 0.8f, movement.Radius + 0.3f) + targetPathPointExtraDistance;
+            targetRadius = horizontalSize + Mathf.Max(enemyAttackRange * 0.8f, movement.Radius + 0.3f) + targetPathPointExtraDistance;
         }
 
         Vector3 enemyDirection = transform.position - targetCenter; // 目标中心 -> 敌人位置的方向 / 목표 중심 -> 적 위치 방향
@@ -349,7 +358,7 @@ public class EnemyPathBlockHandler : MonoBehaviour
         {
             // 目标表面最近点往敌人方向外推一点，通常是最自然的接近点。
             // 목표 표면의 가장 가까운 점을 적 방향으로 조금 밀어낸 지점. 보통 가장 자연스러운 접근 지점.
-            closestPoint + closestDirection * Mathf.Max(enemyAI.attackRange * 0.8f, movement.Radius + 0.3f),
+            closestPoint + closestDirection * Mathf.Max(enemyAttackRange * 0.8f, movement.Radius + 0.3f),
             targetCenter + enemyDirection * targetRadius, // 目标靠近敌人方向的外圈点 / 목표에서 적 쪽 외곽 지점
             targetCenter - enemyDirection * targetRadius, // 目标远离敌人方向的外圈点 / 목표에서 적 반대쪽 외곽 지점
             targetCenter + rightDirection * targetRadius, // 侧边方向候选点 / 측면 방향 후보 지점
