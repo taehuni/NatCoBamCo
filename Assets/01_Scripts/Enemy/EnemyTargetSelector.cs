@@ -116,6 +116,79 @@ public class EnemyTargetSelector : MonoBehaviour
         return null;
     }
 
+    // 计算敌人走到某个建筑攻击位置所需的真实 NavMesh 路径长度。
+    // 적이 특정 건물의 공격 위치까지 이동하는 실제 NavMesh 경로 길이를 계산한다.
+    // 返回 true 代表至少找到了一个可以完整走到的攻击位置，pathLength 是其中路线最短的长度。
+    // true를 반환하면 완전히 도달 가능한 공격 위치를 찾았다는 뜻이며, pathLength는 그중 가장 짧은 경로 길이다.
+    public bool TryGetReachableBuildingPathLength(
+        GameObject target,
+        EnemyAI enemyAI,
+        EnemyMovement movement,
+        BuildingAttackSlotManager attackSlotManager,
+        float buildingMovePointSampleRange,
+        out float pathLength)
+    {
+        pathLength = Mathf.Infinity;
+
+        if (target == null || enemyAI == null || movement == null || attackSlotManager == null)
+        {
+            return false;
+        }
+
+        DamageableBuilding building = target.GetComponentInParent<DamageableBuilding>();
+
+        if (building == null || building.hp <= 0f)
+        {
+            return false;
+        }
+
+        Vector3 movePoint;
+
+        // 先找建筑周围能够站过去攻击的位置。
+        // 먼저 건물 주변에서 실제로 이동할 수 있는 공격 위치를 찾는다.
+        if (!attackSlotManager.TryGetReachableMovePointNearTarget(
+            building.gameObject,
+            enemyAI,
+            movement,
+            buildingMovePointSampleRange,
+            out movePoint))
+        {
+            return false;
+        }
+
+        NavMeshPath path;
+        Vector3 lastReachablePoint;
+
+        // 再计算敌人当前位置到这个攻击位置的路径。
+        // 그다음 적의 현재 위치에서 공격 위치까지의 경로를 계산한다.
+        if (!movement.TryGetPath(
+            movePoint,
+            buildingMovePointSampleRange,
+            out path,
+            out lastReachablePoint))
+        {
+            return false;
+        }
+
+        // 路径不完整，说明敌人目前不能真正走到这个建筑的攻击位置。
+        // 경로가 완전하지 않으면 현재 이 건물의 공격 위치까지 실제로 갈 수 없다.
+        if (path.status != NavMeshPathStatus.PathComplete)
+        {
+            return false;
+        }
+
+        pathLength = movement.GetPathLength(path);
+
+        // 极少数情况下路径拐点不足，使用直线距离作为兜底分数。
+        // 드물게 경로 코너가 부족하면 직선거리를 대체 점수로 사용한다.
+        if (pathLength <= 0f)
+        {
+            pathLength = Vector3.Distance(transform.position, movePoint);
+        }
+
+        return true;
+    }
+
     public DamageableBuilding FindNearestBuildingFromColliders(Collider[] colliders, Vector3 distanceCenter)
     {
         // 从一组 Collider 中找离 distanceCenter 最近的 DamageableBuilding。
@@ -191,46 +264,19 @@ public class EnemyTargetSelector : MonoBehaviour
                 continue;
             }
 
-            Vector3 movePoint;
+            float pathLength;
 
-            // 找这个建筑附近可以站过去攻击的位置。
-            // 이 건물 근처에서 서서 공격할 수 있는 위치를 찾는다.
-            if (!attackSlotManager.TryGetReachableMovePointNearTarget(
+            // 使用统一的可达性和路径长度计算，避免“第一次选目标”和“之后比较目标”采用不同标准。
+            // 동일한 도달 가능 여부와 경로 길이 계산을 사용해서 최초 선택과 이후 비교 기준이 달라지지 않게 한다.
+            if (!TryGetReachableBuildingPathLength(
                 building.gameObject,
                 enemyAI,
                 movement,
+                attackSlotManager,
                 buildingMovePointSampleRange,
-                out movePoint))
+                out pathLength))
             {
                 continue;
-            }
-
-            NavMeshPath path;
-            Vector3 lastReachablePoint;
-
-            // 计算敌人到这个攻击位置的路径。
-            // 적이 이 공격 위치까지 갈 수 있는 경로를 계산한다.
-            if (!movement.TryGetPath(movePoint, buildingMovePointSampleRange, out path, out lastReachablePoint))
-            {
-                continue;
-            }
-
-            // 这里只接受完整路径，不完整路径说明敌人走不到这个攻击位置。
-            // 여기서는 완전한 경로만 허용한다. 불완전한 경로는 공격 위치까지 갈 수 없다는 뜻이다.
-            if (path.status != NavMeshPathStatus.PathComplete)
-            {
-                continue;
-            }
-
-            // 计算真实路径长度，而不是直线距离。
-            // 직선 거리가 아니라 실제 경로 길이를 계산한다.
-            float pathLength = movement.GetPathLength(path);
-
-            if (pathLength <= 0f)
-            {
-                // 极少数情况下路径拐点不足，就用直线距离兜底。
-                // 드물게 경로 코너가 부족하면 직선 거리로 대체한다.
-                pathLength = Vector3.Distance(transform.position, movePoint);
             }
 
             // 谁的路径更短，就选谁。
