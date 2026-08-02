@@ -16,6 +16,7 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
     public float navMeshSampleRange = 5f; // 把目标点修正到附近 NavMesh 的范围 / 목표 지점을 근처 NavMesh로 보정하는 범위
     public float targetPathPointExtraDistance = 1f; // 目标外侧额外寻找路径点的距离 / 타겟 바깥쪽 경로 후보 지점을 추가로 찾는 거리
     public float attackPointRefreshInterval = 0.5f; // 重新选择建筑攻击点的间隔 / 건물 공격 위치를 다시 선택하는 간격
+    public float priorityTargetSwitchPathAdvantage = 1f; // 新目标路线至少短多少米才允许切换 / 새 타깃 경로가 최소 몇 미터 짧아야 교체할지
 
     [Header("Attack Settings / 공격 설정")]
     public float buildingTurnSpeed = 360f; // 攻击建筑前转向速度 / 건물 공격 전 회전 속도
@@ -47,6 +48,7 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
     private bool isAttackingBlockedWall; // 当前目标是否是因为堵路才锁定的墙 / 현재 타겟이 경로 차단 때문에 고정된 벽인지 여부
     private Vector3 blockedWallDestination; // 这面墙原本挡住的目标点 / 이 벽이 원래 막고 있던 목표 지점
     private GameObject blockedWallOriginalTarget; // 这面墙原本挡住的目标对象 / 이 벽이 원래 막고 있던 목표 오브젝트
+    private float nextPriorityTargetSearchTime; // 下一次允许重新比较优先目标的时间 / 다음 우선 타깃 재비교 가능 시간
 
     void Start()
     {
@@ -115,8 +117,8 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
         MoveOrAttackCore();
     }
 
-    // 更新当前优先目标：如果目标丢失，就重新找
-    // 현재 우선 타겟 갱신: 타겟을 잃으면 다시 찾음
+    // 更新当前优先目标：处理目标失效、丢失和 Tank 的定时重新比较。
+    // 현재 우선 타깃 갱신: 타깃 무효, 이탈, Tank의 주기적인 재비교를 처리한다.
     void UpdatePriorityTarget()
     {
         if (IsTargetInvalid(priorityTarget))
@@ -138,12 +140,25 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
                 {
                     ClearPriorityTarget();
                 }
-
-                return;
+                else
+                {
+                    TryRefreshTankPriorityTarget();
+                    return;
+                }
             }
         }
 
-        priorityTarget = targetSelector.FindPriorityTarget(
+        GameObject newTarget = FindPriorityTarget();
+
+        SetPriorityTarget(newTarget);
+        nextPriorityTargetSearchTime = Time.time + Mathf.Max(0.05f, searchInterval);
+    }
+
+    // 按敌人种类查找当前感知范围内的优先目标。
+    // 적 종류에 따라 현재 감지 범위 안의 우선 타깃을 찾는다.
+    GameObject FindPriorityTarget()
+    {
+        return targetSelector.FindPriorityTarget(
             enemyAI,
             movement,
             attackSlotManager,
@@ -153,8 +168,113 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
             targetSelector.detectRange,
             buildingMovePointSampleRange
         );
+    }
 
+    // Tank 会定时重新观察附近墙体，但只有新墙的可达路径明显更短时才更换目标。
+    // Tank는 주기적으로 주변 벽을 다시 확인하지만 새 벽의 도달 경로가 확실히 더 짧을 때만 타깃을 바꾼다.
+    void TryRefreshTankPriorityTarget()
+    {
+        if (Time.time < nextPriorityTargetSearchTime)
+        {
+            return;
+        }
+
+        nextPriorityTargetSearchTime = Time.time + Mathf.Max(0.05f, searchInterval);
+
+        if (enemyAI.ClassTraits == null || enemyAI.ClassTraits.enemyClass != EnemyAI.EnemyClass.Tank)
+        {
+            return;
+        }
+
+        // 经过堵路验证锁定的墙必须先处理，不让普通感知搜索把它随便替换掉。
+        // 실제 경로 차단 검증으로 고정한 벽은 먼저 처리해야 하므로 일반 감지 검색으로 교체하지 않는다.
+        if (isAttackingBlockedWall)
+        {
+            return;
+        }
+
+        DamageableBuilding currentBuilding = priorityTarget.GetComponentInParent<DamageableBuilding>();
+
+        if (currentBuilding == null)
+        {
+            return;
+        }
+
+        // 已经靠近当前墙并准备攻击时保持目标，避免攻击过程中突然转身。
+        // 현재 벽 가까이에서 공격을 준비 중이면 공격 도중 갑자기 방향을 바꾸지 않도록 타깃을 유지한다.
+        float distanceToCurrentBuilding = EnemyTargetUtility.GetDistanceToTarget(transform.position, currentBuilding.gameObject);
+
+        if (distanceToCurrentBuilding <= GetBuildingAttackReach() + 0.05f)
+        {
+            return;
+        }
+
+        GameObject newTarget = FindPriorityTarget();
+
+        if (newTarget == null || newTarget == priorityTarget)
+        {
+            return;
+        }
+
+        DamageableBuilding newBuilding = newTarget.GetComponentInParent<DamageableBuilding>();
+
+        if (newBuilding == null)
+        {
+            return;
+        }
+
+        float newPathLength;
+
+        // 新墙必须有一条可以完整走到攻击位置的路径，否则不切换。
+        // 새 벽의 공격 위치까지 완전한 경로가 있어야 하며, 그렇지 않으면 교체하지 않는다.
+        if (!targetSelector.TryGetReachableBuildingPathLength(
+            newBuilding.gameObject,
+            enemyAI,
+            movement,
+            attackSlotManager,
+            buildingMovePointSampleRange,
+            out newPathLength))
+        {
+            return;
+        }
+
+        float currentPathLength;
+        bool canReachCurrentBuilding = targetSelector.TryGetReachableBuildingPathLength(
+            currentBuilding.gameObject,
+            enemyAI,
+            movement,
+            attackSlotManager,
+            buildingMovePointSampleRange,
+            out currentPathLength
+        );
+
+        float requiredAdvantage = Mathf.Max(0f, priorityTargetSwitchPathAdvantage);
+
+        // 当前墙已经走不到，或者新墙路线至少短 requiredAdvantage 米时，才切换。
+        // 현재 벽에 갈 수 없거나 새 벽 경로가 requiredAdvantage 미터 이상 짧을 때만 교체한다.
+        if (!canReachCurrentBuilding || newPathLength + requiredAdvantage < currentPathLength)
+        {
+            SetPriorityTarget(newBuilding.gameObject);
+        }
+    }
+
+    // 设置新优先目标；目标发生变化时释放旧建筑攻击点预约。
+    // 새 우선 타깃을 설정하고, 타깃이 바뀌면 기존 건물 공격 지점 예약을 해제한다.
+    void SetPriorityTarget(GameObject newTarget)
+    {
+        if (priorityTarget == newTarget)
+        {
+            return;
+        }
+
+        if (attackSlotManager != null)
+        {
+            attackSlotManager.ReleaseAttackPoint();
+        }
+
+        priorityTarget = newTarget;
         isAttackingBlockedWall = false;
+        blockedWallOriginalTarget = null;
     }
 
     // 判断当前锁定目标是否已经失效
@@ -341,13 +461,23 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
             return false;
         }
 
-        DamageableBuilding blockingBuilding = pathBlockHandler.FindBuildingBlockingPath(
-            pathChoice.lastReachablePoint,
-            pathChoice.destination, 
-            buildingLayer,
-            blockedPointSearchRange,
-            blockedPathForwardSearchRange
-        );
+        // 路径选择阶段已经验证过断口正前方的第一个物理障碍，这里直接使用绑定结果。
+        // 경로 선택 단계에서 단절 지점 바로 앞의 첫 실제 장애물을 이미 검증했으므로 여기서는 연결된 결과를 바로 사용한다.
+        DamageableBuilding blockingBuilding = pathChoice.blockingBuilding;
+
+        // 只有物理验证未启用时才使用旧的大范围搜索，避免重新锁定入口旁边的迷惑墙。
+        // 실제 장애물 검증이 비활성화된 경우에만 기존 넓은 범위 검색을 사용해서 입구 옆의 미끼 벽을 다시 선택하지 않게 한다.
+        if (blockingBuilding == null &&
+            pathChoice.blockerValidation == EnemyPathBlockHandler.BlockerValidationResult.NotChecked)
+        {
+            blockingBuilding = pathBlockHandler.FindBuildingBlockingPath(
+                pathChoice.lastReachablePoint,
+                pathChoice.destination,
+                buildingLayer,
+                blockedPointSearchRange,
+                blockedPathForwardSearchRange
+            );
+        }
 
         if (blockingBuilding != null)
         {
@@ -376,8 +506,17 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
         }
 
         Vector3 movePoint;
+        //敌人距离预约攻击点多近，才算“已经到达攻击点
+        //적과 지정 공격 지점 사이의 거리가 일정 값 이하이면 공격 지점에 도착한 것으로 판단
         float preciseAttackPointArriveDistance = GetPreciseAttackPointArriveDistance();
 
+        //攻击点管理器，请根据这座建筑和当前敌人的情况，
+        // 尝试给我预约一个能走到、能攻击、没有被别人占用的位置，
+        // 并把最终位置放进 movePoint(保存敌人应该前往的具体世界坐标)
+        // 공격 지점 관리자에게 이 건물과 현재 적의 상태를 기준으로,
+        // 이동 가능하고, 공격 가능하며, 다른 적이 점유하지 않은 위치를 예약하도록 요청한다.
+        // 최종 위치는 movePoint에 저장한다. 
+        // movePoint는 적이 이동해야 할 구체적인 월드 좌표를 의미한다.
         bool hasAttackPoint = attackSlotManager.TryReserveAttackPoint(
             building,
             enemyAI,
@@ -441,7 +580,9 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
     // 건물 공격 위치는 더 정확해야 하므로 일반 NavMeshAgent 정지 거리만 사용하지 않음
     float GetPreciseAttackPointArriveDistance()
     {
+        //获取敌人的半径 적의 반지름을 가져와
         float agentRadius = movement == null ? 0f : movement.Radius;
+        //计算最低允许距离 최소 허용 거리 계산
         float minimumAllowedDistance = agentRadius + buildingAttackStoppingDistance + 0.1f;
 
         return Mathf.Max(attackPointArriveDistance, minimumAllowedDistance);
