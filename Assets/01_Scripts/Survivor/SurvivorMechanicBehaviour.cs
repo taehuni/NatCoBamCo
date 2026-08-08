@@ -32,6 +32,12 @@ public class SurvivorMechanicBehaviour : MonoBehaviour
             return;
         }
 
+        // 태훈 추가: 구출되기 전에는 타워 수리하러 가지 않음
+        if (survivorAI.state != SurvivorAI.SurvivorState.Rescued)
+        {
+            return;
+        }
+
         if (currentTarget == null || currentTarget.hp >= currentTarget.maxHp)
         {
             currentTarget = FindMostDamagedTower();

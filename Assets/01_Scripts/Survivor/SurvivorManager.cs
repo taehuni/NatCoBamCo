@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement; // 태훈 추가: 씬 전환 감지용
 
 // 생존자 로스터 관리 싱글턴. 씬에 빈 오브젝트 하나 만들어서 붙이면 됨.
 //
@@ -23,6 +24,34 @@ public class SurvivorManager : MonoBehaviour
         }
 
         Instance = this;
+
+        // 태훈 추가: 씬 전환해도 구출 명단(roster)이 유지되도록 파괴 방지
+        DontDestroyOnLoad(gameObject);
+    }
+
+    // 태훈 추가: 씬이 바뀌면 이전 씬의 homePoint(파괴됨)를 새 씬 기준으로 다시 찾아서 이동시킴
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        foreach (SurvivorAI survivor in roster)
+        {
+            if (survivor == null)
+            {
+                continue;
+            }
+
+            survivor.homePoint = FindHomePointForRole(survivor.role);
+            survivor.GoHome();
+        }
     }
 
     public void AddSurvivor(SurvivorAI survivor)
@@ -38,6 +67,10 @@ public class SurvivorManager : MonoBehaviour
         }
 
         roster.Add(survivor);
+
+        // 태훈 추가: 매니저(DontDestroyOnLoad) 밑으로 옮겨서 생존자 본체도 씬 전환 시 같이 유지되게 함
+        survivor.transform.SetParent(transform);
+
         survivor.GoHome();
 
         Debug.Log($"{survivor.survivorName} 생존자 합류 ({survivor.role})");
@@ -46,19 +79,15 @@ public class SurvivorManager : MonoBehaviour
     // 채집가 -> ResidenceBuilding 위치, 연구원 -> ResearchLab 위치, 정비공 -> 없음(직접 이동하므로 불필요)
     Transform FindHomePointForRole(SurvivorAI.SurvivorRole role)
     {
-        if (role == SurvivorAI.SurvivorRole.Gatherer)
-        {
-            ResidenceBuilding residence = FindObjectOfType<ResidenceBuilding>();
-            return residence != null ? residence.transform : null;
-        }
-
         if (role == SurvivorAI.SurvivorRole.Researcher)
         {
             ResearchLab lab = FindObjectOfType<ResearchLab>();
             return lab != null ? lab.transform : null;
         }
 
-        return null;
+        // 태훈 수정: 정비공도 낮에는 거주구역 근처를 배회하도록 홈포인트 부여 (원래는 Gatherer만 해당, Mechanic은 null)
+        ResidenceBuilding residence = FindObjectOfType<ResidenceBuilding>();
+        return residence != null ? residence.transform : null;
     }
 
     // 채집가가 로스터에 있고 부상이 아니면 합산 (자원 획득량 배율 보너스)
