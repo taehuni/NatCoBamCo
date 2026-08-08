@@ -2,8 +2,10 @@ using UnityEngine;
 
 // 탐색 중 생존자 구조 이벤트.
 // ResourceNode.cs / MedicalCenter.cs 와 동일한 패턴(OverlapSphere + PlayerInteractUI + E키)을 따른다.
+// 태훈 수정: 새 프리팹을 스폰하던 방식에서, 이 오브젝트에 이미 붙어있는 SurvivorAI 를 그 자리에서 구출 처리하는 방식으로 변경.
+// Survivor_Mechanic/Gatherer/Researcher 프리팹처럼 SurvivorAI 가 이미 붙어있는 오브젝트에 이 컴포넌트를 같이 붙여서 사용.
 // 흐름: 플레이어 접근 -> 주변 몬스터(enemyLayer) 존재 확인 -> 없으면 E키로 구조
-//      -> survivorPrefab(SurvivorAI 포함) 을 Instantiate -> SurvivorManager 에 합류
+//      -> SurvivorAI.state 를 Rescued 로 변경 -> SurvivorManager 에 합류
 public class SurvivorRescueEvent : MonoBehaviour
 {
     [Header("상호작용")]
@@ -11,11 +13,8 @@ public class SurvivorRescueEvent : MonoBehaviour
     public LayerMask playerLayer;
 
     [Header("생존자 정보")]
-    [Tooltip("SurvivorAI + SurvivorMovement (+ 정비공이면 SurvivorMechanicBehaviour) 가 붙어있는 프리팹")]
-    public GameObject survivorPrefab;
-    public string survivorName = "이름 없는 생존자";
-    public SurvivorAI.SurvivorRole survivorRole;
-    public Transform spawnPoint; // 비어있으면 이 오브젝트 위치를 사용
+    [Tooltip("비어있으면 SurvivorAI 에 이미 설정된 이름을 그대로 사용")]
+    public string survivorName;
 
     [Header("경비 몬스터 체크")]
     public float guardCheckRange = 6f;
@@ -78,29 +77,27 @@ public class SurvivorRescueEvent : MonoBehaviour
     {
         rescued = true;
 
-        if (survivorPrefab == null)
+        SurvivorAI survivorAI = GetComponent<SurvivorAI>();
+
+        if (survivorAI == null)
         {
-            Debug.LogError("survivorPrefab 이 지정되지 않았습니다");
+            Debug.LogError("이 오브젝트에 SurvivorAI 컴포넌트가 없습니다");
             return;
         }
 
-        Vector3 spawnAt = spawnPoint != null ? spawnPoint.position : transform.position;
-        GameObject instance = Instantiate(survivorPrefab, spawnAt, Quaternion.identity);
-
-        SurvivorAI survivorAI = instance.GetComponent<SurvivorAI>();
-
-        if (survivorAI != null)
+        if (!string.IsNullOrEmpty(survivorName))
         {
             survivorAI.survivorName = survivorName;
-            survivorAI.role = survivorRole;
-
-            if (SurvivorManager.Instance != null)
-            {
-                SurvivorManager.Instance.AddSurvivor(survivorAI);
-            }
         }
 
-        Debug.Log($"{survivorName} 구조 완료");
+        survivorAI.state = SurvivorAI.SurvivorState.Rescued;
+
+        if (SurvivorManager.Instance != null)
+        {
+            SurvivorManager.Instance.AddSurvivor(survivorAI);
+        }
+
+        Debug.Log($"{survivorAI.survivorName} 구조 완료");
 
         if (playerUI != null)
         {
@@ -108,7 +105,7 @@ public class SurvivorRescueEvent : MonoBehaviour
         }
 
         // TODO: 아트 팀 - 구조 연출(파티클/사운드)
-        gameObject.SetActive(false);
+        enabled = false; // 트리거 로직만 정지. 오브젝트 자체는 계속 살아서 이동해야 하므로 SetActive(false) 하지 않음
     }
 
     void OnDrawGizmosSelected()

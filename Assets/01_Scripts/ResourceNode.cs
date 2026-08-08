@@ -8,6 +8,10 @@ public class ResourceNode : MonoBehaviour
 
     public float collectTime = 3f;
 
+    // 태훈 추가: 획득 자원 종류/수량
+    public ResourceType resourceType;
+    public int amount = 10;
+
     private bool playerInRange;
     private bool isCollecting;
     private float collectTimer;
@@ -107,7 +111,24 @@ public class ResourceNode : MonoBehaviour
             playerUI.HideSlider();
         }
 
-        Debug.Log("Collect Complete");
+        // 태훈 수정: 로그만 찍던 것을 실제 인벤토리 지급으로 변경 + 채집가 보너스(SurvivorManager.GetGatherBonus) 적용
+        if (ResourceInventory.Instance != null)
+        {
+            float gatherBonus = SurvivorManager.Instance != null ? SurvivorManager.Instance.GetGatherBonus() : 0f;
+            int finalAmount = Mathf.RoundToInt(amount * (1f + gatherBonus));
+
+            ResourceInventory.Instance.Add(resourceType, finalAmount);
+
+            Debug.Log($"Collect Complete: {resourceType} +{finalAmount} (기본 {amount}, 채집가 보너스 {gatherBonus:P0})");
+        }
+
+        // 태훈 추가: 1회성 채집 - 완료되면 노드 비활성화 (재채집 불가)
+        if (playerUI != null)
+        {
+            playerUI.HideButton();
+        }
+
+        gameObject.SetActive(false);
     }
 
     void StopCollect()

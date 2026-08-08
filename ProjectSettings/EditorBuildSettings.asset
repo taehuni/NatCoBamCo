@@ -11,6 +11,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/00_Scenes/jim02_Scene.unity
     guid: 31ffbb91d9b0108498612bcaf6096e6d
+  - enabled: 1
+    path: Assets/00_Scenes/Min_Survivor_Scene.unity
+    guid: da2e65429df8de043b60cc74b9b9d7ad
+  - enabled: 1
+    path: Assets/00_Scenes/Min_Shelter_Scene.unity
+    guid: bbc4c521e121a63557ef4af4bbbc355f
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 289c1b55c9541489481df5cc06664110, type: 3}
   m_UseUCBPForAssetBundles: 0
