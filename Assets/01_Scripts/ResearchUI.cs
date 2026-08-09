@@ -5,29 +5,29 @@ using TMPro;
 
 public class ResearchUI : MonoBehaviour
 {
-    [Header("ÀüÃ¼ UI")]
+    [Header("ï¿½ï¿½Ã¼ UI")]
     public GameObject researchPanel;
 
-    [Header("ÅÇ ¹öÆ°")]
+    [Header("ï¿½ï¿½ ï¿½ï¿½Æ°")]
     public Button wallTabButton;
     public Button towerTabButton;
     public Button closeButton;
 
-    [Header("Ä«µå »ý¼º")]
+    [Header("Ä«ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½")]
     public ResearchCardUI cardPrefab;
     public Transform cardContent;
 
-    [Header("¿¬±¸ µ¥ÀÌÅÍ")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
     public List<ResearchItem> wallResearchItems = new List<ResearchItem>();
     public List<ResearchItem> towerResearchItems = new List<ResearchItem>();
 
-    [Header("¾È³» ÅØ½ºÆ®")]
+    [Header("ï¿½È³ï¿½ ï¿½Ø½ï¿½Æ®")]
     public TMP_Text messageText;
 
-    [Header("UI ¿­¸± ¶§ ²ø ½ºÅ©¸³Æ®")]
+    [Header("UI ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½Æ®")]
     public MonoBehaviour[] disableWhileOpen;
 
-    [Header("°ÔÀÓ ÀÏ½ÃÁ¤Áö")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ ï¿½Ï½ï¿½ï¿½ï¿½ï¿½ï¿½")]
     public bool pauseGameWhileOpen = true;
 
     private ResearchCategory currentCategory = ResearchCategory.Wall;
@@ -63,8 +63,8 @@ public class ResearchUI : MonoBehaviour
 
     void Update()
     {
-        // EÅ°·Î ¿¬±¸¼Ò UI ¿­±â / ´Ý±â
-        if (Input.GetKeyDown(KeyCode.E))
+        // EÅ°ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ UI ï¿½ï¿½ï¿½ï¿½ / ï¿½Ý±ï¿½
+        if (Input.GetKeyDown(KeyCode.G))
         {
             if (isOpen)
             {
@@ -78,19 +78,19 @@ public class ResearchUI : MonoBehaviour
 
         if (!isOpen) return;
 
-        // 1¹ø: º® ÅÇ
+        // 1ï¿½ï¿½: ï¿½ï¿½ ï¿½ï¿½
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             ShowCategory(ResearchCategory.Wall);
         }
 
-        // 2¹ø: Å¸¿ö ÅÇ
+        // 2ï¿½ï¿½: Å¸ï¿½ï¿½ ï¿½ï¿½
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             ShowCategory(ResearchCategory.Tower);
         }
 
-        // ESC: ´Ý±â
+        // ESC: ï¿½Ý±ï¿½
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             CloseUI();
@@ -206,7 +206,7 @@ public class ResearchUI : MonoBehaviour
 
         if (messageText != null)
         {
-            messageText.text = item.itemName + " ¾÷±×·¹ÀÌµå ¿Ï·á!";
+            messageText.text = item.itemName + " ï¿½ï¿½ï¿½×·ï¿½ï¿½Ìµï¿½ ï¿½Ï·ï¿½!";
         }
 
         ShowCategory(currentCategory);

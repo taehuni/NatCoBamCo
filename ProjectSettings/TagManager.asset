@@ -9,6 +9,7 @@ TagManager:
   - Building
   - Core
   - Wall
+  - MainLight
   layers:
   - Default
   - TransparentFX

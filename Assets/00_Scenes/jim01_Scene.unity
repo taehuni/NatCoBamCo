@@ -3867,6 +3867,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   collectTime: 3
+  resourceType: 0
+  amount: 10
 --- !u!65 &774840975
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -10942,9 +10944,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e6cc0ef7dce7824590e0ea965e13528, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInteractUI
-  interactButton: {fileID: 352931965}
-  interactText: {fileID: 125235059}
-  interactSlider: {fileID: 961168542}
+  interactButton: {fileID: 0}
+  interactText: {fileID: 0}
+  interactSlider: {fileID: 0}
 --- !u!114 &2037886779
 MonoBehaviour:
   m_ObjectHideFlags: 0

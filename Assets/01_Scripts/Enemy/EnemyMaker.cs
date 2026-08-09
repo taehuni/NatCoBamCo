@@ -2,13 +2,18 @@ using UnityEngine;
 
 public class EnemyMaker : MonoBehaviour
 {
-    [Header("¼³Á¤")]
-    public GameObject enemyPrefab;   // »ı¼ºÇÒ Àû±º ÇÁ¸®ÆÕ
-    public float spawnInterval = 3f; // »ı¼º ÁÖ±â (ÃÊ)
+    [Header("Enemy")]
+    public GameObject enemyPrefab;   // ì  í”„ë¦¬íŒ¹
+    public float spawnInterval = 3f; // 
     private float timer;
 
     void Update()
     {
+        if (GameManager.Instance.currentPhase != GameManager.GamePhase.Defense)
+        {
+            return;
+        }
+
         timer += Time.deltaTime;
 
         if (timer >= spawnInterval)
@@ -22,12 +27,12 @@ public class EnemyMaker : MonoBehaviour
     {
         if (enemyPrefab == null)
         {
-            Debug.LogError("Enemy PrefabÀÌ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            Debug.LogError("Enemy Prefabì´ ì¡´ì¬í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤!");
             return;
         }
 
-        // ÇöÀç ½ºÆ÷³Ê À§Ä¡¿¡¼­ »ı¼º
+        // ì  ìƒì„±
         Instantiate(enemyPrefab, transform.position, transform.rotation);
-        Debug.Log("Àû±ºÀÌ »ı¼ºµÇ¾ú½À´Ï´Ù!");
+        Debug.Log("ì  ìƒì„±ë¨!");
     }
 }

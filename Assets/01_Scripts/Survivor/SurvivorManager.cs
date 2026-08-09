@@ -42,6 +42,8 @@ public class SurvivorManager : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        Debug.Log("생존자 매니저 : 씬 로딩 완료 - " + scene.name);
+
         foreach (SurvivorAI survivor in roster)
         {
             if (survivor == null)
