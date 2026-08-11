@@ -43,21 +43,40 @@ public class EnemyTargetSelector : MonoBehaviour
                 return FindNearestBuildingByLayer(wallLayer, detectRange, enemyAI, movement, attackSlotManager, buildingMovePointSampleRange);
 
             case EnemyAI.EnemyClass.Ranged:
-                // 远程型优先找塔，找不到塔再找墙。
-                // Ranged 타입은 타워를 먼저 찾고, 없으면 벽을 찾는다.
-                GameObject tower = FindNearestBuildingByLayer(towerLayer, detectRange, enemyAI, movement, attackSlotManager, buildingMovePointSampleRange);
+                // 远程型不要求目标建筑的 NavMesh 路径完整。
+                // 因为即使走不到塔旁边，只要塔已经进入射程并且攻击线没有被挡住，远程型仍然可以攻击。
+                // 원거리형은 목표 건물까지의 NavMesh 경로가 완전할 필요가 없다.
+                // 타워 옆까지 걸어갈 수 없어도 사거리 안에 있고 공격선이 막히지 않았다면 공격할 수 있기 때문이다.
+                GameObject tower = FindNearestBuildingByDistance(towerLayer, detectRange);
 
                 if (tower != null)
                 {
                     return tower;
                 }
 
-                return FindNearestBuildingByLayer(wallLayer, detectRange, enemyAI, movement, attackSlotManager, buildingMovePointSampleRange);
+                // 感知范围里没有塔时，继续保留原来的“墙作为第二优先目标”规则。
+                // 감지 범위 안에 타워가 없으면 기존 규칙대로 벽을 두 번째 우선 타깃으로 사용한다.
+                return FindNearestBuildingByDistance(wallLayer, detectRange);
         }
 
         // Standard 类型没有额外优先目标，默认继续朝 Core 走。
         // Standard 타입은 별도 우선 타깃이 없으므로 기본적으로 Core로 이동한다.
         return null;
+    }
+
+    // 不要求路径完整，只按敌人到建筑表面的实际距离选择最近建筑。
+    // 경로 완전 여부를 요구하지 않고 적에서 건물 표면까지의 실제 거리로 가장 가까운 건물을 선택한다.
+    GameObject FindNearestBuildingByDistance(LayerMask layer, float detectRange)
+    {
+        Collider[] targets = Physics.OverlapSphere(transform.position, detectRange, layer);
+        DamageableBuilding building = FindNearestBuildingFromColliders(targets, transform.position);
+
+        if (building == null || building.hp <= 0f)
+        {
+            return null;
+        }
+
+        return building.gameObject;
     }
 
     public GameObject FindPlayerTarget(LayerMask playerLayer, float detectRange)
@@ -212,7 +231,7 @@ public class EnemyTargetSelector : MonoBehaviour
             // Collider가 건물의 자식 오브젝트에 있을 수 있으므로 부모에서 DamageableBuilding을 찾는다.
             DamageableBuilding building = colliders[i].GetComponentInParent<DamageableBuilding>();
 
-            if (building == null)
+            if (building == null || building.hp <= 0f)
             {
                 continue;
             }

@@ -8,6 +8,10 @@ using UnityEngine.AI;
 // 목적: 많은 적이 같은 위치에 겹치는 것을 줄이고, 앞의 적이 죽으면 뒤의 적이 자동으로 자리를 보충하게 한다.
 public class BuildingAttackSlotManager : MonoBehaviour
 {
+    // 每个体型组预留一段独立编号，防止 normal[0] 和 large[0] 被误认为同一个攻击点。
+    // 체형 그룹마다 독립된 번호 구간을 사용해서 normal[0]과 large[0]을 같은 지점으로 착각하지 않게 한다.
+    private const int AttackPointGroupKeyRange = 100000;
+
     // 当前预约的是哪个建筑。GetInstanceID 可以给场景里的每个对象一个运行时唯一 ID。
     // 현재 예약한 건물이 무엇인지 저장한다. GetInstanceID는 씬 안의 각 오브젝트에 런타임 고유 ID를 준다.
     private int currentAttackBuildingId;
@@ -68,7 +72,6 @@ public class BuildingAttackSlotManager : MonoBehaviour
         EnemyMovement movement,
         float refreshInterval,
         float buildingMovePointSampleRange,
-        float attackPointArriveDistance,
         out Vector3 attackPoint)
     {
         attackPoint = transform.position;
@@ -76,6 +79,15 @@ public class BuildingAttackSlotManager : MonoBehaviour
         // 基础参数不完整时，释放旧预约并返回失败。
         // 기본 인자가 부족하면 기존 예약을 해제하고 실패를 반환한다.
         if (building == null || enemyAI == null || movement == null)
+        {
+            ReleaseAttackPoint();
+            return false;
+        }
+
+        // 远程型敌人不使用建筑近战攻击点。这里作为保护，防止其他代码误调用预约入口。
+        // 원거리형 적은 건물 근접 공격 지점을 사용하지 않는다. 다른 코드가 실수로 예약 입구를 호출하는 경우를 막는 보호 로직이다.
+        if (enemyAI.ClassTraits != null &&
+            enemyAI.ClassTraits.enemyClass == EnemyAI.EnemyClass.Ranged)
         {
             ReleaseAttackPoint();
             return false;
@@ -117,7 +129,13 @@ public class BuildingAttackSlotManager : MonoBehaviour
 
         // 拿到建筑周围所有候选攻击点：优先手动点，没有手动点就自动生成。
         // 건물 주변의 모든 후보 공격 지점을 가져온다. 수동 지점이 있으면 우선 사용하고, 없으면 자동 생성한다.
-        List<Vector3> attackPoints = GetAttackPointCandidates(building.gameObject, enemyAI, movement);
+        int reservationKeyOffset;
+        List<Vector3> attackPoints = GetAttackPointCandidates(
+            building.gameObject,
+            enemyAI,
+            movement,
+            out reservationKeyOffset
+        );
 
         if (attackPoints.Count == 0)
         {
@@ -130,9 +148,13 @@ public class BuildingAttackSlotManager : MonoBehaviour
 
         for (int i = 0; i < attackPoints.Count; i++)
         {
+            // 数组索引前加上体型组编号区间，得到这个点在共享预约表里的唯一编号。
+            // 배열 인덱스 앞에 체형 그룹 번호 구간을 더해서 공유 예약표에서 사용할 고유 번호를 만든다.
+            int reservationKey = reservationKeyOffset + i;
+
             // 已经被其他敌人预约的点跳过。
             // 다른 적이 이미 예약한 지점은 건너뛴다.
-            if (IsAttackPointReservedByOtherEnemy(buildingId, i))
+            if (IsAttackPointReservedByOtherEnemy(buildingId, reservationKey))
             {
                 continue;
             }
@@ -186,7 +208,7 @@ public class BuildingAttackSlotManager : MonoBehaviour
             if (score < bestScore)
             {
                 bestScore = score;
-                bestIndex = i;
+                bestIndex = reservationKey;
                 bestPoint = navMeshPoint;
             }
         }
@@ -862,28 +884,47 @@ public class BuildingAttackSlotManager : MonoBehaviour
             Vector3.up * height;
     }
 
-    List<Vector3> GetAttackPointCandidates(GameObject target, EnemyAI enemyAI, EnemyMovement movement)
+    List<Vector3> GetAttackPointCandidates(
+        GameObject target,
+        EnemyAI enemyAI,
+        EnemyMovement movement,
+        out int reservationKeyOffset)
     {
         // 最终返回的候选攻击点列表。
         // 최종 반환할 후보 공격 지점 목록.
         List<Vector3> attackPoints = new List<Vector3>();
 
+        // 不同体型使用不同的预约编号区间，避免不同数组中相同 index 互相冲突。
+        // 체형마다 다른 예약 번호 구간을 사용해서 서로 다른 배열의 같은 index가 충돌하지 않게 한다.
+        BuildingAttackPoints.AttackPointGroup attackPointGroup =
+            BuildingAttackPoints.GetAttackPointGroupForEnemy(enemyAI);
+        reservationKeyOffset = (int)attackPointGroup * AttackPointGroupKeyRange;
+
         // 优先读取建筑上手动配置的攻击点。
         // 먼저 건물에 수동으로 배치한 공격 지점을 읽는다.
         BuildingAttackPoints manualAttackPoints = target.GetComponentInChildren<BuildingAttackPoints>();
 
-        if (manualAttackPoints != null && manualAttackPoints.attackPoints != null)
+        Transform[] selectedAttackPoints = null;
+
+        if (manualAttackPoints != null)
         {
-            for (int i = 0; i < manualAttackPoints.attackPoints.Length; i++)
+            // 根据当前敌人的类型取得普通组或大型组。Boss 分支目前保留为注释。
+            // 현재 적 타입에 따라 일반 그룹 또는 대형 그룹을 가져온다. Boss 분기는 현재 주석으로 남겨 둔다.
+            selectedAttackPoints = manualAttackPoints.GetAttackPointsForEnemy(enemyAI);
+        }
+
+        if (selectedAttackPoints != null)
+        {
+            for (int i = 0; i < selectedAttackPoints.Length; i++)
             {
-                if (manualAttackPoints.attackPoints[i] == null)
+                if (selectedAttackPoints[i] == null)
                 {
                     continue;
                 }
 
                 // Transform.position 是这个攻击点在世界空间中的位置。
                 // Transform.position은 이 공격 지점의 월드 좌표다.
-                attackPoints.Add(manualAttackPoints.attackPoints[i].position);
+                attackPoints.Add(selectedAttackPoints[i].position);
             }
         }
 

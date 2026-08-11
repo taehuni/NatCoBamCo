@@ -505,6 +505,14 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
             return;
         }
 
+        // 远程型不占用建筑周围的近战攻击点，而是进入射程后直接攻击。
+        // 원거리형은 건물 주변의 근접 공격 지점을 예약하지 않고 사거리 안에 들어오면 바로 공격한다.
+        if (IsRangedEnemy())
+        {
+            MoveOrAttackRangedBuilding(building);
+            return;
+        }
+
         Vector3 movePoint;
         //敌人距离预约攻击点多近，才算“已经到达攻击点
         //적과 지정 공격 지점 사이의 거리가 일정 값 이하이면 공격 지점에 도착한 것으로 판단
@@ -523,7 +531,6 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
             movement,
             attackPointRefreshInterval,
             buildingMovePointSampleRange,
-            preciseAttackPointArriveDistance,
             out movePoint
         );
 
@@ -574,6 +581,108 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
 
         movePoint = attackSlotManager.GetMovePointNearTarget(building.gameObject, movement, buildingMovePointSampleRange);
         movement.MoveToPosition(movePoint, navMeshSampleRange, buildingAttackStoppingDistance);
+    }
+
+    // 远程敌人攻击建筑：不预约攻击点，先尝试从当前位置攻击，打不到时才寻路。
+    // 원거리 적의 건물 공격: 공격 지점을 예약하지 않고 현재 위치에서 먼저 공격을 시도한 뒤, 공격할 수 없을 때만 길을 찾는다.
+    void MoveOrAttackRangedBuilding(DamageableBuilding building)
+    {
+        if (building == null || building.hp <= 0f)
+        {
+            ClearPriorityTarget();
+            return;
+        }
+
+        // 远程敌人不使用近战攻击点；如果之前曾经预约过，立即释放。
+        // 원거리 적은 근접 공격 지점을 사용하지 않으므로 기존 예약이 있다면 즉시 해제한다.
+        if (attackSlotManager != null)
+        {
+            attackSlotManager.ReleaseAttackPoint();
+        }
+
+        float distanceToBuilding = EnemyTargetUtility.GetDistanceToTarget(
+            transform.position,
+            building.gameObject
+        );
+        bool isInsideAttackRange =
+            distanceToBuilding <= GetBuildingAttackReach() + 0.05f;
+
+        // 必须先检查射程，再检查路径。
+        // NavMesh 路径不完整不代表远程攻击一定打不到目标。
+        // 반드시 사거리를 먼저 확인하고 그다음 경로를 확인한다.
+        // NavMesh 경로가 불완전해도 원거리 공격은 목표에 닿을 수 있다.
+        if (isInsideAttackRange)
+        {
+            movement.SetAutoRotation(false);
+            FaceTarget(building.gameObject);
+
+            // 前方攻击盒确认射程，攻击线确认中间没有敌人、环境墙或其他建筑阻挡。
+            // 전방 공격 박스로 사거리를 확인하고 공격선으로 적, 환경 벽, 다른 건물의 방해 여부를 확인한다.
+            if (CanHitBuildingWithFrontBox(building))
+            {
+                movement.Stop();
+                attack.AttackBuilding(building);
+                return;
+            }
+        }
+
+        // 当前站位还打不到目标时，恢复 NavMeshAgent 自动转向并开始寻路。
+        // 현재 위치에서 목표를 공격할 수 없으면 NavMeshAgent 자동 회전을 복구하고 길찾기를 시작한다.
+        movement.SetAutoRotation(true);
+
+        EnemyPathBlockHandler.PathChoice buildingPath;
+
+        if (!pathBlockHandler.TryFindBestPathToTarget(
+            building.gameObject,
+            enemyAI,
+            movement,
+            navMeshSampleRange,
+            targetPathPointExtraDistance,
+            out buildingPath))
+        {
+            return;
+        }
+
+        // 目标还不在可攻击状态时，继续使用原来的堵路建筑识别和切换逻辑。
+        // 아직 목표를 공격할 수 없으면 기존의 경로 차단 건물 식별 및 타깃 전환 로직을 계속 사용한다.
+        if (HandleBlockedPath(buildingPath, building.gameObject))
+        {
+            return;
+        }
+
+        Vector3 rangedMovePoint;
+
+        // 路径没有需要处理的堵路建筑后，再找一个“能够进入射程”的可达站位。
+        // 这里只计算移动点，不会写入攻击点预约字典。
+        // 처리할 경로 차단 건물이 없으면 사거리 안으로 들어갈 수 있는 도달 가능한 위치를 찾는다.
+        // 여기서는 이동 위치만 계산하며 공격 지점 예약 Dictionary에는 기록하지 않는다.
+        if (attackSlotManager != null &&
+            attackSlotManager.TryGetReachableMovePointNearTarget(
+                building.gameObject,
+                enemyAI,
+                movement,
+                buildingMovePointSampleRange,
+                out rangedMovePoint))
+        {
+            movement.MoveToPosition(
+                rangedMovePoint,
+                navMeshSampleRange,
+                buildingAttackStoppingDistance
+            );
+            return;
+        }
+
+        // 找不到更合适的射击站位时，使用通用路径候选点作为最后兜底。
+        // 더 적절한 사격 위치를 찾지 못하면 일반 경로 후보 지점을 마지막 대안으로 사용한다.
+        movement.MoveToPosition(buildingPath.destination, navMeshSampleRange);
+    }
+
+    bool IsRangedEnemy()
+    {
+        return
+            enemyAI != null &&
+            enemyAI.ClassTraits != null &&
+            enemyAI.ClassTraits.enemyClass == EnemyAI.EnemyClass.Ranged;
     }
 
     // 建筑攻击点需要更精确，不能直接用普通 NavMeshAgent 停止距离
