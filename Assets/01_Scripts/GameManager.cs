@@ -139,15 +139,23 @@ public class GameManager : MonoBehaviour
 
             case GamePhase.Defense:
 
-                if (timer >= defenseTime)
-                {
-                    ChangePhase(GamePhase.DefenseEnd);
-                }
+                //이후 디펜스 페이즈 시간 계산에 사용. (n초 이상이면 강제 패배 등.)
 
                 break;
         }
     }
 
+    public void CompleteDefense()
+    {
+        if (currentPhase != GamePhase.Defense)
+        {
+            return;
+        }
+
+        Debug.Log("모든 웨이브 방어 성공!");
+
+        ChangePhase(GamePhase.DefenseEnd);
+    }
 
     public void ChangePhase(GamePhase newPhase)
     {
