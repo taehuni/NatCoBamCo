@@ -5,29 +5,29 @@ using TMPro;
 
 public class ResearchUI : MonoBehaviour
 {
-    [Header("��ü UI")]
+    [Header("건설 UI")]
     public GameObject researchPanel;
 
-    [Header("�� ��ư")]
+    [Header("버튼")]
     public Button wallTabButton;
     public Button towerTabButton;
     public Button closeButton;
 
-    [Header("ī�� ����")]
+    [Header("프리팹")]
     public ResearchCardUI cardPrefab;
     public Transform cardContent;
 
-    [Header("���� ������")]
+    [Header("리스트")]
     public List<ResearchItem> wallResearchItems = new List<ResearchItem>();
     public List<ResearchItem> towerResearchItems = new List<ResearchItem>();
 
-    [Header("�ȳ� �ؽ�Ʈ")]
+    [Header("텍스트")]
     public TMP_Text messageText;
 
-    [Header("UI ���� �� �� ��ũ��Ʈ")]
+    [Header("UI 텍스트")]
     public MonoBehaviour[] disableWhileOpen;
 
-    [Header("���� �Ͻ�����")]
+    [Header("게임이 정지해도 열리게")]
     public bool pauseGameWhileOpen = true;
 
     private ResearchCategory currentCategory = ResearchCategory.Wall;
@@ -63,7 +63,7 @@ public class ResearchUI : MonoBehaviour
 
     void Update()
     {
-        // EŰ�� ������ UI ���� / �ݱ�
+        // 현재 G키로 변경 이후 해당 함수 제거 후 연구소 건물 스크립트에 함수 추가 예정
         if (Input.GetKeyDown(KeyCode.G))
         {
             if (isOpen)
@@ -78,19 +78,19 @@ public class ResearchUI : MonoBehaviour
 
         if (!isOpen) return;
 
-        // 1��: �� ��
+        // 1: 벽
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             ShowCategory(ResearchCategory.Wall);
         }
 
-        // 2��: Ÿ�� ��
+        // 2: 타워
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             ShowCategory(ResearchCategory.Tower);
         }
 
-        // ESC: �ݱ�
+        // ESC: UI닫기
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             CloseUI();
