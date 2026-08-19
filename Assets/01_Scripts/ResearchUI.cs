@@ -5,29 +5,29 @@ using TMPro;
 
 public class ResearchUI : MonoBehaviour
 {
-    [Header("ÀüÃ¼ UI")]
+    [Header("ê±´ì„¤ UI")]
     public GameObject researchPanel;
 
-    [Header("ÅÇ ¹öÆ°")]
+    [Header("ë²„íŠ¼")]
     public Button wallTabButton;
     public Button towerTabButton;
     public Button closeButton;
 
-    [Header("Ä«µå »ı¼º")]
+    [Header("í”„ë¦¬íŒ¹")]
     public ResearchCardUI cardPrefab;
     public Transform cardContent;
 
-    [Header("¿¬±¸ µ¥ÀÌÅÍ")]
+    [Header("ë¦¬ìŠ¤íŠ¸")]
     public List<ResearchItem> wallResearchItems = new List<ResearchItem>();
     public List<ResearchItem> towerResearchItems = new List<ResearchItem>();
 
-    [Header("¾È³» ÅØ½ºÆ®")]
+    [Header("í…ìŠ¤íŠ¸")]
     public TMP_Text messageText;
 
-    [Header("UI ¿­¸± ¶§ ²ø ½ºÅ©¸³Æ®")]
+    [Header("UI í…ìŠ¤íŠ¸")]
     public MonoBehaviour[] disableWhileOpen;
 
-    [Header("°ÔÀÓ ÀÏ½ÃÁ¤Áö")]
+    [Header("ê²Œì„ì´ ì •ì§€í•´ë„ ì—´ë¦¬ê²Œ")]
     public bool pauseGameWhileOpen = true;
 
     private ResearchCategory currentCategory = ResearchCategory.Wall;
@@ -63,8 +63,8 @@ public class ResearchUI : MonoBehaviour
 
     void Update()
     {
-        // EÅ°·Î ¿¬±¸¼Ò UI ¿­±â / ´İ±â
-        if (Input.GetKeyDown(KeyCode.E))
+        // í˜„ì¬ Gí‚¤ë¡œ ë³€ê²½ ì´í›„ í•´ë‹¹ í•¨ìˆ˜ ì œê±° í›„ ì—°êµ¬ì†Œ ê±´ë¬¼ ìŠ¤í¬ë¦½íŠ¸ì— í•¨ìˆ˜ ì¶”ê°€ ì˜ˆì •
+        if (Input.GetKeyDown(KeyCode.G))
         {
             if (isOpen)
             {
@@ -78,19 +78,19 @@ public class ResearchUI : MonoBehaviour
 
         if (!isOpen) return;
 
-        // 1¹ø: º® ÅÇ
+        // 1: ë²½
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             ShowCategory(ResearchCategory.Wall);
         }
 
-        // 2¹ø: Å¸¿ö ÅÇ
+        // 2: íƒ€ì›Œ
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             ShowCategory(ResearchCategory.Tower);
         }
 
-        // ESC: ´İ±â
+        // ESC: UIë‹«ê¸°
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             CloseUI();
@@ -206,7 +206,7 @@ public class ResearchUI : MonoBehaviour
 
         if (messageText != null)
         {
-            messageText.text = item.itemName + " ¾÷±×·¹ÀÌµå ¿Ï·á!";
+            messageText.text = item.itemName + " ï¿½ï¿½ï¿½×·ï¿½ï¿½Ìµï¿½ ï¿½Ï·ï¿½!";
         }
 
         ShowCategory(currentCategory);
