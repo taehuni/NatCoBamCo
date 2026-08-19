@@ -13,8 +13,13 @@ public class EnemyAttack : MonoBehaviour
     public float attackDamage;
     public float attackCooldown;
 
+    [Header("Ranged Attack Data / 원거리 공격 데이터")]
+    public Transform firePos;
+    public EnemyRangedProjectile rangedProjectilePrefab;
+
     private EnemyMovement movement;
     private float nextAttackTime;
+    private bool hasWarnedMissingRangedSetup;
 
     public void Initialize(EnemyAI enemyAI, EnemyMovement movement)
     {
@@ -56,6 +61,40 @@ public class EnemyAttack : MonoBehaviour
         nextAttackTime = Time.time + attackCooldown;
     }
 
+    // 远程攻击建筑：在 FirePos 生成投射物，伤害在投射物抵达目标后结算。
+    // 원거리 건물 공격: FirePos에서 투사체를 생성하고, 투사체가 목표에 도착했을 때 피해를 적용한다.
+    public void AttackRangedBuilding(DamageableBuilding building)
+    {
+        if (building == null)
+        {
+            return;
+        }
+
+        if (movement != null)
+        {
+            movement.Stop();
+        }
+
+        if (Time.time < nextAttackTime)
+        {
+            return;
+        }
+
+        if (!CanSpawnRangedProjectile())
+        {
+            return;
+        }
+
+        EnemyRangedProjectile projectile = Instantiate(
+            rangedProjectilePrefab,
+            firePos.position,
+            firePos.rotation
+        );
+
+        projectile.Initialize(building, attackDamage);
+        nextAttackTime = Time.time + attackCooldown;
+    }
+
     public void AttackCore(Core core)
     {
         // 没有 Core 时直接返回。
@@ -87,5 +126,63 @@ public class EnemyAttack : MonoBehaviour
         // 更新下一次攻击时间。
         // 다음 공격 시간을 갱신한다.
         nextAttackTime = Time.time + attackCooldown;
+    }
+
+    // 远程攻击 Core：和攻击建筑共用同一个投射物预制体与攻击冷却。
+    // 원거리 Core 공격: 건물 공격과 같은 투사체 프리팹 및 공격 쿨다운을 사용한다.
+    public void AttackRangedCore(Core core)
+    {
+        if (core == null)
+        {
+            return;
+        }
+
+        if (movement != null)
+        {
+            movement.Stop();
+        }
+
+        if (Time.time < nextAttackTime)
+        {
+            return;
+        }
+
+        if (!CanSpawnRangedProjectile())
+        {
+            return;
+        }
+
+        EnemyRangedProjectile projectile = Instantiate(
+            rangedProjectilePrefab,
+            firePos.position,
+            firePos.rotation
+        );
+
+        projectile.Initialize(core, attackDamage);
+        nextAttackTime = Time.time + attackCooldown;
+    }
+
+    // 检查远程攻击需要的引用是否已经在 Inspector 中设置。
+    // 원거리 공격에 필요한 참조가 Inspector에 설정되어 있는지 확인한다.
+    bool CanSpawnRangedProjectile()
+    {
+        if (firePos != null && rangedProjectilePrefab != null)
+        {
+            hasWarnedMissingRangedSetup = false;
+            return true;
+        }
+
+        // Update 会反复尝试攻击，所以只提示一次，避免 Console 被同一条警告刷满。
+        // Update에서 공격을 반복 시도하므로 같은 경고가 Console을 가득 채우지 않도록 한 번만 출력한다.
+        if (!hasWarnedMissingRangedSetup)
+        {
+            Debug.LogWarning(
+                gameObject.name +
+                " cannot perform ranged attack. Assign Fire Pos and Ranged Projectile Prefab on EnemyAttack."
+            );
+            hasWarnedMissingRangedSetup = true;
+        }
+
+        return false;
     }
 }

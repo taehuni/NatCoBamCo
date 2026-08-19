@@ -43,10 +43,10 @@ public class EnemyTargetSelector : MonoBehaviour
                 return FindNearestBuildingByLayer(wallLayer, detectRange, enemyAI, movement, attackSlotManager, buildingMovePointSampleRange);
 
             case EnemyAI.EnemyClass.Ranged:
-                // 远程型不要求目标建筑的 NavMesh 路径完整。
-                // 因为即使走不到塔旁边，只要塔已经进入射程并且攻击线没有被挡住，远程型仍然可以攻击。
-                // 원거리형은 목표 건물까지의 NavMesh 경로가 완전할 필요가 없다.
-                // 타워 옆까지 걸어갈 수 없어도 사거리 안에 있고 공격선이 막히지 않았다면 공격할 수 있기 때문이다.
+                // 远程型优先寻找感知范围内的塔，而且不要求目标塔的 NavMesh 路径完整。
+                // 即使走不到塔旁边，只要塔进入射程，抛物线投射物仍然可以攻击它。
+                // 원거리형은 감지 범위 안의 타워를 우선 찾으며 목표 타워까지의 NavMesh 경로가 완전할 필요가 없다.
+                // 타워 옆까지 걸어갈 수 없어도 사거리 안에 들어오면 포물선 투사체로 공격할 수 있다.
                 GameObject tower = FindNearestBuildingByDistance(towerLayer, detectRange);
 
                 if (tower != null)
@@ -54,9 +54,11 @@ public class EnemyTargetSelector : MonoBehaviour
                     return tower;
                 }
 
-                // 感知范围里没有塔时，继续保留原来的“墙作为第二优先目标”规则。
-                // 감지 범위 안에 타워가 없으면 기존 규칙대로 벽을 두 번째 우선 타깃으로 사용한다.
-                return FindNearestBuildingByDistance(wallLayer, detectRange);
+                // 没有塔时不要主动锁定附近任意墙，否则入口旁边的诱饵墙也会被当成优先目标。
+                // 返回 null 后，敌人会继续前往 Core；只有路径确实被堵住时，堵路验证才会锁定真正的墙或塔。
+                // 타워가 없을 때 주변의 아무 벽이나 고정하면 입구 옆의 미끼 벽까지 우선 타깃이 될 수 있으므로 선택하지 않는다.
+                // null을 반환하면 Core로 계속 이동하며, 실제로 경로가 막혔을 때만 경로 차단 검증으로 진짜 벽이나 타워를 고정한다.
+                return null;
         }
 
         // Standard 类型没有额外优先目标，默认继续朝 Core 走。
