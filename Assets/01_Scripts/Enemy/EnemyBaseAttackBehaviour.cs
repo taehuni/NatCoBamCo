@@ -436,11 +436,23 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
             return;
         }
 
-        float distance = GetDistanceToCore();
+        float distance = IsRangedEnemy()
+            ? GetRangedDistanceToTarget(core.gameObject)
+            : GetDistanceToCore();
 
         if (distance <= attack.attackRange)
         {
-            attack.AttackCore(core);
+            if (IsRangedEnemy())
+            {
+                movement.SetAutoRotation(false);
+                FaceTarget(core.gameObject);
+                attack.AttackRangedCore(core);
+            }
+            else
+            {
+                attack.AttackCore(core);
+            }
+
             return;
         }
 
@@ -600,12 +612,13 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
             attackSlotManager.ReleaseAttackPoint();
         }
 
-        float distanceToBuilding = EnemyTargetUtility.GetDistanceToTarget(
-            transform.position,
-            building.gameObject
-        );
-        bool isInsideAttackRange =
-            distanceToBuilding <= GetBuildingAttackReach() + 0.05f;
+        // 远程射程从真正的发射位置 FirePos 开始计算，不再使用近战敌人的身体半径和前方攻击盒。
+        // 원거리 사거리는 실제 발사 위치 FirePos부터 계산하며, 근접 적의 몸 반지름이나 전방 공격 박스를 사용하지 않는다.
+        movement.SetAutoRotation(false);
+        FaceTarget(building.gameObject);
+
+        float distanceToBuilding = GetRangedDistanceToTarget(building.gameObject);
+        bool isInsideAttackRange = distanceToBuilding <= attack.attackRange + 0.05f;
 
         // 必须先检查射程，再检查路径。
         // NavMesh 路径不完整不代表远程攻击一定打不到目标。
@@ -613,17 +626,11 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
         // NavMesh 경로가 불완전해도 원거리 공격은 목표에 닿을 수 있다.
         if (isInsideAttackRange)
         {
-            movement.SetAutoRotation(false);
-            FaceTarget(building.gameObject);
-
-            // 前方攻击盒确认射程，攻击线确认中间没有敌人、环境墙或其他建筑阻挡。
-            // 전방 공격 박스로 사거리를 확인하고 공격선으로 적, 환경 벽, 다른 건물의 방해 여부를 확인한다.
-            if (CanHitBuildingWithFrontBox(building))
-            {
-                movement.Stop();
-                attack.AttackBuilding(building);
-                return;
-            }
+            // 抛物线投射物会越过中间的敌人、环境墙和其他建筑，直接攻击当前锁定目标。
+            // 포물선 투사체는 중간의 적, 환경 벽, 다른 건물을 넘어 현재 고정된 목표를 직접 공격한다.
+            movement.Stop();
+            attack.AttackRangedBuilding(building);
+            return;
         }
 
         // 当前站位还打不到目标时，恢复 NavMeshAgent 自动转向并开始寻路。
@@ -675,6 +682,17 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
         // 找不到更合适的射击站位时，使用通用路径候选点作为最后兜底。
         // 더 적절한 사격 위치를 찾지 못하면 일반 경로 후보 지점을 마지막 대안으로 사용한다.
         movement.MoveToPosition(buildingPath.destination, navMeshSampleRange);
+    }
+
+    // 计算 FirePos 到目标 Collider 表面的距离；FirePos 未设置时暂时退回敌人自身位置。
+    // FirePos에서 목표 Collider 표면까지의 거리를 계산하며, FirePos가 없으면 임시로 적 위치를 사용한다.
+    float GetRangedDistanceToTarget(GameObject target)
+    {
+        Vector3 attackOrigin = attack != null && attack.firePos != null
+            ? attack.firePos.position
+            : transform.position;
+
+        return EnemyTargetUtility.GetDistanceToTarget(attackOrigin, target);
     }
 
     bool IsRangedEnemy()
