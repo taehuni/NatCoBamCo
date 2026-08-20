@@ -121,7 +121,16 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
     // 현재 우선 타깃 갱신: 타깃 무효, 이탈, Tank의 주기적인 재비교를 처리한다.
     void UpdatePriorityTarget()
     {
-        if (IsTargetInvalid(priorityTarget))
+        // 没有优先目标是正常状态，只有已有目标真正失效时才清理。
+        // 우선 타깃이 없는 것은 정상 상태이며, 기존 타깃이 실제로 무효가 되었을 때만 정리한다.
+        if (priorityTarget != null && IsTargetInvalid(priorityTarget))
+        {
+            ClearPriorityTarget();
+        }
+
+        // Unity 中已销毁对象会表现为 null；如果它原本是堵路墙，需要清理一次堵路状态。
+        // Unity에서 파괴된 오브젝트는 null처럼 동작한다. 기존 타깃이 막는 벽이었다면 막힘 상태를 한 번 정리한다.
+        if (priorityTarget == null && isAttackingBlockedWall)
         {
             ClearPriorityTarget();
         }
@@ -554,10 +563,13 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
                 preciseAttackPointArriveDistance
             );
 
-            float distanceToBuilding = EnemyTargetUtility.GetDistanceToTarget(transform.position, building.gameObject);
-            bool isCloseEnoughToTryAttack = distanceToBuilding <= GetBuildingAttackReach() + 0.05f;
-
-            if (!isNearAttackPoint && !isCloseEnoughToTryAttack)
+            // 已预约攻击点但还没有到达时，只负责向攻击点移动。
+            // 不能因为身体已经靠近建筑，就在每一帧先转向建筑尝试攻击，再转回移动方向。
+            // 否则攻击射线被其他敌人挡住时，会在“面向建筑”和“面向攻击点”之间反复摇摆。
+            // 공격 지점을 예약했지만 아직 도착하지 않았다면 공격 지점으로 이동하는 일만 처리한다.
+            // 몸이 건물 가까이에 있다는 이유로 매 프레임 건물을 바라보며 공격을 시도한 뒤 다시 이동 방향으로 돌면 안 된다.
+            // 다른 적이 공격선을 막고 있을 때 "건물 방향"과 "공격 지점 방향" 사이에서 계속 흔들릴 수 있기 때문이다.
+            if (!isNearAttackPoint)
             {
                 movement.MoveToPosition(movePoint, navMeshSampleRange, buildingAttackStoppingDistance);
                 return;
@@ -570,29 +582,35 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
             if (CanHitBuildingWithFrontBox(building))
             {
                 attack.AttackBuilding(building);
-                return;
-            }
-
-            if (!isNearAttackPoint)
-            {
-                movement.MoveToPosition(movePoint, navMeshSampleRange, buildingAttackStoppingDistance);
             }
 
             return;
         }
 
-        movement.SetAutoRotation(false);
-        FaceTarget(building.gameObject);
-
-        if (CanHitBuildingWithFrontBox(building))
-        {
-            movement.Stop();
-            attack.AttackBuilding(building);
-            return;
-        }
-
+        // 没有预约到攻击点，通常表示可用点已经被其他敌人占满。
+        // 此时只移动到建筑附近等待，不在每一帧强制转向建筑尝试抢打。
+        // 否则会在“面向建筑”和“面向等待位置”之间来回切换，再次出现左右摇摆。
+        // 공격 지점을 예약하지 못했다면 보통 사용 가능한 지점이 다른 적에게 모두 예약된 상태다.
+        // 이때는 건물 근처의 대기 위치로만 이동하고, 매 프레임 건물을 바라보며 공격을 빼앗으려 하지 않는다.
+        // 그렇지 않으면 "건물 방향"과 "대기 위치 방향"이 반복 전환되어 다시 좌우로 흔들리게 된다.
         movePoint = attackSlotManager.GetMovePointNearTarget(building.gameObject, movement, buildingMovePointSampleRange);
-        movement.MoveToPosition(movePoint, navMeshSampleRange, buildingAttackStoppingDistance);
+
+        bool isNearWaitingPoint = attackSlotManager.IsNearAttackPoint(
+            movement,
+            movePoint,
+            preciseAttackPointArriveDistance
+        );
+
+        if (!isNearWaitingPoint)
+        {
+            movement.MoveToPosition(movePoint, navMeshSampleRange, buildingAttackStoppingDistance);
+            return;
+        }
+
+        // 已经到达等待位置就停下，等后续刷新时出现空闲攻击点再自动补位。
+        // 대기 위치에 도착하면 멈추고, 이후 갱신 때 빈 공격 지점이 생기면 자동으로 보충한다.
+        movement.SetAutoRotation(true);
+        movement.Stop();
     }
 
     // 远程敌人攻击建筑：不预约攻击点，先尝试从当前位置攻击，打不到时才寻路。
