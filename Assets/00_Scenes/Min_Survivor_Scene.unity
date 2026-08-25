@@ -898,8 +898,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 1357851921}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e6cc0ef7dce7824590e0ea965e13528, type: 3}
-  m_Name: 
+  m_Script: {fileID: 11500000, guid: 9ef0b07c575df184ea9c8f91aff2ed69, type: 3}
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInteractUI
   interactButton: {fileID: 966918121}
   interactText: {fileID: 595131034}

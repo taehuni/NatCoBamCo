@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,6 +19,17 @@ public class ResourceNode : MonoBehaviour
     private PlayerInteractUI playerUI;
     private Slider playerSlider;
 
+    // 태훈 추가: 씬을 다시 로드해도(파밍씬 재입장) 이미 채집한 노드가 초기화되어 재등장하지 않도록 static으로 기억
+    private static readonly HashSet<string> collectedNodeIds = new HashSet<string>();
+    private string NodeId => $"{gameObject.scene.name}:{gameObject.name}:{transform.position}";
+
+    void Awake()
+    {
+        if (collectedNodeIds.Contains(NodeId))
+        {
+            gameObject.SetActive(false);
+        }
+    }
 
     void Update()
     {
@@ -128,6 +140,7 @@ public class ResourceNode : MonoBehaviour
             playerUI.HideButton();
         }
 
+        collectedNodeIds.Add(NodeId);
         gameObject.SetActive(false);
     }
 

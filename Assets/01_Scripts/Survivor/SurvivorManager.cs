@@ -15,6 +15,9 @@ public class SurvivorManager : MonoBehaviour
     [Header("생존자 목록")]
     public List<SurvivorAI> roster = new List<SurvivorAI>();
 
+    // 태훈 추가: 한 번 자리 잡은(정착한) 생존자는 다른 씬을 왕복해도 다시 안 건드림 (안 그러면 파밍씬 재입장 때 거기로 또 배치돼버림)
+    private readonly HashSet<SurvivorAI> settled = new HashSet<SurvivorAI>();
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -44,13 +47,15 @@ public class SurvivorManager : MonoBehaviour
     {
         foreach (SurvivorAI survivor in roster)
         {
-            if (survivor == null)
+            if (survivor == null || settled.Contains(survivor))
             {
                 continue;
             }
 
+            survivor.gameObject.SetActive(true); // 태훈 추가: 구출 직후 숨겨뒀던 생존자를 새 씬에서 다시 보이게 함
             survivor.homePoint = FindHomePointForRole(survivor.role);
             survivor.GoHome();
+            settled.Add(survivor);
         }
     }
 
