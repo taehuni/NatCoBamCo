@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 // 탐색 중 생존자 구조 이벤트.
@@ -23,6 +24,18 @@ public class SurvivorRescueEvent : MonoBehaviour
     private bool playerInRange;
     private bool rescued;
     private PlayerInteractUI playerUI;
+
+    // 태훈 추가: 씬을 다시 로드해도(파밍씬 재입장) 이미 구출한 생존자가 트랩 상태로 재등장(=중복)하지 않도록 static으로 기억
+    private static readonly HashSet<string> rescuedIds = new HashSet<string>();
+    private string RescueId => $"{gameObject.scene.name}:{gameObject.name}:{transform.position}";
+
+    void Start()
+    {
+        if (rescuedIds.Contains(RescueId))
+        {
+            gameObject.SetActive(false);
+        }
+    }
 
     void Update()
     {
@@ -77,6 +90,10 @@ public class SurvivorRescueEvent : MonoBehaviour
     {
         rescued = true;
 
+        // 태훈 수정: SurvivorManager.AddSurvivor() 가 이 오브젝트를 자기 밑(DontDestroyOnLoad)으로 재부모화하기 전에
+        // RescueId를 먼저 계산해둠 (재부모화 후에 계산하면 gameObject.scene 이 바뀌어서 씬 재입장 시 비교가 안 맞음)
+        string rescueId = RescueId;
+
         SurvivorAI survivorAI = GetComponent<SurvivorAI>();
 
         if (survivorAI == null)
@@ -105,7 +122,11 @@ public class SurvivorRescueEvent : MonoBehaviour
         }
 
         // TODO: 아트 팀 - 구조 연출(파티클/사운드)
-        enabled = false; // 트리거 로직만 정지. 오브젝트 자체는 계속 살아서 이동해야 하므로 SetActive(false) 하지 않음
+        rescuedIds.Add(rescueId);
+
+        // 태훈 수정: 구출 즉시 파밍씬에서 사라지게 함. SurvivorManager가 DontDestroyOnLoad로 데리고 있다가
+        // 다음 씬(쉘터 등)이 로드되면 그 씬의 거주구역/연구실 기준으로 다시 활성화해서 배치함
+        gameObject.SetActive(false);
     }
 
     void OnDrawGizmosSelected()
