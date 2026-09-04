@@ -17,7 +17,9 @@ using UnityEngine;
 [RequireComponent(typeof(EnemyAttack))]
 [RequireComponent(typeof(EnemyTargetSelector))]
 [RequireComponent(typeof(EnemyPathBlockHandler))]
-public class EnemyAI : MonoBehaviour
+// 同时实现 IDamageable，让通用伤害系统可以通过统一接口攻击敌人。
+// IDamageable도 구현하여 공용 피해 시스템이 동일한 인터페이스로 적에게 피해를 줄 수 있게 한다.
+public class EnemyAI : MonoBehaviour, IDamageable
 {
     // 敌人等级：普通、精英、Boss。主要给掉落、技能、特殊增伤等系统判断用。
     // 적 등급: 일반, 엘리트, 보스. 드롭, 스킬, 특수 추가 피해 판단에 사용한다.

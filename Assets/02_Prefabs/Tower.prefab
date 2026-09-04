@@ -31,6 +31,34 @@ Transform:
   m_Children: []
   m_Father: {fileID: 229280137461177115}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &810000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3113098753654139490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d4e66a928aa401dbaf3681a8e5ce249, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingHealth
+  maxHp: 30
+  health: 30
+--- !u!114 &810000000000000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3113098753654139490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82a1ba0ed3e342d18c969a13b283fd35, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingDefense
+  defensePower: 0
+  minimumDamage: 5
 --- !u!1 &1554907209210825661
 GameObject:
   m_ObjectHideFlags: 0
@@ -140,6 +168,8 @@ GameObject:
   - component: {fileID: 216560323487879410}
   - component: {fileID: 7229235344376794275}
   - component: {fileID: 3841751019800861297}
+  - component: {fileID: 810000000000000001}
+  - component: {fileID: 810000000000000002}
   - component: {fileID: 7878074846571628987}
   m_Layer: 12
   m_Name: Tower
@@ -301,9 +331,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5eba2b3a16b963f43bfc15ef426f55c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DamageableBuilding
-  hp: 30
-  maxHp: 30
-  defensePower: 0
+  legacyHealth: 30
+  legacyMaxHp: 30
+  legacyDefensePower: 0
+  legacyDataMigrated: 1
 --- !u!114 &7878074846571628987
 MonoBehaviour:
   m_ObjectHideFlags: 0
