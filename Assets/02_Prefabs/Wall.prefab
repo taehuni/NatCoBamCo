@@ -31,6 +31,34 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1478996688184544054}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &810000000000000601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4532783231396865526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d4e66a928aa401dbaf3681a8e5ce249, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingHealth
+  maxHp: 99999
+  health: 99999
+--- !u!114 &810000000000000602
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4532783231396865526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82a1ba0ed3e342d18c969a13b283fd35, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingDefense
+  defensePower: 3
+  minimumDamage: 5
 --- !u!1 &355991183339301425
 GameObject:
   m_ObjectHideFlags: 0
@@ -348,6 +376,8 @@ GameObject:
   - component: {fileID: 5072356529946183334}
   - component: {fileID: -7909805100043561948}
   - component: {fileID: -148260465304290221}
+  - component: {fileID: 810000000000000601}
+  - component: {fileID: 810000000000000602}
   - component: {fileID: 5914853766754138621}
   m_Layer: 11
   m_Name: Wall
@@ -426,9 +456,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5eba2b3a16b963f43bfc15ef426f55c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DamageableBuilding
-  hp: 99999
-  maxHp: 99999
-  defensePower: 3
+  legacyHealth: 99999
+  legacyMaxHp: 99999
+  legacyDefensePower: 3
+  legacyDataMigrated: 1
 --- !u!114 &5914853766754138621
 MonoBehaviour:
   m_ObjectHideFlags: 0
