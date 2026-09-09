@@ -9,8 +9,7 @@ public class EnemyRangedProjectile : MonoBehaviour
     public float arcHeight = 2f; // 抛物线最高点相对直线轨迹抬高多少 / 직선 궤적보다 포물선 정점이 얼마나 높을지
     public float minimumTravelTime = 0.05f; // 防止距离过近时同一帧瞬间命中 / 거리가 너무 가까울 때 한 프레임에 즉시 명중하는 것을 방지
 
-    private DamageableBuilding targetBuilding;
-    private Core targetCore;
+    private IDamageable targetDamageable;
     private GameObject targetObject;
     private Vector3 startPosition;
     private Vector3 targetPoint;
@@ -62,17 +61,15 @@ public class EnemyRangedProjectile : MonoBehaviour
     // EnemyAttack에서 건물 목표와 이번 공격의 피해량을 전달받는다.
     public void Initialize(DamageableBuilding building, float projectileDamage)
     {
-        targetBuilding = building;
-        targetCore = null;
+        targetDamageable = building != null ? building.Damageable : null;
         InitializeFlight(building == null ? null : building.gameObject, projectileDamage);
     }
 
-    // Core 不是 DamageableBuilding，所以提供一个 Core 专用初始化入口。
-    // Core는 DamageableBuilding이 아니므로 Core 전용 초기화 입구를 제공한다.
+    // 从 Core 所在物体获取 IDamageable，命中时与建筑使用相同的受伤接口。
+    // Core가 있는 오브젝트에서 IDamageable을 가져와 명중 시 건물과 같은 피해 인터페이스를 사용한다.
     public void Initialize(Core core, float projectileDamage)
     {
-        targetBuilding = null;
-        targetCore = core;
+        targetDamageable = core != null ? core.GetComponent<IDamageable>() : null;
         InitializeFlight(core == null ? null : core.gameObject, projectileDamage);
     }
 
@@ -86,7 +83,7 @@ public class EnemyRangedProjectile : MonoBehaviour
         elapsedTime = 0f;
         hasHit = false;
 
-        if (targetObject == null)
+        if (targetObject == null || targetDamageable == null)
         {
             Destroy(gameObject);
             return;
@@ -115,15 +112,12 @@ public class EnemyRangedProjectile : MonoBehaviour
 
         hasHit = true;
 
-        if (targetBuilding != null)
+        // 接口引用不会使用 Unity 的销毁判空，因此还要确认受伤组件仍然存在。
+        // 인터페이스 참조에는 Unity의 파괴 여부 검사가 적용되지 않으므로 피해 컴포넌트가 여전히 존재하는지도 확인한다.
+        if (targetObject != null && targetDamageable is Component damageableComponent && damageableComponent != null)
         {
-            targetBuilding.GetDamage(damage);
-            Debug.Log(gameObject.name + " hit " + targetBuilding.gameObject.name + " for " + damage + " damage");
-        }
-        else if (targetCore != null)
-        {
-            targetCore.GetDamage(damage);
-            Debug.Log(gameObject.name + " hit " + targetCore.gameObject.name + " for " + damage + " damage");
+            targetDamageable.TakeDamage(damage);
+            Debug.Log(gameObject.name + " hit " + targetObject.name + " for " + damage + " damage");
         }
 
         Destroy(gameObject);

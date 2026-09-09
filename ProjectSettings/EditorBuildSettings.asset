@@ -23,6 +23,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/00_Scenes/Min_Shelter_Scene.unity
     guid: bbc4c521e121a63557ef4af4bbbc355f
+  - enabled: 1
+    path: Assets/00_Scenes/tie0_Scene.unity
+    guid: 3016371f046a4e848846405959424a6a
+  - enabled: 1
+    path: Assets/00_Scenes/tie1_Scene.unity
+    guid: 54e473ef0a195eb42ae60499156aa79f
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 289c1b55c9541489481df5cc06664110, type: 3}
   m_UseUCBPForAssetBundles: 0
