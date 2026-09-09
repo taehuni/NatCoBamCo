@@ -51,9 +51,16 @@ public class EnemyAttack : MonoBehaviour
             return;
         }
 
-        // 对建筑造成伤害。
-        // 건물에 피해를 준다.
-        building.GetDamage(attackDamage);
+        // 通过建筑的 IDamageable 接口造成伤害。
+        // 건물의 IDamageable 인터페이스로 피해를 준다.
+        IDamageable damageable = building.Damageable;
+
+        if (damageable == null)
+        {
+            return;
+        }
+
+        damageable.TakeDamage(attackDamage);
         Debug.Log(gameObject.name + " attacked " + building.gameObject.name + " for " + attackDamage + " damage");
 
         // 记录下一次允许攻击的时间。
@@ -118,9 +125,16 @@ public class EnemyAttack : MonoBehaviour
             return;
         }
 
-        // 对 Core 造成伤害。
-        // Core에 피해를 준다.
-        core.GetDamage(attackDamage);
+        // 直接获取 Core 所在物体上的 IDamageable，再通过接口造成伤害。
+        // Core가 있는 오브젝트에서 IDamageable을 가져와 인터페이스로 피해를 준다.
+        IDamageable damageable = core.GetComponent<IDamageable>();
+
+        if (damageable == null)
+        {
+            return;
+        }
+
+        damageable.TakeDamage(attackDamage);
         Debug.Log(gameObject.name + " attacked " + core.gameObject.name + " for " + attackDamage + " damage");
 
         // 更新下一次攻击时间。
