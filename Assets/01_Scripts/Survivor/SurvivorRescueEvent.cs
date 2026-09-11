@@ -7,7 +7,7 @@ using UnityEngine;
 // Survivor_Mechanic/Gatherer/Researcher 프리팹처럼 SurvivorAI 가 이미 붙어있는 오브젝트에 이 컴포넌트를 같이 붙여서 사용.
 // 흐름: 플레이어 접근 -> 주변 몬스터(enemyLayer) 존재 확인 -> 없으면 E키로 구조
 //      -> SurvivorAI.state 를 Rescued 로 변경 -> SurvivorManager 에 합류
-public class SurvivorRescueEvent : MonoBehaviour
+public class SurvivorRescueEvent : MonoBehaviour, IInteractionTarget
 {
     [Header("상호작용")]
     public float detectRange = 4f;
@@ -29,6 +29,23 @@ public class SurvivorRescueEvent : MonoBehaviour
     private static readonly HashSet<string> rescuedIds = new HashSet<string>();
     private string RescueId => $"{gameObject.scene.name}:{gameObject.name}:{transform.position}";
 
+    private PlayerController interactionPlayer;
+    public KeyCode InteractionKey => KeyCode.E;
+    public bool CanBeginInteraction => !rescued && GetComponent<SurvivorAI>() != null && GuardsCleared();
+    public bool InteractionInProgress => false;
+    public bool IsPlayerInInteractionRange(PlayerController player) =>
+        InteractionSelection.IsInRange(this, player, detectRange, playerLayer);
+
+    void OnEnable() => InteractionSelection.Register(this);
+
+    void OnDisable()
+    {
+
+        if (playerUI != null) playerUI.HideButton(this);
+        InteractionSelection.Unregister(this);
+        interactionPlayer = null;
+    }
+
     void Start()
     {
         if (rescuedIds.Contains(RescueId))
@@ -41,7 +58,7 @@ public class SurvivorRescueEvent : MonoBehaviour
     {
         CheckPlayerNear();
 
-        if (playerInRange && !rescued && GuardsCleared() && Input.GetKeyDown(KeyCode.E))
+        if (playerInRange && Input.GetKeyDown(KeyCode.E) && InteractionSelection.TryBegin(this, interactionPlayer))
         {
             Rescue();
         }
@@ -52,6 +69,7 @@ public class SurvivorRescueEvent : MonoBehaviour
         Collider[] players = Physics.OverlapSphere(transform.position, detectRange, playerLayer);
 
         playerInRange = players.Length > 0;
+        interactionPlayer = playerInRange ? players[0].GetComponentInParent<PlayerController>() : null;
 
         if (playerInRange)
         {
@@ -61,11 +79,11 @@ public class SurvivorRescueEvent : MonoBehaviour
             {
                 if (GuardsCleared())
                 {
-                    playerUI.ShowButton("생존자 구조(E)");
+                    playerUI.ShowButton("생존자 구조(E)", this);
                 }
                 else
                 {
-                    playerUI.ShowButton("주변 몬스터를 먼저 처치하세요");
+                    playerUI.ShowButton("주변 몬스터를 먼저 처치하세요", this);
                 }
             }
         }
@@ -73,7 +91,7 @@ public class SurvivorRescueEvent : MonoBehaviour
         {
             if (playerUI != null)
             {
-                playerUI.HideButton();
+                playerUI.HideButton(this);
             }
 
             playerUI = null;
@@ -118,7 +136,7 @@ public class SurvivorRescueEvent : MonoBehaviour
 
         if (playerUI != null)
         {
-            playerUI.HideButton();
+            playerUI.HideButton(this);
         }
 
         // TODO: 아트 팀 - 구조 연출(파티클/사운드)

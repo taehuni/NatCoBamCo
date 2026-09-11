@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MedicalCenter : MonoBehaviour
+public class MedicalCenter : MonoBehaviour, IInteractionTarget
 {
     [Header("상호작용")]
     public float detectRange = 4f;
@@ -19,11 +19,28 @@ public class MedicalCenter : MonoBehaviour
     private Slider playerSlider;
     private PlayerController player;
 
+    private PlayerController interactionPlayer;
+    public KeyCode InteractionKey => KeyCode.E;
+    public bool CanBeginInteraction => !isHealing;
+    public bool InteractionInProgress => isHealing;
+    public bool IsPlayerInInteractionRange(PlayerController player) =>
+        InteractionSelection.IsInRange(this, player, detectRange, playerLayer);
+
+    void OnEnable() => InteractionSelection.Register(this);
+
+    void OnDisable()
+    {
+        StopHeal();
+        if (playerUI != null) playerUI.HideButton(this);
+        InteractionSelection.Unregister(this);
+        interactionPlayer = null;
+    }
+
     void Update()
     {
         CheckPlayerNear();
 
-        if (playerInRange && Input.GetKeyDown(KeyCode.E) && !isHealing)
+        if (playerInRange && Input.GetKeyDown(KeyCode.E) && InteractionSelection.TryBegin(this, interactionPlayer))
         {
             StartHeal();
         }
@@ -39,6 +56,7 @@ public class MedicalCenter : MonoBehaviour
         Collider[] players = Physics.OverlapSphere(transform.position, detectRange, playerLayer);
 
         playerInRange = players.Length > 0;
+        interactionPlayer = playerInRange ? players[0].GetComponentInParent<PlayerController>() : null;
 
         if (playerInRange)
         {
@@ -49,20 +67,19 @@ public class MedicalCenter : MonoBehaviour
             if (playerUI != null)
             {
                 playerSlider = playerUI.interactSlider;
-                playerUI.ShowButton("회복하기(E)");
+                playerUI.ShowButton("회복하기(E)", this);
             }
         }
         else
         {
             if (playerUI != null)
             {
-                playerUI.HideButton();
+                playerUI.HideButton(this);
             }
 
+            StopHeal();
             playerUI = null;
             player = null;
-
-            StopHeal();
         }
     }
 
@@ -72,10 +89,10 @@ public class MedicalCenter : MonoBehaviour
         healTimer = 0f;
 
         if (playerUI != null)
-            playerUI.ShowSlider();
+            playerUI.ShowSlider(this);
 
         if (playerSlider != null)
-            playerSlider.value = 0f;
+            playerUI?.SetProgress(0f, this);
     }
 
     void UpdateHeal()
@@ -83,7 +100,7 @@ public class MedicalCenter : MonoBehaviour
         healTimer += Time.deltaTime;
 
         if (playerSlider != null)
-            playerSlider.value = healTimer / interactTime;
+            playerUI?.SetProgress(healTimer / interactTime, this);
 
         if (healTimer >= interactTime)
         {
@@ -102,10 +119,10 @@ public class MedicalCenter : MonoBehaviour
         }
 
         if (playerSlider != null)
-            playerSlider.value = 0f;
+            playerUI?.SetProgress(0f, this);
 
         if (playerUI != null)
-            playerUI.HideSlider();
+            playerUI.HideSlider(this);
     }
 
     void StopHeal()
@@ -114,10 +131,10 @@ public class MedicalCenter : MonoBehaviour
         healTimer = 0f;
 
         if (playerSlider != null)
-            playerSlider.value = 0f;
+            playerUI?.SetProgress(0f, this);
 
         if (playerUI != null)
-            playerUI.HideSlider();
+            playerUI.HideSlider(this);
     }
 
     void OnDrawGizmosSelected()

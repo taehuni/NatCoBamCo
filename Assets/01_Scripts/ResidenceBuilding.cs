@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ResidenceBuilding : MonoBehaviour
+public class ResidenceBuilding : MonoBehaviour, IInteractionTarget
 {
     [Header("상호작용")]
     public float detectRange = 4f;
@@ -11,11 +11,28 @@ public class ResidenceBuilding : MonoBehaviour
 
     private bool playerInRange;
 
+    private PlayerController interactionPlayer;
+    public KeyCode InteractionKey => KeyCode.E;
+    public bool CanBeginInteraction => true;
+    public bool InteractionInProgress => false;
+    public bool IsPlayerInInteractionRange(PlayerController player) =>
+        InteractionSelection.IsInRange(this, player, detectRange, playerLayer);
+
+    void OnEnable() => InteractionSelection.Register(this);
+
+    void OnDisable()
+    {
+
+        if (playerUI != null) playerUI.HideButton(this);
+        InteractionSelection.Unregister(this);
+        interactionPlayer = null;
+    }
+
     void Update()
     {
         CheckPlayerNear();
 
-        if (playerInRange && Input.GetKeyDown(KeyCode.E))
+        if (playerInRange && Input.GetKeyDown(KeyCode.E) && InteractionSelection.TryBegin(this, interactionPlayer))
         {
             OpenResidence();
         }
@@ -26,18 +43,19 @@ public class ResidenceBuilding : MonoBehaviour
         Collider[] players = Physics.OverlapSphere(transform.position, detectRange, playerLayer);
 
         playerInRange = players.Length > 0;
+        interactionPlayer = playerInRange ? players[0].GetComponentInParent<PlayerController>() : null;
 
         if (playerInRange)
         {
             playerUI = players[0].GetComponentInParent<PlayerInteractUI>();
 
             if (playerUI != null)
-                playerUI.ShowButton("거주구역(E)");
+                playerUI.ShowButton("거주구역(E)", this);
         }
         else
         {
             if (playerUI != null)
-                playerUI.HideButton();
+                playerUI.HideButton(this);
 
             playerUI = null;
         }

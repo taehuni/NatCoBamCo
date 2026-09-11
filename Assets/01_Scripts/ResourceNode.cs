@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ResourceNode : MonoBehaviour
+public class ResourceNode : MonoBehaviour, IInteractionTarget
 {
     public float detectRange = 2f;
     public LayerMask playerLayer;
@@ -12,6 +12,8 @@ public class ResourceNode : MonoBehaviour
     // 태훈 추가: 획득 자원 종류/수량
     public ResourceType resourceType;
     public int amount = 10;
+
+    [SerializeField] private DailyResourceSpawner dailySpawner;
 
     private bool playerInRange;
     private bool isCollecting;
@@ -23,9 +25,26 @@ public class ResourceNode : MonoBehaviour
     private static readonly HashSet<string> collectedNodeIds = new HashSet<string>();
     private string NodeId => $"{gameObject.scene.name}:{gameObject.name}:{transform.position}";
 
+    private PlayerController interactionPlayer;
+    public KeyCode InteractionKey => KeyCode.E;
+    public bool CanBeginInteraction => !isCollecting;
+    public bool InteractionInProgress => isCollecting;
+    public bool IsPlayerInInteractionRange(PlayerController player) =>
+        InteractionSelection.IsInRange(this, player, detectRange, playerLayer);
+
+    void OnEnable() => InteractionSelection.Register(this);
+
+    void OnDisable()
+    {
+        StopCollect();
+        if (playerUI != null) playerUI.HideButton(this);
+        InteractionSelection.Unregister(this);
+        interactionPlayer = null;
+    }
+
     void Awake()
     {
-        if (collectedNodeIds.Contains(NodeId))
+        if (dailySpawner == null && collectedNodeIds.Contains(NodeId))
         {
             gameObject.SetActive(false);
         }
@@ -35,7 +54,7 @@ public class ResourceNode : MonoBehaviour
     {
         CheckPlayerNear();
 
-        if (playerInRange && Input.GetKeyDown(KeyCode.E))
+        if (playerInRange && Input.GetKeyDown(KeyCode.E) && InteractionSelection.TryBegin(this, interactionPlayer))
         {
             StartCollect();
         }
@@ -51,6 +70,7 @@ public class ResourceNode : MonoBehaviour
         Collider[] players = Physics.OverlapSphere(transform.position, detectRange, playerLayer);
 
         playerInRange = players.Length > 0;
+        interactionPlayer = playerInRange ? players[0].GetComponentInParent<PlayerController>() : null;
 
 
         if (playerInRange)
@@ -59,21 +79,17 @@ public class ResourceNode : MonoBehaviour
             if (playerUI != null)
             {
                 playerSlider = playerUI.interactSlider;
-                playerUI.ShowButton("채집하기(E)");
+                playerUI.ShowButton("채집하기(E)", this);
             }
         }
         else
         {
+            StopCollect();
             if (playerUI != null)
             {
-                playerUI.HideButton();
+                playerUI.HideButton(this);
                 playerUI = null;
             }
-        }
-
-        if (!playerInRange)
-        {
-            StopCollect();
         }
     }
 
@@ -84,12 +100,12 @@ public class ResourceNode : MonoBehaviour
 
         if (playerUI != null)
         {
-            playerUI.ShowSlider();
+            playerUI.ShowSlider(this);
         }
 
         if (playerSlider != null)
         {
-            playerSlider.value = 0f;
+            playerUI?.SetProgress(0f, this);
         }
     }
 
@@ -99,7 +115,7 @@ public class ResourceNode : MonoBehaviour
 
         if (playerSlider != null)
         {
-            playerSlider.value = collectTimer / collectTime;
+            playerUI?.SetProgress(collectTimer / collectTime, this);
         }
 
         if (collectTimer >= collectTime)
@@ -110,17 +126,27 @@ public class ResourceNode : MonoBehaviour
 
     void CollectComplete()
     {
+        // A day rollover cancels the old action before it can award the new day's resource.
+        if (dailySpawner != null && !dailySpawner.CanCollect(this)) return;
+
         isCollecting = false;
         collectTimer = 0f;
 
         if (playerSlider != null)
         {
-            playerSlider.value = 0f;
+            playerUI?.SetProgress(0f, this);
         }
 
         if (playerUI != null)
         {
-            playerUI.HideSlider();
+            playerUI.HideSlider(this);
+        }
+
+        // Keep the node available if the scene has not connected its inventory.
+        if (ResourceInventory.Instance == null)
+        {
+            Debug.LogWarning("Resource inventory is missing; resource node was not consumed.", this);
+            return;
         }
 
         // 태훈 수정: 로그만 찍던 것을 실제 인벤토리 지급으로 변경 + 채집가 보너스(SurvivorManager.GetGatherBonus) 적용
@@ -137,11 +163,18 @@ public class ResourceNode : MonoBehaviour
         // 태훈 추가: 1회성 채집 - 완료되면 노드 비활성화 (재채집 불가)
         if (playerUI != null)
         {
-            playerUI.HideButton();
+            playerUI.HideButton(this);
         }
 
-        collectedNodeIds.Add(NodeId);
-        gameObject.SetActive(false);
+        if (dailySpawner != null)
+        {
+            dailySpawner.MarkCollected(this);
+        }
+        else
+        {
+            collectedNodeIds.Add(NodeId);
+            gameObject.SetActive(false);
+        }
     }
 
     void StopCollect()
@@ -151,12 +184,12 @@ public class ResourceNode : MonoBehaviour
 
         if (playerSlider != null)
         {
-            playerSlider.value = 0f;
+            playerUI?.SetProgress(0f, this);
         }
 
         if (playerUI != null)
         {
-            playerUI.HideSlider();
+            playerUI.HideSlider(this);
         }
 
     }

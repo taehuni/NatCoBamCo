@@ -7,6 +7,8 @@ public class ResourceInventory : MonoBehaviour
 {
     public static ResourceInventory Instance { get; private set; }
 
+    public event System.Action Changed;
+
     private Dictionary<ResourceType, int> amounts = new Dictionary<ResourceType, int>();
 
     void Awake()
@@ -20,6 +22,11 @@ public class ResourceInventory : MonoBehaviour
         Instance = this;
 
         DontDestroyOnLoad(gameObject);
+    }
+
+    void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
     }
 
     public void Add(ResourceType type, int amount)
@@ -37,10 +44,37 @@ public class ResourceInventory : MonoBehaviour
         amounts[type] += amount;
 
         Debug.Log($"{type} +{amount} (보유: {amounts[type]})");
+        Changed?.Invoke();
     }
 
     public int Get(ResourceType type)
     {
         return amounts.ContainsKey(type) ? amounts[type] : 0;
+    }
+
+    public bool CanAfford(IReadOnlyDictionary<ResourceType, int> cost)
+    {
+        if (cost == null) return false;
+        foreach (var item in cost)
+        {
+            if (!System.Enum.IsDefined(typeof(ResourceType), item.Key) ||
+                item.Value < 0 || Get(item.Key) < item.Value) return false;
+        }
+        return true;
+    }
+
+    // Check every balance first, then publish one update after all deductions.
+    public bool TrySpend(IReadOnlyDictionary<ResourceType, int> cost)
+    {
+        if (!CanAfford(cost)) return false;
+        bool changed = false;
+        foreach (var item in cost)
+        {
+            if (item.Value == 0) continue;
+            amounts[item.Key] -= item.Value;
+            changed = true;
+        }
+        if (changed) Changed?.Invoke();
+        return true;
     }
 }

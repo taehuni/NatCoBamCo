@@ -15,7 +15,8 @@ public class CameraFollow : MonoBehaviour
 
     void Start()
     {
-        target = GameObject.FindWithTag("Player").transform;
+        var player = GameObject.FindWithTag("Player");
+        target = player != null ? player.transform : null;
 
         yaw = transform.eulerAngles.y; //자기의 rotation.y
 
@@ -30,6 +31,7 @@ public class CameraFollow : MonoBehaviour
 
     public void targetFollow()
     {
+        if (target == null) return;
         yaw += Input.GetAxis("Mouse X") * mouseSensitivity; //마우스 좌우 이동 값
         pitch -= Input.GetAxis("Mouse Y") * mouseSensitivity; //마우스 상하 이동 값
         pitch = Mathf.Clamp(pitch, minPitch, maxPitch); //상하이동 제한
