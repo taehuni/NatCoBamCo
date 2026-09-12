@@ -17,7 +17,7 @@ namespace BamCoNatCo.EditorTools
         private const float SnapRadius = 20f;
         private static readonly int HandleHash = "BamCoNatCo.SnapResize".GetHashCode();
         private static readonly Rect PanelRect = new Rect(12f, 12f, 350f, 94f);
-        private readonly GUIContent icon = new GUIContent("Snap", "单边吸附拉伸 / Snap Resize (Shift+T)");
+        private readonly GUIContent icon = new GUIContent("Snap", "한쪽 크기 조절 / Snap Resize (Shift+T)");
 
         private Transform dragTarget;
         private SceneView dragView;
@@ -101,7 +101,7 @@ namespace BamCoNatCo.EditorTools
             if (EditorApplication.isPlayingOrWillChangePlaymode)
             {
                 FinishDrag(false);
-                DrawPanel("请退出 Play 模式后编辑场景。", false);
+                DrawPanel("플레이 모드를 종료한 뒤 편집하세요.", false);
                 return;
             }
 
@@ -114,7 +114,7 @@ namespace BamCoNatCo.EditorTools
             if (!valid)
             {
                 FinishDrag(false);
-                DrawPanel("请选择一个 Cube、Plane 或带网格的场景对象。", false);
+                DrawPanel("Cube, Plane 또는 메시가 있는 오브젝트를 하나 선택하세요.", false);
                 return;
             }
 
@@ -122,8 +122,8 @@ namespace BamCoNatCo.EditorTools
                 FinishDrag(false);
 
             DrawPanel(activeControl == 0
-                ? "拖动彩色圆点：单边拉伸；按住 V：吸附顶点。"
-                : (snapped ? "已吸附：另一边保持不动。" : "将鼠标靠近目标顶点；Esc 取消本次拉伸。"), true);
+                ? "점 드래그: 한쪽 크기 조절 / V 누르기: 정점 스냅"
+                : (snapped ? "스냅됨: 반대쪽 면은 고정됩니다." : "대상 정점으로 마우스를 이동하세요. Esc: 취소"), true);
 
             if (activeControl != 0 && view == dragView)
             {
@@ -158,11 +158,11 @@ namespace BamCoNatCo.EditorTools
         {
             Handles.BeginGUI();
             GUILayout.BeginArea(PanelRect, GUI.skin.box);
-            GUILayout.Label("单边吸附拉伸 / Snap Resize", EditorStyles.boldLabel);
+            GUILayout.Label("한쪽 크기 조절 / Snap Resize", EditorStyles.boldLabel);
             GUILayout.Label(message, EditorStyles.wordWrappedMiniLabel);
             using (new EditorGUI.DisabledScope(!allowOptions))
-                alwaysSnap = GUILayout.Toggle(alwaysSnap, "自动吸附（勾选后无需按住 V）");
-            GUILayout.Label("Shift+T 启用 · T 返回矩形工具 · Ctrl+Z 撤销", EditorStyles.miniLabel);
+                alwaysSnap = GUILayout.Toggle(alwaysSnap, "자동 스냅 (V 키 없이 사용)");
+            GUILayout.Label("Shift+T 켜기 · T 사각형 · Ctrl+Z 실행 취소", EditorStyles.miniLabel);
             GUILayout.EndArea();
             Handles.EndGUI();
         }
@@ -297,7 +297,7 @@ namespace BamCoNatCo.EditorTools
             {
                 Handles.DrawWireDisc(snapshot.fixedWorldPoint, view.camera.transform.forward,
                     HandleUtility.GetHandleSize(snapshot.fixedWorldPoint) * 0.06f);
-                Handles.Label(snapshot.fixedWorldPoint, "固定 / Fixed");
+                Handles.Label(snapshot.fixedWorldPoint, "고정 / Fixed");
             }
             if (snapped && dragTarget != null)
             {

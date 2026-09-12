@@ -107,6 +107,30 @@ public class EnemyTargetSelector : MonoBehaviour
         return null;
     }
 
+    // 资源地区使用带视野过滤的入口，基地敌人继续使用原来的优先目标规则。
+    // 자원 지역에서는 시야로 필터링하는 함수를 사용하고, 기지의 적은 기존 우선 타깃 규칙을 유지한다.
+    public GameObject FindVisiblePlayerTarget(LayerMask playerLayer, float detectRange, EnemyVision vision)
+    {
+        if (vision == null || detectRange <= 0f)
+        {
+            return null;
+        }
+
+        // 球形查询只收集附近候选者；通过扇形角度和遮挡检查后才算真正看到。
+        // 구형 검색은 주변 후보만 수집한다. 부채꼴 시야각과 가림 검사를 통과해야 실제로 본 것으로 판단한다.
+        Collider[] targets = Physics.OverlapSphere(transform.position, detectRange, playerLayer, QueryTriggerInteraction.Ignore);
+        for (int i = 0; i < targets.Length; i++)
+        {
+            PlayerController player = targets[i].GetComponentInParent<PlayerController>();
+            if (player != null && vision.CanSeeTarget(player.gameObject, detectRange))
+            {
+                return player.gameObject;
+            }
+        }
+
+        return null;
+    }
+
     public GameObject FindNearestBuildingByLayer(
         LayerMask layer,
         float detectRange,

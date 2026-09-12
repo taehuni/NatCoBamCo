@@ -57,12 +57,26 @@ public class ScenePortal : MonoBehaviour, IInteractable
         }
         else
         {
-            if (playerUI != null)
-            {
-                playerUI.HideButton();
-                playerUI = null;
-            }
+            ClearPlayerInteraction();
         }
+    }
+
+    // 玩家 UI 会跨场景保留，离开或关闭传送点时主动清除提示和交互状态。
+    // 플레이어 UI는 씬 전환 후에도 유지되므로 포털에서 벗어나거나 포털이 비활성화되면 안내와 상호작용 상태를 정리한다.
+    void ClearPlayerInteraction()
+    {
+        if (playerUI != null)
+        {
+            playerUI.HideButton();
+        }
+
+        playerUI = null;
+        playerInRange = false;
+    }
+
+    void OnDisable()
+    {
+        ClearPlayerInteraction();
     }
 
     void LoadTargetScene()
@@ -73,6 +87,9 @@ public class ScenePortal : MonoBehaviour, IInteractable
             return;
         }
 
+        // 切场景不会再执行旧传送点的离开检测，因此先关闭玩家身上的提示。
+        // 씬을 전환하면 기존 포털의 범위 이탈 검사가 실행되지 않으므로 플레이어의 안내를 먼저 닫는다.
+        ClearPlayerInteraction();
         SceneManager.LoadScene(targetSceneName);
     }
 
