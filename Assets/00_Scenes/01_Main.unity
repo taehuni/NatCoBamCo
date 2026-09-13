@@ -10276,7 +10276,13 @@ MonoBehaviour:
   - category: 0
     itemName: "\uB098\uBB34 \uBCBD"
     icon: {fileID: 0}
-    buildPrefab: {fileID: 0}
+    buildPrefab: {fileID: 4532783231396865526, guid: 4bf6492300b9a024ead8fd240b05b94b, type: 3}
+    cost:
+      configured: 1
+      wood: 20
+      metal: 0
+      rareMetal: 0
+      food: 0
     costText: "\uC18C\uBAA8 \uC790\uC6D0: \uBAA9\uC7AC 20"
     descriptionText: "\uBE60\uB974\uAC8C \uC124\uCE58\uD560 \uC218 \uC788\uB294 \uAE30\uBCF8
       \uBC29\uC5B4\uBCBD\uC785\uB2C8\uB2E4."
@@ -10284,36 +10290,70 @@ MonoBehaviour:
     itemName: "\uCCA0\uC81C \uBCBD"
     icon: {fileID: 0}
     buildPrefab: {fileID: 0}
-    costText: "\uC18C\uBAA8 \uC790\uC6D0: \uCCA0 40 / \uBAA9\uC7AC 15"
+    cost:
+      configured: 1
+      wood: 15
+      metal: 40
+      rareMetal: 0
+      food: 0
+    costText: "\uC18C\uBAA8 \uC790\uC6D0: \uBAA9\uC7AC 15 / \uAE08\uC18D 40"
     descriptionText: "\uBCF4\uC2A4 \uACF5\uACA9\uC744 \uBC84\uD2F0\uAE30 \uC704\uD55C
       \uACE0\uB0B4\uAD6C\uB3C4 \uBC29\uC5B4\uBCBD\uC785\uB2C8\uB2E4."
   - category: 0
     itemName: "\uAC15\uD654 \uBCBD"
     icon: {fileID: 0}
     buildPrefab: {fileID: 0}
-    costText: "\uC18C\uBAA8 \uC790\uC6D0: \uCCA0 70 / \uBD80\uD488 30"
+    cost:
+      configured: 1
+      wood: 0
+      metal: 70
+      rareMetal: 30
+      food: 0
+    costText: "\uC18C\uBAA8 \uC790\uC6D0: \uAE08\uC18D 70 / \uD76C\uADC0 \uAE08\uC18D
+      30"
     descriptionText: "\uBCF4\uC2A4 \uACF5\uACA9\uC744 \uBC84\uD2F0\uAE30 \uC704\uD55C
       \uACE0\uB0B4\uAD6C\uB3C4 \uBC29\uC5B4\uBCBD\uC785\uB2C8\uB2E4."
   towerItems:
   - category: 1
     itemName: "\uAE30\uAD00\uCD1D \uD0C0\uC6CC"
     icon: {fileID: 0}
-    buildPrefab: {fileID: 0}
-    costText: "\uC18C\uBAA8 \uC790\uC6D0: \uCCA0 60 / \uBD80\uD488 35"
+    buildPrefab: {fileID: 3113098753654139490, guid: e414f223729f13d4ea7d57cd5f846dfe, type: 3}
+    cost:
+      configured: 1
+      wood: 0
+      metal: 60
+      rareMetal: 35
+      food: 0
+    costText: "\uC18C\uBAA8 \uC790\uC6D0: \uAE08\uC18D 60 / \uD76C\uADC0 \uAE08\uC18D
+      35"
     descriptionText: "\uBE60\uB978 \uC5F0\uC0AC\uB85C \uC77C\uBC18 \uC880\uBE44\uB97C
       \uCC98\uB9AC\uD558\uB294 \uD0C0\uC6CC\uC785\uB2C8\uB2E4."
   - category: 1
     itemName: "\uC800\uACA9 \uD0C0\uC6CC"
     icon: {fileID: 0}
-    buildPrefab: {fileID: 0}
-    costText: "\uC18C\uBAA8 \uC790\uC6D0: \uCCA0 80 / \uBD80\uD488 45"
+    buildPrefab: {fileID: 239154205310747760, guid: cdf30f09fd063c2469699ae03cd0a8e8, type: 3}
+    cost:
+      configured: 1
+      wood: 0
+      metal: 80
+      rareMetal: 45
+      food: 0
+    costText: "\uC18C\uBAA8 \uC790\uC6D0: \uAE08\uC18D 80 / \uD76C\uADC0 \uAE08\uC18D
+      45"
     descriptionText: "\uAC15\uD55C \uB2E8\uC77C \uD53C\uD574\uB85C \uBCF4\uC2A4\uC640
       \uACE0\uCCB4\uB825 \uC801\uC744 \uACF5\uACA9\uD569\uB2C8\uB2E4."
   - category: 1
     itemName: "\uC804\uAE30 \uD0C0\uC6CC"
     icon: {fileID: 0}
-    buildPrefab: {fileID: 0}
-    costText: "\uC18C\uBAA8 \uC790\uC6D0: \uCCA0 65 / \uBD80\uD488 40"
+    buildPrefab: {fileID: 3113098753654139490, guid: 0e7844744efb72e478d969f129af85ae, type: 3}
+    cost:
+      configured: 1
+      wood: 0
+      metal: 65
+      rareMetal: 40
+      food: 0
+    costText: "\uC18C\uBAA8 \uC790\uC6D0: \uAE08\uC18D 65 / \uD76C\uADC0 \uAE08\uC18D
+      40"
     descriptionText: "\uBC94\uC704 \uB0B4 \uC801\uC758 \uC774\uB3D9 \uC18D\uB3C4\uB97C
       \uAC10\uC18C\uC2DC\uD0B5\uB2C8\uB2E4."
   buildingItems:
@@ -10321,25 +10361,50 @@ MonoBehaviour:
     itemName: "\uC5F0\uAD6C\uC18C"
     icon: {fileID: 0}
     buildPrefab: {fileID: 0}
-    costText: "\uC18C\uBAA8 \uC790\uC6D0: \uCCA0 80 / \uBD80\uD488 50"
+    cost:
+      configured: 1
+      wood: 0
+      metal: 80
+      rareMetal: 50
+      food: 0
+    costText: "\uC18C\uBAA8 \uC790\uC6D0: \uAE08\uC18D 80 / \uD76C\uADC0 \uAE08\uC18D
+      50"
     descriptionText: "\uBCBD\uACFC \uD0C0\uC6CC\uB97C \uC5C5\uADF8\uB808\uC774\uB4DC\uD560
       \uC218 \uC788\uB294 \uAC74\uBB3C\uC785\uB2C8\uB2E4."
   - category: 2
     itemName: "\uC758\uB8CC\uC18C"
     icon: {fileID: 0}
-    buildPrefab: {fileID: 0}
-    costText: "\uC18C\uBAA8 \uC790\uC6D0: \uBAA9\uC7AC 40 / \uBD80\uD488 30"
+    buildPrefab: {fileID: 9158830039081272896, guid: 6f0ea048c23aab349ba3272487f9b95e, type: 3}
+    cost:
+      configured: 1
+      wood: 40
+      metal: 0
+      rareMetal: 30
+      food: 0
+    costText: "\uC18C\uBAA8 \uC790\uC6D0: \uBAA9\uC7AC 40 / \uD76C\uADC0 \uAE08\uC18D
+      30"
     descriptionText: "\uD50C\uB808\uC774\uC5B4\uC758 \uCCB4\uB825\uC744 \uD68C\uBCF5\uD560
       \uC218 \uC788\uB294 \uAC74\uBB3C\uC785\uB2C8\uB2E4."
   - category: 2
     itemName: "\uC815\uBE44\uC18C"
     icon: {fileID: 0}
     buildPrefab: {fileID: 0}
-    costText: "\uC18C\uBAA8 \uC790\uC6D0: \uCCA0 60 / \uBD80\uD488 45"
+    cost:
+      configured: 1
+      wood: 0
+      metal: 60
+      rareMetal: 45
+      food: 0
+    costText: "\uC18C\uBAA8 \uC790\uC6D0: \uAE08\uC18D 60 / \uD76C\uADC0 \uAE08\uC18D
+      45"
     descriptionText: "\uBC29\uC5B4\uBCBD\uACFC \uD0C0\uC6CC\uB97C \uC218\uB9AC\uD558\uB294
       \uAC74\uBB3C\uC785\uB2C8\uB2E4."
-  buildingSystemObject: {fileID: 0}
-  disableWhileOpen: []
+  buildingSystemObject: {fileID: 876058049}
+  disableWhileOpen:
+  - {fileID: 876058055}
+  - {fileID: 876058053}
+  - {fileID: 1332405961}
+  - {fileID: 876058052}
   unlockCursorWhenOpen: 1
 --- !u!1 &1765754004
 GameObject:

@@ -40,6 +40,7 @@ public class BuildQuickUI : MonoBehaviour
     [Header("마우스 설정")]
     public bool unlockCursorWhenOpen = true;
 
+    private readonly Dictionary<MonoBehaviour, bool> previousControlStates = new Dictionary<MonoBehaviour, bool>();
     private bool isOpen = false;
     private BuildCategory currentCategory = BuildCategory.Wall;
 
@@ -108,6 +109,9 @@ public class BuildQuickUI : MonoBehaviour
     {
         if (buildQuickPanel == null) return;
 
+        if (isOpen) return;
+        var placement = FindFirstObjectByType<BuildingSystem>();
+        if (placement != null) placement.CancelPlacement();
         buildQuickPanel.SetActive(true);
         isOpen = true;
 
@@ -250,16 +254,12 @@ public class BuildQuickUI : MonoBehaviour
 
         Debug.Log("설치 선택: " + item.itemName);
 
+        if (item.buildPrefab == null || item.cost == null || !item.cost.IsValid) return;
+        var placement = FindFirstObjectByType<BuildingSystem>();
+        if (placement == null) return;
+        buildingSystemObject = placement.gameObject;
         CloseUI();
-
-        if (buildingSystemObject != null && item.buildPrefab != null)
-        {
-            buildingSystemObject.SendMessage(
-                "StartPlacement",
-                item.buildPrefab,
-                SendMessageOptions.DontRequireReceiver
-            );
-        }
+        placement.StartPlacement(item);
     }
 
     void SetPlayerControl(bool value)
@@ -270,7 +270,17 @@ public class BuildQuickUI : MonoBehaviour
         {
             if (disableWhileOpen[i] != null)
             {
-                disableWhileOpen[i].enabled = value;
+                var control = disableWhileOpen[i];
+                if (!value)
+                {
+                    if (!previousControlStates.ContainsKey(control)) previousControlStates[control] = control.enabled;
+                    control.enabled = false;
+                }
+                else if (previousControlStates.TryGetValue(control, out bool wasEnabled))
+                {
+                    control.enabled = wasEnabled;
+                    previousControlStates.Remove(control);
+                }
             }
         }
     }
