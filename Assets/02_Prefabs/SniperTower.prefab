@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 620530081892635228}
   - component: {fileID: 1796706151583066343}
   - component: {fileID: 6208253241604335749}
+  - component: {fileID: 810000000000000301}
+  - component: {fileID: 810000000000000302}
   - component: {fileID: 6090294365334769938}
   - component: {fileID: 2579201923932168478}
   m_Layer: 12
@@ -160,9 +162,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5eba2b3a16b963f43bfc15ef426f55c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DamageableBuilding
-  hp: 100
-  maxHp: 100
-  defensePower: 0
+  legacyHealth: 100
+  legacyMaxHp: 100
+  legacyDefensePower: 0
+  legacyDataMigrated: 1
 --- !u!114 &6090294365334769938
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -531,6 +534,34 @@ Transform:
   m_Children: []
   m_Father: {fileID: 7366903949148173790}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &810000000000000301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 239154205310747760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d4e66a928aa401dbaf3681a8e5ce249, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingHealth
+  maxHp: 100
+  health: 100
+--- !u!114 &810000000000000302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 239154205310747760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82a1ba0ed3e342d18c969a13b283fd35, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingDefense
+  defensePower: 0
+  minimumDamage: 5
 --- !u!1 &4237861447009460389
 GameObject:
   m_ObjectHideFlags: 0

@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 2338778759370353594}
   - component: {fileID: 3185249789785309339}
   - component: {fileID: 5323501339476996286}
+  - component: {fileID: 810000000000000201}
+  - component: {fileID: 810000000000000202}
   - component: {fileID: 5932233419127310932}
   m_Layer: 12
   m_Name: MedicalCenter
@@ -156,9 +158,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5eba2b3a16b963f43bfc15ef426f55c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DamageableBuilding
-  hp: 30
-  maxHp: 30
-  defensePower: 0
+  legacyHealth: 30
+  legacyMaxHp: 30
+  legacyDefensePower: 0
+  legacyDataMigrated: 1
 --- !u!114 &5932233419127310932
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -177,3 +180,31 @@ MonoBehaviour:
     m_Bits: 512
   interactTime: 2
   healAmount: 50
+--- !u!114 &810000000000000201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9158830039081272896}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d4e66a928aa401dbaf3681a8e5ce249, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingHealth
+  maxHp: 30
+  health: 30
+--- !u!114 &810000000000000202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9158830039081272896}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82a1ba0ed3e342d18c969a13b283fd35, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingDefense
+  defensePower: 0
+  minimumDamage: 5

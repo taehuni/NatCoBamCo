@@ -16,7 +16,10 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
     public float navMeshSampleRange = 5f; // 把目标点修正到附近 NavMesh 的范围 / 목표 지점을 근처 NavMesh로 보정하는 범위
     public float targetPathPointExtraDistance = 1f; // 目标外侧额外寻找路径点的距离 / 타겟 바깥쪽 경로 후보 지점을 추가로 찾는 거리
     public float attackPointRefreshInterval = 0.5f; // 重新选择建筑攻击点的间隔 / 건물 공격 위치를 다시 선택하는 간격
+    public float attackPointReservationRange = 3f; // 距离建筑表面多近才允许预约攻击点 / 건물 표면에 얼마나 가까워야 공격 지점을 예약할 수 있는지
     public float priorityTargetSwitchPathAdvantage = 1f; // 新目标路线至少短多少米才允许切换 / 새 타깃 경로가 최소 몇 미터 짧아야 교체할지
+    public float attackPointInvalidReleaseDelay = 1.2f; // 已到位的敌人持续无法攻击多久后释放位置 / 도착한 적이 계속 공격하지 못할 때 자리를 해제하기까지의 시간
+    public float attackPointRetryDelay = 0.35f; // 失效释放后再次抢攻击点前的等待时间 / 무효 자리 해제 후 공격 지점을 다시 예약하기 전 대기 시간
 
     [Header("Attack Settings / 공격 설정")]
     public float buildingTurnSpeed = 360f; // 攻击建筑前转向速度 / 건물 공격 전 회전 속도
@@ -49,6 +52,14 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
     private Vector3 blockedWallDestination; // 这面墙原本挡住的目标点 / 이 벽이 원래 막고 있던 목표 지점
     private GameObject blockedWallOriginalTarget; // 这面墙原本挡住的目标对象 / 이 벽이 원래 막고 있던 목표 오브젝트
     private float nextPriorityTargetSearchTime; // 下一次允许重新比较优先目标的时间 / 다음 우선 타깃 재비교 가능 시간
+
+    // 攻击点失效追踪：只有敌人曾经到达过该点，后来持续被挤开或打不到时才释放。
+    // 공격 지점 무효 추적: 적이 해당 지점에 도착한 뒤 계속 밀려나거나 공격하지 못할 때만 해제한다.
+    private int trackedAttackBuildingId;
+    private int trackedAttackPointIndex = -1;
+    private bool hasReachedTrackedAttackPoint;
+    private float attackPointInvalidStartTime = -1f;
+    private float nextAttackPointReservationTime;
 
     void Start()
     {
@@ -90,7 +101,7 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
     {
         if (attackSlotManager != null)
         {
-            attackSlotManager.ReleaseAttackPoint();
+            attackSlotManager.ReleaseAllReservations();
         }
     }
 
@@ -98,7 +109,7 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
     {
         if (attackSlotManager != null)
         {
-            attackSlotManager.ReleaseAttackPoint();
+            attackSlotManager.ReleaseAllReservations();
         }
     }
 
@@ -278,8 +289,10 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
 
         if (attackSlotManager != null)
         {
-            attackSlotManager.ReleaseAttackPoint();
+            attackSlotManager.ReleaseAllReservations();
         }
+
+        ResetAttackPointValidityTracking();
 
         priorityTarget = newTarget;
         isAttackingBlockedWall = false;
@@ -320,8 +333,10 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
 
         if (attackSlotManager != null)
         {
-            attackSlotManager.ReleaseAttackPoint();
+            attackSlotManager.ReleaseAllReservations();
         }
+
+        ResetAttackPointValidityTracking();
     }
 
     // 锁定堵路墙，让敌人持续攻击这面墙，而不是每帧重新找 Core
@@ -383,7 +398,8 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
             return;
         }
 
-        attackSlotManager.ReleaseAttackPoint();
+        attackSlotManager.ReleaseAllReservations();
+        ResetAttackPointValidityTracking();
 
         EnemyPathBlockHandler.PathChoice targetPath;
 
@@ -425,7 +441,8 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
             return;
         }
 
-        attackSlotManager.ReleaseAttackPoint();
+        attackSlotManager.ReleaseAllReservations();
+        ResetAttackPointValidityTracking();
 
         EnemyPathBlockHandler.PathChoice corePath;
 
@@ -522,6 +539,7 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
     {
         if (building == null || building.hp <= 0f)
         {
+            ResetAttackPointValidityTracking();
             ClearPriorityTarget();
             return;
         }
@@ -530,87 +548,205 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
         // 원거리형은 건물 주변의 근접 공격 지점을 예약하지 않고 사거리 안에 들어오면 바로 공격한다.
         if (IsRangedEnemy())
         {
+            ResetAttackPointValidityTracking();
             MoveOrAttackRangedBuilding(building);
             return;
         }
 
-        Vector3 movePoint;
-        //敌人距离预约攻击点多近，才算“已经到达攻击点
-        //적과 지정 공격 지점 사이의 거리가 일정 값 이하이면 공격 지점에 도착한 것으로 판단
+        // 敌人距离预约攻击点多近，才算已经到达攻击点。
+        // 적이 예약한 공격 지점에 얼마나 가까워야 도착으로 판단할지 계산한다.
         float preciseAttackPointArriveDistance = GetPreciseAttackPointArriveDistance();
-
-        //攻击点管理器，请根据这座建筑和当前敌人的情况，
-        // 尝试给我预约一个能走到、能攻击、没有被别人占用的位置，
-        // 并把最终位置放进 movePoint(保存敌人应该前往的具体世界坐标)
-        // 공격 지점 관리자에게 이 건물과 현재 적의 상태를 기준으로,
-        // 이동 가능하고, 공격 가능하며, 다른 적이 점유하지 않은 위치를 예약하도록 요청한다.
-        // 최종 위치는 movePoint에 저장한다. 
-        // movePoint는 적이 이동해야 할 구체적인 월드 좌표를 의미한다.
-        bool hasAttackPoint = attackSlotManager.TryReserveAttackPoint(
-            building,
-            enemyAI,
-            movement,
-            attackPointRefreshInterval,
-            buildingMovePointSampleRange,
-            out movePoint
+        float distanceToBuildingSurface = EnemyTargetUtility.GetDistanceToTarget(
+            transform.position,
+            building.gameObject
         );
+
+        float allowedReservationRange = Mathf.Max(0.1f, attackPointReservationRange);
+        bool alreadyWaitingForBuilding = attackSlotManager.HasWaitingPointFor(building);
+
+        // 尚未靠近建筑、也没有外围等待位时，先正常接近建筑，不提前抢攻击点。
+        // 아직 건물 가까이에 없고 바깥 대기 자리도 없다면 먼저 건물에 접근하며 공격 지점을 미리 차지하지 않는다.
+        if (distanceToBuildingSurface > allowedReservationRange && !alreadyWaitingForBuilding)
+        {
+            attackSlotManager.ReleaseAllReservations();
+            ResetAttackPointValidityTracking();
+            MoveNearBuildingBeforeReservation(building);
+            return;
+        }
+
+        Vector3 movePoint = attackSlotManager.CurrentAttackPoint;
+        bool hasAttackPoint = attackSlotManager.HasAttackPoint;
+
+        // 失效释放后的短暂时间内不马上把同一个点抢回来，让其他等待者有机会补位。
+        // 무효 자리 해제 직후 같은 자리를 바로 다시 차지하지 않고 다른 대기 적에게 보충 기회를 준다.
+        if (hasAttackPoint || Time.time >= nextAttackPointReservationTime)
+        {
+            hasAttackPoint = attackSlotManager.TryReserveAttackPoint(
+                building,
+                enemyAI,
+                movement,
+                attackPointRefreshInterval,
+                buildingMovePointSampleRange,
+                out movePoint
+            );
+        }
 
         if (hasAttackPoint)
         {
+            TrackCurrentAttackPoint(building);
+
             bool isNearAttackPoint = attackSlotManager.IsNearAttackPoint(
                 movement,
                 movePoint,
                 preciseAttackPointArriveDistance
             );
 
-            // 已预约攻击点但还没有到达时，只负责向攻击点移动。
-            // 不能因为身体已经靠近建筑，就在每一帧先转向建筑尝试攻击，再转回移动方向。
-            // 否则攻击射线被其他敌人挡住时，会在“面向建筑”和“面向攻击点”之间反复摇摆。
-            // 공격 지점을 예약했지만 아직 도착하지 않았다면 공격 지점으로 이동하는 일만 처리한다.
-            // 몸이 건물 가까이에 있다는 이유로 매 프레임 건물을 바라보며 공격을 시도한 뒤 다시 이동 방향으로 돌면 안 된다.
-            // 다른 적이 공격선을 막고 있을 때 "건물 방향"과 "공격 지점 방향" 사이에서 계속 흔들릴 수 있기 때문이다.
             if (!isNearAttackPoint)
             {
+                // 第一次去攻击点时允许正常赶路；只有已经到过、后来被挤开的敌人才开始失效计时。
+                // 처음 공격 지점으로 가는 중에는 정상 이동하고, 한 번 도착한 뒤 밀려난 적만 무효 시간을 센다.
+                if (hasReachedTrackedAttackPoint && HasAttackPointBeenInvalidLongEnough())
+                {
+                    ReleaseInvalidAttackPoint();
+                    MoveToWaitingPosition(building, preciseAttackPointArriveDistance);
+                    return;
+                }
+
                 movement.MoveToPosition(movePoint, navMeshSampleRange, buildingAttackStoppingDistance);
                 return;
             }
 
+            hasReachedTrackedAttackPoint = true;
             movement.Stop();
             movement.SetAutoRotation(false);
             FaceTarget(building.gameObject);
 
             if (CanHitBuildingWithFrontBox(building))
             {
+                // 能正常攻击说明位置有效，清除失效计时。攻击冷却期间也会保持预约。
+                // 정상 공격이 가능하면 무효 타이머를 초기화한다. 공격 쿨타임 중에도 예약은 유지한다.
+                attackPointInvalidStartTime = -1f;
                 attack.AttackBuilding(building);
+                return;
+            }
+
+            // 已经站到点上但持续被其他敌人或环境挡住时，超时释放，允许等待者补位。
+            // 지점에 도착했지만 다른 적이나 환경에 계속 막히면 일정 시간 후 해제해서 대기 적이 보충하게 한다.
+            if (HasAttackPointBeenInvalidLongEnough())
+            {
+                ReleaseInvalidAttackPoint();
+                MoveToWaitingPosition(building, preciseAttackPointArriveDistance);
             }
 
             return;
         }
 
-        // 没有预约到攻击点，通常表示可用点已经被其他敌人占满。
-        // 此时只移动到建筑附近等待，不在每一帧强制转向建筑尝试抢打。
-        // 否则会在“面向建筑”和“面向等待位置”之间来回切换，再次出现左右摇摆。
-        // 공격 지점을 예약하지 못했다면 보통 사용 가능한 지점이 다른 적에게 모두 예약된 상태다.
-        // 이때는 건물 근처의 대기 위치로만 이동하고, 매 프레임 건물을 바라보며 공격을 빼앗으려 하지 않는다.
-        // 그렇지 않으면 "건물 방향"과 "대기 위치 방향"이 반복 전환되어 다시 좌우로 흔들리게 된다.
-        movePoint = attackSlotManager.GetMovePointNearTarget(building.gameObject, movement, buildingMovePointSampleRange);
+        ResetAttackPointValidityTracking();
+        MoveToWaitingPosition(building, preciseAttackPointArriveDistance);
+    }
 
-        bool isNearWaitingPoint = attackSlotManager.IsNearAttackPoint(
+    // 没有攻击点时前往独立的外围等待位，不再继续挤向建筑表面。
+    // 공격 지점이 없으면 독립된 바깥 대기 위치로 이동하며 건물 표면으로 계속 밀고 들어가지 않는다.
+    void MoveToWaitingPosition(DamageableBuilding building, float arriveDistance)
+    {
+        Vector3 waitingPoint;
+
+        if (!attackSlotManager.TryReserveWaitingPoint(
+            building,
+            enemyAI,
             movement,
-            movePoint,
-            preciseAttackPointArriveDistance
-        );
-
-        if (!isNearWaitingPoint)
+            buildingMovePointSampleRange,
+            out waitingPoint))
         {
-            movement.MoveToPosition(movePoint, navMeshSampleRange, buildingAttackStoppingDistance);
+            // 等待点也满了就留在当前位置，不再向攻击区域施加移动压力。
+            // 대기 지점도 모두 찼다면 현재 위치에 머물러 공격 구역으로 이동 압력을 더하지 않는다.
+            movement.SetAutoRotation(true);
+            movement.Stop();
             return;
         }
 
-        // 已经到达等待位置就停下，等后续刷新时出现空闲攻击点再自动补位。
-        // 대기 위치에 도착하면 멈추고, 이후 갱신 때 빈 공격 지점이 생기면 자동으로 보충한다.
+        if (!attackSlotManager.IsNearAttackPoint(movement, waitingPoint, arriveDistance))
+        {
+            movement.SetAutoRotation(true);
+            movement.MoveToPosition(waitingPoint, navMeshSampleRange, buildingAttackStoppingDistance);
+            return;
+        }
+
         movement.SetAutoRotation(true);
         movement.Stop();
+    }
+
+    void TrackCurrentAttackPoint(DamageableBuilding building)
+    {
+        int buildingId = building.GetInstanceID();
+        int attackPointIndex = attackSlotManager.CurrentAttackPointIndex;
+
+        if (trackedAttackBuildingId == buildingId && trackedAttackPointIndex == attackPointIndex)
+        {
+            return;
+        }
+
+        trackedAttackBuildingId = buildingId;
+        trackedAttackPointIndex = attackPointIndex;
+        hasReachedTrackedAttackPoint = false;
+        attackPointInvalidStartTime = -1f;
+    }
+
+    bool HasAttackPointBeenInvalidLongEnough()
+    {
+        if (attackPointInvalidStartTime < 0f)
+        {
+            attackPointInvalidStartTime = Time.time;
+            return false;
+        }
+
+        return Time.time - attackPointInvalidStartTime >= Mathf.Max(0.1f, attackPointInvalidReleaseDelay);
+    }
+
+    void ReleaseInvalidAttackPoint()
+    {
+        attackSlotManager.ReleaseAttackPoint();
+        nextAttackPointReservationTime = Time.time + Mathf.Max(0f, attackPointRetryDelay);
+        ResetAttackPointValidityTracking();
+    }
+
+    void ResetAttackPointValidityTracking()
+    {
+        trackedAttackBuildingId = 0;
+        trackedAttackPointIndex = -1;
+        hasReachedTrackedAttackPoint = false;
+        attackPointInvalidStartTime = -1f;
+    }
+
+    // 尚未进入攻击点预约范围时，只负责向建筑附近靠近，不占用任何攻击点。
+    // 아직 공격 지점 예약 범위에 들어오지 않았다면 공격 지점을 점유하지 않고 건물 근처로만 이동한다.
+    void MoveNearBuildingBeforeReservation(DamageableBuilding building)
+    {
+        Vector3 approachPoint;
+
+        // 优先寻找一个路径完整、能够走到的建筑附近位置。
+        // 먼저 완전한 경로로 도달할 수 있는 건물 근처 위치를 찾는다.
+        bool foundApproachPoint = attackSlotManager.TryGetReachableMovePointNearTarget(
+            building.gameObject,
+            enemyAI,
+            movement,
+            buildingMovePointSampleRange,
+            out approachPoint
+        );
+
+        // 如果精确的靠近位置暂时找不到，就使用原有的最近可走点作为后备目标。
+        // 정확한 접근 지점을 찾지 못하면 기존의 가장 가까운 이동 가능 지점을 예비 목표로 사용한다.
+        if (!foundApproachPoint)
+        {
+            approachPoint = attackSlotManager.GetMovePointNearTarget(
+                building.gameObject,
+                movement,
+                buildingMovePointSampleRange
+            );
+        }
+
+        movement.SetAutoRotation(true);
+        movement.MoveToPosition(approachPoint, navMeshSampleRange, buildingAttackStoppingDistance);
     }
 
     // 远程敌人攻击建筑：不预约攻击点，先尝试从当前位置攻击，打不到时才寻路。
@@ -627,8 +763,11 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
         // 원거리 적은 근접 공격 지점을 사용하지 않으므로 기존 예약이 있다면 즉시 해제한다.
         if (attackSlotManager != null)
         {
-            attackSlotManager.ReleaseAttackPoint();
+            attackSlotManager.ReleaseAllReservations();
         }
+
+
+        ResetAttackPointValidityTracking();
 
         // 远程射程从真正的发射位置 FirePos 开始计算，不再使用近战敌人的身体半径和前方攻击盒。
         // 원거리 사거리는 실제 발사 위치 FirePos부터 계산하며, 근접 적의 몸 반지름이나 전방 공격 박스를 사용하지 않는다.

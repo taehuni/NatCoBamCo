@@ -25,11 +25,27 @@ public class BuildingAttackSlotManager : MonoBehaviour
     // 다음에 공격 지점을 다시 선택할 수 있는 시간. 매 프레임 계속 바꾸는 것을 막는다.
     private float nextAttackPointRefreshTime;
 
+    // 当前预约的等待位置。等待位置位于攻击点外侧，避免没有攻击点的敌人继续挤进攻击区域。
+    // 현재 예약한 대기 위치. 공격 지점 바깥에 배치해서 공격 지점이 없는 적이 공격 구역으로 계속 밀고 들어오지 않게 한다.
+    private int currentWaitingBuildingId;
+    private int currentWaitingPointIndex = -1;
+    private Vector3 currentWaitingPoint;
+    private float nextWaitingPointValidationTime;
+
+    // 等待点不需要每帧重新算路，定期确认一次仍然可达即可。
+    // 대기 지점은 매 프레임 경로를 다시 계산할 필요가 없으며 일정 간격으로 도달 가능 여부만 확인하면 된다.
+    private const float WaitingPointValidationInterval = 0.5f;
+
     // 静态字典：所有敌人共享，用来记录“某个建筑的某个攻击点被哪个敌人占了”。
     // 정적 Dictionary: 모든 적이 공유하며, "어떤 건물의 어떤 공격 지점이 어느 적에게 예약되었는지" 기록한다.
     // 结构：建筑ID -> 攻击点Index -> 预约这个点的敌人SlotManager。
     // 구조: 건물ID -> 공격 지점 인덱스 -> 그 지점을 예약한 적의 SlotManager.
     private static Dictionary<int, Dictionary<int, BuildingAttackSlotManager>> attackPointReservations =
+        new Dictionary<int, Dictionary<int, BuildingAttackSlotManager>>();
+
+    // 等待点使用独立预约表，不会和真正的攻击点互相占用。
+    // 대기 지점은 별도의 예약표를 사용하므로 실제 공격 지점 예약과 충돌하지 않는다.
+    private static Dictionary<int, Dictionary<int, BuildingAttackSlotManager>> waitingPointReservations =
         new Dictionary<int, Dictionary<int, BuildingAttackSlotManager>>();
 
     // 当前敌人是否已经预约了一个攻击点。
@@ -52,18 +68,42 @@ public class BuildingAttackSlotManager : MonoBehaviour
         }
     }
 
+    public int CurrentAttackBuildingId
+    {
+        get
+        {
+            return currentAttackBuildingId;
+        }
+    }
+
+    public int CurrentAttackPointIndex
+    {
+        get
+        {
+            return currentAttackPointIndex;
+        }
+    }
+
+    public bool HasWaitingPointFor(DamageableBuilding building)
+    {
+        return
+            building != null &&
+            currentWaitingPointIndex >= 0 &&
+            currentWaitingBuildingId == building.GetInstanceID();
+    }
+
     void OnDisable()
     {
         // 敌人被禁用时释放攻击点，避免点位永远被占。
         // 적이 비활성화될 때 공격 지점을 해제해서 자리가 영원히 점유되지 않게 한다.
-        ReleaseAttackPoint();
+        ReleaseAllReservations();
     }
 
     void OnDestroy()
     {
         // 敌人销毁时也释放攻击点。
         // 적이 제거될 때도 공격 지점을 해제한다.
-        ReleaseAttackPoint();
+        ReleaseAllReservations();
     }
 
     public bool TryReserveAttackPoint(
@@ -244,6 +284,129 @@ public class BuildingAttackSlotManager : MonoBehaviour
         // 최종 선택한 공격 지점을 예약한다.
         ReserveAttackPoint(buildingId, bestIndex, bestPoint, refreshInterval);
         attackPoint = bestPoint;
+        return true;
+    }
+
+    // 没有抢到攻击点时，为敌人预约一个位于攻击点外侧的等待位置。
+    // 공격 지점을 얻지 못했을 때 공격 지점 바깥쪽의 대기 위치를 예약한다.
+    public bool TryReserveWaitingPoint(
+        DamageableBuilding building,
+        EnemyAI enemyAI,
+        EnemyMovement movement,
+        float buildingMovePointSampleRange,
+        out Vector3 waitingPoint)
+    {
+        waitingPoint = transform.position;
+
+        if (building == null || enemyAI == null || movement == null || HasAttackPoint)
+        {
+            ReleaseWaitingPoint();
+            return false;
+        }
+
+        int buildingId = building.GetInstanceID();
+        CleanupWaitingPointReservations(buildingId);
+
+        // 已经在等待同一座建筑时继续使用原位置，避免等待者来回换位。
+        // 같은 건물을 기다리는 중이면 기존 위치를 유지해서 대기 중 좌우로 흔들리지 않게 한다.
+        if (currentWaitingBuildingId == buildingId && currentWaitingPointIndex >= 0)
+        {
+            if (Time.time < nextWaitingPointValidationTime)
+            {
+                waitingPoint = currentWaitingPoint;
+                return true;
+            }
+
+            Vector3 navMeshPoint;
+            NavMeshPath path;
+            Vector3 lastReachablePoint;
+
+            if (movement.TryGetNavMeshPoint(currentWaitingPoint, buildingMovePointSampleRange, out navMeshPoint) &&
+                movement.TryGetPath(navMeshPoint, buildingMovePointSampleRange, out path, out lastReachablePoint) &&
+                path.status == NavMeshPathStatus.PathComplete)
+            {
+                currentWaitingPoint = navMeshPoint;
+                nextWaitingPointValidationTime = Time.time + WaitingPointValidationInterval;
+                waitingPoint = navMeshPoint;
+                return true;
+            }
+
+            ReleaseWaitingPoint();
+        }
+
+        if (currentWaitingBuildingId != 0)
+        {
+            ReleaseWaitingPoint();
+        }
+
+        int reservationKeyOffset;
+        List<Vector3> waitingPoints = GetWaitingPointCandidates(
+            building.gameObject,
+            enemyAI,
+            movement,
+            out reservationKeyOffset
+        );
+
+        int bestIndex = -1;
+        Vector3 bestPoint = transform.position;
+        float bestPathLength = Mathf.Infinity;
+        float minimumWaitingDistance =
+            GetBuildingAttackReach(enemyAI, movement) + Mathf.Max(0.2f, movement.Radius * 0.35f);
+
+        for (int i = 0; i < waitingPoints.Count; i++)
+        {
+            int reservationKey = reservationKeyOffset + i;
+
+            if (IsWaitingPointReservedByOtherEnemy(buildingId, reservationKey))
+            {
+                continue;
+            }
+
+            Vector3 navMeshPoint;
+
+            if (!movement.TryGetNavMeshPoint(waitingPoints[i], buildingMovePointSampleRange, out navMeshPoint))
+            {
+                continue;
+            }
+
+            // NavMesh 修正后如果位置被吸回建筑攻击区域，就不把它当等待位置。
+            // NavMesh 보정 후 건물 공격 구역 안으로 끌려온 위치는 대기 위치로 사용하지 않는다.
+            if (EnemyTargetUtility.GetDistanceToTarget(navMeshPoint, building.gameObject) < minimumWaitingDistance)
+            {
+                continue;
+            }
+
+            NavMeshPath path;
+            Vector3 lastReachablePoint;
+
+            if (!movement.TryGetPath(navMeshPoint, buildingMovePointSampleRange, out path, out lastReachablePoint) ||
+                path.status != NavMeshPathStatus.PathComplete)
+            {
+                continue;
+            }
+
+            float pathLength = movement.GetPathLength(path);
+
+            if (pathLength <= 0f)
+            {
+                pathLength = Vector3.Distance(transform.position, navMeshPoint);
+            }
+
+            if (pathLength < bestPathLength)
+            {
+                bestPathLength = pathLength;
+                bestIndex = reservationKey;
+                bestPoint = navMeshPoint;
+            }
+        }
+
+        if (bestIndex < 0)
+        {
+            return false;
+        }
+
+        ReserveWaitingPoint(buildingId, bestIndex, bestPoint);
+        waitingPoint = bestPoint;
         return true;
     }
 
@@ -645,10 +808,56 @@ public class BuildingAttackSlotManager : MonoBehaviour
         nextAttackPointRefreshTime = 0f;
     }
 
+    public void ReleaseWaitingPoint()
+    {
+        if (currentWaitingBuildingId == 0 || currentWaitingPointIndex < 0)
+        {
+            return;
+        }
+
+        Dictionary<int, BuildingAttackSlotManager> buildingReservations;
+
+        if (waitingPointReservations.TryGetValue(currentWaitingBuildingId, out buildingReservations))
+        {
+            BuildingAttackSlotManager reservedEnemy;
+
+            if (buildingReservations.TryGetValue(currentWaitingPointIndex, out reservedEnemy) &&
+                reservedEnemy == this)
+            {
+                buildingReservations.Remove(currentWaitingPointIndex);
+            }
+
+            if (buildingReservations.Count == 0)
+            {
+                waitingPointReservations.Remove(currentWaitingBuildingId);
+            }
+        }
+
+        currentWaitingBuildingId = 0;
+        currentWaitingPointIndex = -1;
+        currentWaitingPoint = Vector3.zero;
+        nextWaitingPointValidationTime = 0f;
+    }
+
+    // 目标变化、敌人禁用或销毁时，同时释放攻击点和等待点。
+    // 타깃 변경, 적 비활성화 또는 제거 시 공격 지점과 대기 지점을 함께 해제한다.
+    public void ReleaseAllReservations()
+    {
+        ReleaseAttackPoint();
+        ReleaseWaitingPoint();
+    }
+
     public void DrawCurrentAttackPointGizmos(float attackPointArriveDistance)
     {
         if (currentAttackPointIndex < 0)
         {
+            if (currentWaitingPointIndex >= 0)
+            {
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawLine(transform.position, currentWaitingPoint);
+                Gizmos.DrawWireSphere(currentWaitingPoint, 0.18f);
+            }
+
             return;
         }
 
@@ -683,6 +892,10 @@ public class BuildingAttackSlotManager : MonoBehaviour
 
     void ReserveAttackPoint(int buildingId, int attackPointIndex, Vector3 attackPoint, float refreshInterval)
     {
+        // 一旦获得真正的攻击点，就不再占用外围等待点。
+        // 실제 공격 지점을 얻으면 바깥쪽 대기 지점은 더 이상 점유하지 않는다.
+        ReleaseWaitingPoint();
+
         // 如果预约的还是同一个点，只更新坐标和下次刷新时间。
         // 같은 지점을 계속 예약 중이면 좌표와 다음 갱신 시간만 갱신한다.
         if (currentAttackBuildingId == buildingId && currentAttackPointIndex == attackPointIndex)
@@ -715,6 +928,59 @@ public class BuildingAttackSlotManager : MonoBehaviour
         nextAttackPointRefreshTime = Time.time + refreshInterval;
     }
 
+    void ReserveWaitingPoint(int buildingId, int waitingPointIndex, Vector3 waitingPoint)
+    {
+        if (currentWaitingBuildingId == buildingId && currentWaitingPointIndex == waitingPointIndex)
+        {
+            currentWaitingPoint = waitingPoint;
+            return;
+        }
+
+        ReleaseWaitingPoint();
+
+        if (!waitingPointReservations.ContainsKey(buildingId))
+        {
+            waitingPointReservations[buildingId] = new Dictionary<int, BuildingAttackSlotManager>();
+        }
+
+        waitingPointReservations[buildingId][waitingPointIndex] = this;
+        currentWaitingBuildingId = buildingId;
+        currentWaitingPointIndex = waitingPointIndex;
+        currentWaitingPoint = waitingPoint;
+        nextWaitingPointValidationTime = Time.time + WaitingPointValidationInterval;
+    }
+
+    bool IsWaitingPointReservedByOtherEnemy(int buildingId, int waitingPointIndex)
+    {
+        Dictionary<int, BuildingAttackSlotManager> buildingReservations;
+
+        if (!waitingPointReservations.TryGetValue(buildingId, out buildingReservations))
+        {
+            return false;
+        }
+
+        BuildingAttackSlotManager reservedEnemy;
+
+        if (!buildingReservations.TryGetValue(waitingPointIndex, out reservedEnemy))
+        {
+            return false;
+        }
+
+        bool isInvalid =
+            reservedEnemy == null ||
+            !reservedEnemy.isActiveAndEnabled ||
+            reservedEnemy.currentWaitingBuildingId != buildingId ||
+            reservedEnemy.currentWaitingPointIndex != waitingPointIndex;
+
+        if (isInvalid)
+        {
+            buildingReservations.Remove(waitingPointIndex);
+            return false;
+        }
+
+        return reservedEnemy != this;
+    }
+
     bool IsAttackPointReservedByOtherEnemy(int buildingId, int attackPointIndex)
     {
         // 判断某个点是否已经被“其他敌人”预约。
@@ -739,7 +1005,10 @@ public class BuildingAttackSlotManager : MonoBehaviour
 
         // 如果记录里的敌人已经没了或者被禁用，就清掉这个无效预约。
         // 기록된 적이 사라졌거나 비활성화되었으면 무효 예약을 제거한다.
-        if (reservedEnemy == null || !reservedEnemy.isActiveAndEnabled)
+        if (reservedEnemy == null ||
+            !reservedEnemy.isActiveAndEnabled ||
+            reservedEnemy.currentAttackBuildingId != buildingId ||
+            reservedEnemy.currentAttackPointIndex != attackPointIndex)
         {
             buildingReservations.Remove(attackPointIndex);
             return false;
@@ -769,7 +1038,10 @@ public class BuildingAttackSlotManager : MonoBehaviour
 
             // 预约敌人还存在且启用，就保留。
             // 예약한 적이 아직 존재하고 활성화되어 있으면 유지한다.
-            if (reservedEnemy != null && reservedEnemy.isActiveAndEnabled)
+            if (reservedEnemy != null &&
+                reservedEnemy.isActiveAndEnabled &&
+                reservedEnemy.currentAttackBuildingId == buildingId &&
+                reservedEnemy.currentAttackPointIndex == reservation.Key)
             {
                 continue;
             }
@@ -799,6 +1071,51 @@ public class BuildingAttackSlotManager : MonoBehaviour
         if (buildingReservations.Count == 0)
         {
             attackPointReservations.Remove(buildingId);
+        }
+    }
+
+    void CleanupWaitingPointReservations(int buildingId)
+    {
+        Dictionary<int, BuildingAttackSlotManager> buildingReservations;
+
+        if (!waitingPointReservations.TryGetValue(buildingId, out buildingReservations))
+        {
+            return;
+        }
+
+        List<int> removeIndexes = null;
+
+        foreach (KeyValuePair<int, BuildingAttackSlotManager> reservation in buildingReservations)
+        {
+            BuildingAttackSlotManager reservedEnemy = reservation.Value;
+
+            if (reservedEnemy != null &&
+                reservedEnemy.isActiveAndEnabled &&
+                reservedEnemy.currentWaitingBuildingId == buildingId &&
+                reservedEnemy.currentWaitingPointIndex == reservation.Key)
+            {
+                continue;
+            }
+
+            if (removeIndexes == null)
+            {
+                removeIndexes = new List<int>();
+            }
+
+            removeIndexes.Add(reservation.Key);
+        }
+
+        if (removeIndexes != null)
+        {
+            for (int i = 0; i < removeIndexes.Count; i++)
+            {
+                buildingReservations.Remove(removeIndexes[i]);
+            }
+        }
+
+        if (buildingReservations.Count == 0)
+        {
+            waitingPointReservations.Remove(buildingId);
         }
     }
 
@@ -939,6 +1256,63 @@ public class BuildingAttackSlotManager : MonoBehaviour
         // 수동 지점이 없을 때만 건물 Bounds를 기준으로 후보 지점을 자동 생성한다.
         AddAutoAttackPointCandidates(target, enemyAI, movement, attackPoints);
         return attackPoints;
+    }
+
+    List<Vector3> GetWaitingPointCandidates(
+        GameObject target,
+        EnemyAI enemyAI,
+        EnemyMovement movement,
+        out int reservationKeyOffset)
+    {
+        int attackPointGroupOffset;
+        List<Vector3> attackPoints = GetAttackPointCandidates(
+            target,
+            enemyAI,
+            movement,
+            out attackPointGroupOffset
+        );
+
+        reservationKeyOffset = attackPointGroupOffset;
+        List<Vector3> waitingPoints = new List<Vector3>();
+
+        Bounds bounds;
+        Vector3 targetCenter = target.transform.position;
+
+        if (EnemyTargetUtility.TryGetTargetBounds(target, out bounds))
+        {
+            targetCenter = bounds.center;
+        }
+
+        targetCenter.y = transform.position.y;
+        float rowSpacing = Mathf.Max(movement.Radius * 2.5f + 0.5f, 1.5f);
+        const int waitingRowCount = 3;
+
+        // 每个攻击点后方生成三层等待点。越靠后的敌人会停在更外侧，不再全挤到攻击区域。
+        // 각 공격 지점 뒤에 세 줄의 대기 지점을 만든다. 뒤쪽 적은 더 바깥에서 기다려 공격 구역에 몰리지 않는다.
+        for (int row = 1; row <= waitingRowCount; row++)
+        {
+            for (int i = 0; i < attackPoints.Count; i++)
+            {
+                Vector3 outwardDirection = attackPoints[i] - targetCenter;
+                outwardDirection.y = 0f;
+
+                if (outwardDirection.sqrMagnitude < 0.001f)
+                {
+                    outwardDirection = transform.position - targetCenter;
+                    outwardDirection.y = 0f;
+                }
+
+                if (outwardDirection.sqrMagnitude < 0.001f)
+                {
+                    outwardDirection = Vector3.back;
+                }
+
+                outwardDirection.Normalize();
+                waitingPoints.Add(attackPoints[i] + outwardDirection * rowSpacing * row);
+            }
+        }
+
+        return waitingPoints;
     }
 
     void AddAutoAttackPointCandidates(GameObject target, EnemyAI enemyAI, EnemyMovement movement, List<Vector3> attackPoints)

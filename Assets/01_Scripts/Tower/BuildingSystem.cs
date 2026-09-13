@@ -347,8 +347,7 @@ public class BuildingSystem : MonoBehaviour
         }
         foreach (var health in previewBuilding.GetComponentsInChildren<DamageableBuilding>(true))
         {
-            health.hp = 0f;
-            health.maxHp = 0f;
+            health.Health.SetHealthValues(0f, 0f);
             Destroy(health);
         }
 

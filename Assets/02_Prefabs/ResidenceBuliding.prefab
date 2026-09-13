@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 2462217944617130712}
   - component: {fileID: 692421549932440058}
   - component: {fileID: 6352566873395409390}
+  - component: {fileID: 810000000000000101}
+  - component: {fileID: 810000000000000102}
   - component: {fileID: 3037073081700165351}
   m_Layer: 12
   m_Name: ResidenceBuliding
@@ -156,9 +158,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5eba2b3a16b963f43bfc15ef426f55c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DamageableBuilding
-  hp: 30
-  maxHp: 30
-  defensePower: 0
+  legacyHealth: 30
+  legacyMaxHp: 30
+  legacyDefensePower: 0
+  legacyDataMigrated: 1
 --- !u!114 &3037073081700165351
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -175,3 +178,31 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
+--- !u!114 &810000000000000101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2809363730602080652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d4e66a928aa401dbaf3681a8e5ce249, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingHealth
+  maxHp: 30
+  health: 30
+--- !u!114 &810000000000000102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2809363730602080652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82a1ba0ed3e342d18c969a13b283fd35, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingDefense
+  defensePower: 0
+  minimumDamage: 5
