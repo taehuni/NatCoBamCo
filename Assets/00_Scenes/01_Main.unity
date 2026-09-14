@@ -1241,6 +1241,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   targetSceneName: 02_Collection
+  interactKey: 101
 --- !u!65 &239607959
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2266,7 +2267,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b7afb66faa589f4990619b6ded6d066, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMaker
-  enemyPrefab: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+  enemyPrefab: {fileID: 8864233865591062455, guid: aa4b3a12347ae904690d0e8e4950dca1, type: 3}
   spawnInterval: 3
   totalWaves: 5
   enemiesPerWave: 5
@@ -3285,7 +3286,7 @@ MonoBehaviour:
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.16666667
+  m_VoxelSize: 0.11666667
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 23800000, guid: 911b99271b05b1d4495312471e0984a2, type: 2}
   m_BuildHeightMesh: 0
@@ -4749,7 +4750,7 @@ MonoBehaviour:
   isRemoveMode: 0
   removeRayLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 6144
 --- !u!114 &876058053
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5201,7 +5202,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b7afb66faa589f4990619b6ded6d066, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMaker
-  enemyPrefab: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+  enemyPrefab: {fileID: 8864233865591062455, guid: aa4b3a12347ae904690d0e8e4950dca1, type: 3}
   spawnInterval: 3
   totalWaves: 5
   enemiesPerWave: 5
@@ -5904,7 +5905,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b7afb66faa589f4990619b6ded6d066, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMaker
-  enemyPrefab: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+  enemyPrefab: {fileID: 8864233865591062455, guid: aa4b3a12347ae904690d0e8e4950dca1, type: 3}
   spawnInterval: 3
   totalWaves: 5
   enemiesPerWave: 5
@@ -9271,7 +9272,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b7afb66faa589f4990619b6ded6d066, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMaker
-  enemyPrefab: {fileID: 8864233865591062455, guid: 6f8989e44ba7d4647a9ace54073788cd, type: 3}
+  enemyPrefab: {fileID: 8864233865591062455, guid: aa4b3a12347ae904690d0e8e4950dca1, type: 3}
   spawnInterval: 3
   totalWaves: 5
   enemiesPerWave: 5
