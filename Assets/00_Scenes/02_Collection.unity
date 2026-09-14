@@ -250,7 +250,7 @@ MonoBehaviour:
     m_Bits: 512
   collectTime: 3
   resourceType: 3
-  amount: 10
+  amount: 35
   dailySpawner: {fileID: 1335230196}
 --- !u!1 &37122593
 GameObject:
@@ -967,7 +967,7 @@ MonoBehaviour:
     m_Bits: 512
   collectTime: 3
   resourceType: 0
-  amount: 10
+  amount: 40
   dailySpawner: {fileID: 0}
 --- !u!65 &545292418
 BoxCollider:
@@ -2321,6 +2321,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   targetSceneName: 01_Main
+  interactKey: 101
 --- !u!65 &938462176
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3241,6 +3242,10 @@ MonoBehaviour:
   spawnerId: fdcb1f5cf0664934a37c41277926d75f
   resourceNode: {fileID: 21829251}
   firstDayResource: 3
+  woodAmount: 40
+  metalAmount: 60
+  rareMetalAmount: 35
+  foodAmount: 10
 --- !u!4 &1335230197
 Transform:
   m_ObjectHideFlags: 0
@@ -3538,7 +3543,7 @@ MonoBehaviour:
     m_Bits: 512
   collectTime: 3
   resourceType: 1
-  amount: 10
+  amount: 60
   dailySpawner: {fileID: 1474011101}
 --- !u!1 &1467180323
 GameObject:
@@ -3684,6 +3689,10 @@ MonoBehaviour:
   spawnerId: 36c563af133e4de5a2e2a5a8ed0d5bcd
   resourceNode: {fileID: 1440759440}
   firstDayResource: 1
+  woodAmount: 40
+  metalAmount: 60
+  rareMetalAmount: 35
+  foodAmount: 10
 --- !u!4 &1474011102
 Transform:
   m_ObjectHideFlags: 0
@@ -4637,6 +4646,10 @@ MonoBehaviour:
   spawnerId: 2e61d845b55843a38b620dc928276ff3
   resourceNode: {fileID: 653762023}
   firstDayResource: 2
+  woodAmount: 40
+  metalAmount: 60
+  rareMetalAmount: 35
+  foodAmount: 10
 --- !u!4 &1793640041
 Transform:
   m_ObjectHideFlags: 0

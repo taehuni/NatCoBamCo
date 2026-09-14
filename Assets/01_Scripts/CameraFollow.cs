@@ -1,5 +1,7 @@
 using UnityEngine;
 
+// Publish this frame's look direction before PlayerController reads it.
+[DefaultExecutionOrder(-100)]
 public class CameraFollow : MonoBehaviour
 {
     public Transform target; //목표(플레이어)
@@ -26,17 +28,33 @@ public class CameraFollow : MonoBehaviour
 
     void Update()
     {
-        targetFollow();
+        UpdateLookRotation();
+    }
+
+    void LateUpdate()
+    {
+        UpdateFollowPosition();
     }
 
     public void targetFollow()
+    {
+        UpdateLookRotation();
+        UpdateFollowPosition();
+    }
+
+    void UpdateLookRotation()
     {
         if (target == null) return;
         yaw += Input.GetAxis("Mouse X") * mouseSensitivity; //마우스 좌우 이동 값
         pitch -= Input.GetAxis("Mouse Y") * mouseSensitivity; //마우스 상하 이동 값
         pitch = Mathf.Clamp(pitch, minPitch, maxPitch); //상하이동 제한
 
-        Quaternion rotation = Quaternion.Euler(pitch, yaw, 0f); //각도 계산
+        transform.rotation = Quaternion.Euler(pitch, yaw, 0f); //각도 계산
+    }
+
+    void UpdateFollowPosition()
+    {
+        if (target == null) return;
 
         Vector3 pivot = target.position + Vector3.up * height;
 
@@ -46,7 +64,6 @@ public class CameraFollow : MonoBehaviour
             -distance
         );
 
-        transform.position = pivot + rotation * offset;
-        transform.rotation = rotation;
+        transform.position = pivot + transform.rotation * offset;
     }
 }

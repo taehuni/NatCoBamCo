@@ -8,6 +8,12 @@ public class DailyResourceSpawner : MonoBehaviour
     [SerializeField] private ResourceNode resourceNode;
     [SerializeField] private ResourceType firstDayResource = ResourceType.Metal;
 
+    [Header("Base yield by resource type")]
+    [SerializeField, Min(1)] private int woodAmount = 40;
+    [SerializeField, Min(1)] private int metalAmount = 60;
+    [SerializeField, Min(1)] private int rareMetalAmount = 35;
+    [SerializeField, Min(1)] private int foodAmount = 10;
+
     private sealed class DailyState
     {
         public int day = 1;
@@ -72,8 +78,21 @@ public class DailyResourceSpawner : MonoBehaviour
         // Disabling also cancels any collection that was in progress at the day boundary.
         resourceNode.gameObject.SetActive(false);
         resourceNode.resourceType = state.type;
+        resourceNode.amount = GetAmount(state.type);
         displayedDay = day;
         resourceNode.gameObject.SetActive(!state.collected);
+    }
+
+    private int GetAmount(ResourceType type)
+    {
+        switch (type)
+        {
+            case ResourceType.Wood: return Mathf.Max(1, woodAmount);
+            case ResourceType.Metal: return Mathf.Max(1, metalAmount);
+            case ResourceType.RareMetal: return Mathf.Max(1, rareMetalAmount);
+            case ResourceType.Food: return Mathf.Max(1, foodAmount);
+            default: return 1;
+        }
     }
 
     public bool CanCollect(ResourceNode node)
