@@ -37,7 +37,9 @@ public class PlayerController : MonoBehaviour
     public void PlayerMoveAndRotate()
     {
         //카메라의 좌우 이동을 플레이어한테 반응
-        float cameraY = mainCam.transform.eulerAngles.y;
+        // Capture before rotating the player: its child camera inherits that rotation.
+        Quaternion viewRotation = mainCam.transform.rotation;
+        float cameraY = viewRotation.eulerAngles.y;
         transform.rotation = Quaternion.Euler(0f, cameraY, 0f);
 
         //상하좌우 이동 받기
@@ -45,8 +47,8 @@ public class PlayerController : MonoBehaviour
         float vertical = Input.GetAxisRaw("Vertical");
 
         //카메라에 방향 가져와 앞,우
-        Vector3 forward = mainCam.transform.forward;
-        Vector3 right = mainCam.transform.right;
+        Vector3 forward = viewRotation * Vector3.forward;
+        Vector3 right = viewRotation * Vector3.right;
 
         //y측 값이 없음(하늘에 올아가기 제한)
         forward.y = 0f;

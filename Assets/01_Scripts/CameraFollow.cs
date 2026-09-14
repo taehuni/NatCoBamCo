@@ -56,6 +56,9 @@ public class CameraFollow : MonoBehaviour
     {
         if (target == null) return;
 
+        // Player is this camera's parent, so its rotation can alter our world rotation after Update.
+        transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
+
         Vector3 pivot = target.position + Vector3.up * height;
 
         Vector3 offset = new Vector3(

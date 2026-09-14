@@ -458,7 +458,9 @@ public class BuildingSystem : MonoBehaviour
             Destroy(staging);
             return;
         }
-        building.transform.SetParent(null, true);
+        BuiltBuildingPersistence.Register(building);
+        // Also allow placement in unsaved test scenes that cannot be retained by path.
+        if (building.transform.parent == staging.transform) building.transform.SetParent(null, true);
         Destroy(staging);
         lastBuildFrame = Time.frameCount;
         Physics.SyncTransforms();

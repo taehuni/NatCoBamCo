@@ -38,7 +38,8 @@ public class SurvivorMechanicBehaviour : MonoBehaviour
             return;
         }
 
-        if (currentTarget == null || currentTarget.hp >= currentTarget.maxHp)
+        if (currentTarget == null || !currentTarget.gameObject.activeInHierarchy ||
+            currentTarget.hp >= currentTarget.maxHp)
         {
             currentTarget = FindMostDamagedTower();
         }
