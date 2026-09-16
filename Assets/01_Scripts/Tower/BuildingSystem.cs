@@ -28,6 +28,7 @@ public class BuildingSystem : MonoBehaviour
     private BuildingObject currentRemoveTarget; //현재 삭제할 대상
     private Renderer[] removeTargetRenderers; //대상의 renderers
     private Material[][] removeTargetOriginalMaterials; //원래 대상의 materials
+    private int placementStartedFrame = -1;
 
 
 
@@ -47,7 +48,13 @@ public class BuildingSystem : MonoBehaviour
 
         if (isBuildMode)
         {
-            HandleBuildingSelection(); //건축 선택
+            // BuildQuickUI에서 숫자로 항목을 고른 같은 프레임에는
+            // 아래의 기존 숫자 단축키가 선택을 덮어쓰지 않게 한다.
+            if (Time.frameCount != placementStartedFrame)
+            {
+                HandleBuildingSelection(); //건축 선택
+            }
+
             UpdatePreview(); //미리보기
 
             if (Input.GetKeyDown(KeyCode.R))
@@ -55,9 +62,16 @@ public class BuildingSystem : MonoBehaviour
                 RotatePreview(); //미리보기 회전
             }
 
-            if (Input.GetMouseButtonDown(0) && canBuild)
+            if ((Input.GetMouseButtonDown(0) ||
+                 Input.GetKeyDown(KeyCode.Return) ||
+                 Input.GetKeyDown(KeyCode.KeypadEnter)) && canBuild)
             {
                 TryBuild(); //건조시도
+            }
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                CancelPlacement();
             }
         }
 
@@ -74,23 +88,6 @@ public class BuildingSystem : MonoBehaviour
     //모드전환 건조 - 삭제
     void HandleModeSwitch()
     {
-        if (Input.GetKeyDown(KeyCode.B))  //b키 누르면 건조모드 전환
-        {
-            isBuildMode = !isBuildMode;
-
-            if (isBuildMode)
-            {
-                isRemoveMode = false; //삭제 모드 끄기
-                ClearRemoveTarget(); //삭제 모드 재질 전화 끄기
-                CreatePreview(); //미리보기 만들어
-            }
-            else
-            {
-                currentRotationY = 0f; //회전 초기화
-                DestroyPreview(); //미리보기 끄기
-            }
-        }
-
         if (Input.GetKeyDown(KeyCode.X)) //x키 누르면 삭제 모드 전환
         {
             isRemoveMode = !isRemoveMode;
@@ -106,6 +103,33 @@ public class BuildingSystem : MonoBehaviour
                 ClearRemoveTarget(); //임시 저장한 삭제대상 초기화
             }
         }
+    }
+
+    // BuildQuickUI에서 선택한 실제 프리팹으로 즉시 배치 모드를 시작한다.
+    public void StartPlacement(GameObject prefab)
+    {
+        if (prefab == null)
+        {
+            Debug.LogWarning("배치할 건축물 프리팹이 연결되지 않았습니다.");
+            return;
+        }
+
+        currentBuildingPrefab = prefab;
+        isBuildMode = true;
+        isRemoveMode = false;
+        placementStartedFrame = Time.frameCount;
+        currentRotationY = 0f;
+        ClearRemoveTarget();
+        DestroyPreview();
+        CreatePreview();
+    }
+
+    public void CancelPlacement()
+    {
+        isBuildMode = false;
+        currentRotationY = 0f;
+        canBuild = false;
+        DestroyPreview();
     }
 
     //삭제 대상 재질 변경함수
@@ -276,12 +300,12 @@ public class BuildingSystem : MonoBehaviour
             colliders[i].enabled = false;
         }
 
-        //전기 타워 미리보기 때 기능 비활성화
-        ElectricTower[] electricTowers = previewBuilding.GetComponentsInChildren<ElectricTower>();
+        // 미리보기에서는 공격, 회복, 연구 등 실제 건물 기능을 실행하지 않는다.
+        Behaviour[] behaviours = previewBuilding.GetComponentsInChildren<Behaviour>(true);
 
-        for (int i = 0; i < electricTowers.Length; i++)
+        for (int i = 0; i < behaviours.Length; i++)
         {
-            electricTowers[i].enabled = false;
+            behaviours[i].enabled = false;
         }
     }
 
@@ -359,6 +383,7 @@ public class BuildingSystem : MonoBehaviour
     {
         Quaternion buildRotation = Quaternion.Euler(0f, currentRotationY, 0f);
         Instantiate(currentBuildingPrefab, currentBuildPosition, buildRotation);
+        CancelPlacement();
     }
 
     //간조 위치 높이 계산함수
