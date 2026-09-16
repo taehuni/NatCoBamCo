@@ -1,48 +1,39 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class ResearchInteract : MonoBehaviour
 {
     public ResearchUI researchUI;
-    public string playerTag = "Player";
 
-    private bool isPlayerNear = false;
-
-    void Update()
+    void Awake()
     {
-        if (isPlayerNear && Input.GetKeyDown(KeyCode.E))
-        {
-            Debug.Log("EÅ° ÀÔ·ÂµÊ - ¿¬±¸¼Ò UI ¿­±â ½Ãµµ");
+        ResolveResearchUI();
+    }
 
-            if (researchUI != null)
-            {
-                researchUI.OpenUI();
-            }
-            else
-            {
-                Debug.LogError("ResearchUI°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù.");
-            }
+    void OnMouseDown()
+    {
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
+
+        ResolveResearchUI();
+
+        if (researchUI != null)
+        {
+            researchUI.OpenUI();
+        }
+        else
+        {
+            Debug.LogError("ResearchUIê°€ ì¥ë©´ì— ì—†ìŠµë‹ˆë‹¤.");
         }
     }
 
-    void OnTriggerEnter(Collider other)
+    void ResolveResearchUI()
     {
-        Debug.Log("Trigger Enter: " + other.name);
-
-        if (other.CompareTag(playerTag))
+        if (researchUI == null)
         {
-            Debug.Log("ÇÃ·¹ÀÌ¾î°¡ ¿¬±¸¼Ò ¹üÀ§¿¡ µé¾î¿È");
-            isPlayerNear = true;
-        }
-    }
-
-    void OnTriggerExit(Collider other)
-    {
-        Debug.Log("Trigger Exit: " + other.name);
-
-        if (other.CompareTag(playerTag))
-        {
-            Debug.Log("ÇÃ·¹ÀÌ¾î°¡ ¿¬±¸¼Ò ¹üÀ§¿¡¼­ ³ª°¨");
-            isPlayerNear = false;
+            researchUI = FindFirstObjectByType<ResearchUI>(FindObjectsInactive.Include);
         }
     }
 }
