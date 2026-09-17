@@ -5,36 +5,44 @@ using TMPro;
 
 public class ResearchUI : MonoBehaviour
 {
-    [Header("건설 UI")]
+    [Header("��ü UI")]
     public GameObject researchPanel;
 
-    [Header("버튼")]
+    [Header("�� ��ư")]
     public Button wallTabButton;
     public Button towerTabButton;
     public Button closeButton;
 
-    [Header("프리팹")]
+    [Header("ī�� ����")]
     public ResearchCardUI cardPrefab;
     public Transform cardContent;
 
-    [Header("리스트")]
+    [Header("���� ������")]
     public List<ResearchItem> wallResearchItems = new List<ResearchItem>();
     public List<ResearchItem> towerResearchItems = new List<ResearchItem>();
 
-    [Header("텍스트")]
+    [Header("�ȳ� �ؽ�Ʈ")]
     public TMP_Text messageText;
 
-    [Header("UI 텍스트")]
+    [Header("UI ���� �� �� ��ũ��Ʈ")]
     public MonoBehaviour[] disableWhileOpen;
 
-    [Header("게임이 정지해도 열리게")]
-    public bool pauseGameWhileOpen = true;
+    [Header("���� �Ͻ�����")]
+    public bool pauseGameWhileOpen = false;
 
     private ResearchCategory currentCategory = ResearchCategory.Wall;
     private bool isOpen = false;
+    private PlayerController playerController;
+    private CameraFollow cameraFollow;
+    private bool playerControllerWasEnabled;
+    private bool playerControllerStateCaptured;
+    private bool cameraFollowWasEnabled;
+    private bool cameraFollowStateCaptured;
 
     void Start()
     {
+        CachePlayerControls();
+
         if (researchPanel != null)
         {
             researchPanel.SetActive(false);
@@ -63,34 +71,21 @@ public class ResearchUI : MonoBehaviour
 
     void Update()
     {
-        // 현재 G키로 변경 이후 해당 함수 제거 후 연구소 건물 스크립트에 함수 추가 예정
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            if (isOpen)
-            {
-                CloseUI();
-            }
-            else
-            {
-                OpenUI();
-            }
-        }
-
         if (!isOpen) return;
 
-        // 1: 벽
+        // 1��: �� ��
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             ShowCategory(ResearchCategory.Wall);
         }
 
-        // 2: 타워
+        // 2��: Ÿ�� ��
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             ShowCategory(ResearchCategory.Tower);
         }
 
-        // ESC: UI닫기
+        // ESC: �ݱ�
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             CloseUI();
@@ -102,6 +97,7 @@ public class ResearchUI : MonoBehaviour
         if (researchPanel == null) return;
 
         researchPanel.SetActive(true);
+        researchPanel.transform.SetAsLastSibling();
         isOpen = true;
 
         Cursor.lockState = CursorLockMode.None;
@@ -214,6 +210,39 @@ public class ResearchUI : MonoBehaviour
 
     void SetPlayerControl(bool value)
     {
+        CachePlayerControls();
+
+        if (!value)
+        {
+            if (playerController != null && !playerControllerStateCaptured)
+            {
+                playerControllerWasEnabled = playerController.enabled;
+                playerControllerStateCaptured = true;
+                playerController.enabled = false;
+            }
+
+            if (cameraFollow != null && !cameraFollowStateCaptured)
+            {
+                cameraFollowWasEnabled = cameraFollow.enabled;
+                cameraFollowStateCaptured = true;
+                cameraFollow.enabled = false;
+            }
+        }
+        else
+        {
+            if (playerController != null && playerControllerStateCaptured)
+            {
+                playerController.enabled = playerControllerWasEnabled;
+                playerControllerStateCaptured = false;
+            }
+
+            if (cameraFollow != null && cameraFollowStateCaptured)
+            {
+                cameraFollow.enabled = cameraFollowWasEnabled;
+                cameraFollowStateCaptured = false;
+            }
+        }
+
         if (disableWhileOpen == null) return;
 
         for (int i = 0; i < disableWhileOpen.Length; i++)
@@ -222,6 +251,19 @@ public class ResearchUI : MonoBehaviour
             {
                 disableWhileOpen[i].enabled = value;
             }
+        }
+    }
+
+    void CachePlayerControls()
+    {
+        if (playerController == null)
+        {
+            playerController = FindFirstObjectByType<PlayerController>(FindObjectsInactive.Include);
+        }
+
+        if (cameraFollow == null)
+        {
+            cameraFollow = FindFirstObjectByType<CameraFollow>(FindObjectsInactive.Include);
         }
     }
 }

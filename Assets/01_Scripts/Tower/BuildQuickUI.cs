@@ -1,51 +1,67 @@
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
 public class BuildQuickUI : MonoBehaviour
 {
-    [Header("¥‹√‡≈∞")]
-    public KeyCode openKey = KeyCode.N;
+    [Header("Îã®Ï∂ïÌÇ§")]
+    public KeyCode openKey = KeyCode.B;
 
-    [Header("¿¸√º UI")]
+    [Header("Ï†ÑÏ≤¥ UI")]
     public GameObject buildQuickPanel;
     public GameObject categoryPanel;
     public GameObject buildCardPanel;
 
-    [Header("ƒ´≈◊∞Ì∏Æ πˆ∆∞")]
+    [Header("Ïπ¥ÌÖåÍ≥†Î¶¨ Î≤ÑÌäº")]
     public Button wallButton;
     public Button towerButton;
     public Button buildingButton;
     public Button closeButton;
 
-    [Header("ƒ´µÂ ª˝º∫")]
+    [Header("Ïπ¥Îìú ÏÉùÏÑ±")]
     public BuildCardUI cardPrefab;
     public Transform cardContent;
 
-    [Header("¡¶∏Ò")]
+    [Header("Ï†úÎ™©")]
     public TMP_Text titleText;
 
-    [Header("∞«√‡ µ•¿Ã≈Õ")]
+    [Header("Í±¥ÏÑ§ Îç∞Ïù¥ÌÑ∞")]
     public List<BuildItem> wallItems = new List<BuildItem>();
     public List<BuildItem> towerItems = new List<BuildItem>();
     public List<BuildItem> buildingItems = new List<BuildItem>();
 
-    [Header("º≥ƒ° Ω√Ω∫≈€")]
+    [Header("Î∞∞Ïπò ÏãúÏä§ÌÖú")]
     public GameObject buildingSystemObject;
 
-    [Header("UI ø≠∏± ∂ß ≤¯ Ω∫≈©∏≥∆Æ")]
-    public MonoBehaviour[] disableWhileOpen;
+    [Header("Ïπ¥Îìú UI ÌÅ¨Í∏∞")]
+    public Vector2 cardPanelSize = new Vector2(900f, 560f);
+    public Vector2 cardAreaSize = new Vector2(840f, 450f);
+    public Vector2 cardSize = new Vector2(230f, 390f);
+    [Min(0f)] public float cardSpacing = 20f;
 
-    [Header("∏∂øÏΩ∫ º≥¡§")]
-    public bool unlockCursorWhenOpen = true;
-
-    private readonly Dictionary<MonoBehaviour, bool> previousControlStates = new Dictionary<MonoBehaviour, bool>();
     private bool isOpen = false;
     private BuildCategory currentCategory = BuildCategory.Wall;
+    private PlayerController playerController;
+    private CameraFollow cameraFollow;
+    private bool playerControllerWasEnabled;
+    private bool playerControllerStateCaptured;
+    private bool cameraFollowWasEnabled;
+    private bool cameraFollowStateCaptured;
 
     void Start()
     {
+        ConfigureCardLayout();
+
+        playerController = GetComponentInParent<PlayerController>(true);
+        Transform playerRoot = playerController != null ? playerController.transform : transform.root;
+        cameraFollow = playerRoot.GetComponentInChildren<CameraFollow>(true);
+        BuildingSystem linkedBuildingSystem = playerRoot.GetComponentInChildren<BuildingSystem>(true);
+
+        if (buildingSystemObject == null && linkedBuildingSystem != null)
+            buildingSystemObject = linkedBuildingSystem.gameObject;
+
         if (buildQuickPanel != null)
             buildQuickPanel.SetActive(false);
 
@@ -55,29 +71,10 @@ public class BuildQuickUI : MonoBehaviour
         if (buildCardPanel != null)
             buildCardPanel.SetActive(false);
 
-        if (wallButton != null)
-        {
-            wallButton.onClick.RemoveAllListeners();
-            wallButton.onClick.AddListener(() => ShowCategory(BuildCategory.Wall));
-        }
-
-        if (towerButton != null)
-        {
-            towerButton.onClick.RemoveAllListeners();
-            towerButton.onClick.AddListener(() => ShowCategory(BuildCategory.Tower));
-        }
-
-        if (buildingButton != null)
-        {
-            buildingButton.onClick.RemoveAllListeners();
-            buildingButton.onClick.AddListener(() => ShowCategory(BuildCategory.Building));
-        }
-
-        if (closeButton != null)
-        {
-            closeButton.onClick.RemoveAllListeners();
-            closeButton.onClick.AddListener(CloseUI);
-        }
+        ConfigureKeyboardOnlyButton(wallButton, 1);
+        ConfigureKeyboardOnlyButton(towerButton, 2);
+        ConfigureKeyboardOnlyButton(buildingButton, 3);
+        ConfigureKeyboardOnlyButton(closeButton, 0);
     }
 
     void Update()
@@ -92,14 +89,21 @@ public class BuildQuickUI : MonoBehaviour
 
         if (!isOpen) return;
 
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-            ShowCategory(BuildCategory.Wall);
+        int pressedNumber = GetPressedNumber();
 
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-            ShowCategory(BuildCategory.Tower);
-
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-            ShowCategory(BuildCategory.Building);
+        if (categoryPanel != null && categoryPanel.activeSelf)
+        {
+            if (pressedNumber == 1)
+                ShowCategory(BuildCategory.Wall);
+            else if (pressedNumber == 2)
+                ShowCategory(BuildCategory.Tower);
+            else if (pressedNumber == 3)
+                ShowCategory(BuildCategory.Building);
+        }
+        else if (buildCardPanel != null && buildCardPanel.activeSelf && pressedNumber > 0)
+        {
+            SelectBuildItemByNumber(pressedNumber);
+        }
 
         if (Input.GetKeyDown(KeyCode.Escape))
             CloseUI();
@@ -109,24 +113,19 @@ public class BuildQuickUI : MonoBehaviour
     {
         if (buildQuickPanel == null) return;
 
-        if (isOpen) return;
-        var placement = FindFirstObjectByType<BuildingSystem>();
-        if (placement != null) placement.CancelPlacement();
         buildQuickPanel.SetActive(true);
         isOpen = true;
 
-        // N¿ª ¥≠∑∂¿ª ∂ß¥¬ ƒ´≈◊∞Ì∏Æ º±≈√√¢∏∏ ∫∏¿Ã∞‘ «‘
+        // NÏùÑ ÎàÑÎ•¥Î©¥ Ìï≠ÏÉÅ Ïπ¥ÌÖåÍ≥†Î¶¨ ÏÑ†ÌÉùÏ∞ΩÎ∂ÄÌÑ∞ Î≥¥Ïù¥Í≤å Ìï®
         if (categoryPanel != null)
             categoryPanel.SetActive(true);
 
         if (buildCardPanel != null)
             buildCardPanel.SetActive(false);
 
-        if (unlockCursorWhenOpen)
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
+        // ÌÇ§Î≥¥Îìú Ï†ÑÏö© UIÏù¥ÎØÄÎ°ú ÎßàÏö∞Ïä§ Ïª§ÏÑúÎ•º ÌíÄÏßÄ ÏïäÎäîÎã§.
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
 
         SetPlayerControl(false);
     }
@@ -138,11 +137,8 @@ public class BuildQuickUI : MonoBehaviour
         buildQuickPanel.SetActive(false);
         isOpen = false;
 
-        if (unlockCursorWhenOpen)
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
 
         SetPlayerControl(true);
     }
@@ -151,11 +147,9 @@ public class BuildQuickUI : MonoBehaviour
     {
         currentCategory = category;
 
-        // 1, 2, 3 º±≈√«œ∏È ƒ´≈◊∞Ì∏Æ √¢¿∫ ≤®¡¸
         if (categoryPanel != null)
             categoryPanel.SetActive(false);
 
-        // ƒ´µÂ ∆–≥Œ¿∫ ƒ—¡¸
         if (buildCardPanel != null)
             buildCardPanel.SetActive(true);
 
@@ -164,16 +158,15 @@ public class BuildQuickUI : MonoBehaviour
         if (titleText != null)
         {
             if (category == BuildCategory.Wall)
-                titleText.text = "∫Æ ¡æ∑˘";
+                titleText.text = "Î≤Ω ÏÑ†ÌÉù";
             else if (category == BuildCategory.Tower)
-                titleText.text = "≈∏øˆ ¡æ∑˘";
+                titleText.text = "ÌÉÄÏõå ÏÑ†ÌÉù";
             else
-                titleText.text = "∞«√‡π∞ ¡æ∑˘";
+                titleText.text = "Í±¥Î¨º ÏÑ†ÌÉù";
         }
 
         List<BuildItem> list = GetCurrentList();
-
-        CreateSideSpacer("LeftSpacer", 25f);
+        CenterCardContent(list.Count);
 
         for (int i = 0; i < list.Count; i++)
         {
@@ -181,13 +174,54 @@ public class BuildQuickUI : MonoBehaviour
 
             BuildCardUI card = Instantiate(cardPrefab, cardContent);
             card.Setup(list[i], this);
-        }
 
-        CreateSideSpacer("RightSpacer", 25f);
+            LayoutElement cardLayout = card.GetComponent<LayoutElement>();
+
+            if (cardLayout != null)
+            {
+                cardLayout.minWidth = cardSize.x;
+                cardLayout.preferredWidth = cardSize.x;
+                cardLayout.minHeight = cardSize.y;
+                cardLayout.preferredHeight = cardSize.y;
+            }
+
+            if (card.placeButtonText != null)
+                card.placeButtonText.text = (i + 1).ToString();
+
+            if (card.placeButton != null)
+            {
+                card.placeButton.onClick.RemoveAllListeners();
+                card.placeButton.enabled = false;
+            }
+        }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(cardContent as RectTransform);
 
         UpdateButtonVisual();
+    }
+
+    void CenterCardContent(int cardCount)
+    {
+        if (cardContent == null) return;
+
+        RectTransform contentRect = cardContent as RectTransform;
+
+        if (contentRect == null) return;
+
+        float totalWidth = cardCount > 0
+            ? cardSize.x * cardCount + cardSpacing * (cardCount - 1)
+            : 0f;
+
+        ContentSizeFitter fitter = cardContent.GetComponent<ContentSizeFitter>();
+
+        if (fitter != null)
+            fitter.enabled = false;
+
+        contentRect.anchorMin = new Vector2(0.5f, 0.5f);
+        contentRect.anchorMax = new Vector2(0.5f, 0.5f);
+        contentRect.pivot = new Vector2(0.5f, 0.5f);
+        contentRect.anchoredPosition = Vector2.zero;
+        contentRect.sizeDelta = new Vector2(totalWidth, cardSize.y);
     }
 
     List<BuildItem> GetCurrentList()
@@ -201,6 +235,116 @@ public class BuildQuickUI : MonoBehaviour
         return buildingItems;
     }
 
+    void SelectBuildItemByNumber(int shortcutNumber)
+    {
+        List<BuildItem> list = GetCurrentList();
+        int index = shortcutNumber - 1;
+
+        if (index >= 0 && index < list.Count)
+            SelectBuildItem(list[index]);
+    }
+
+    int GetPressedNumber()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) return 1;
+        if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2)) return 2;
+        if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) return 3;
+        return 0;
+    }
+
+    void ConfigureCardLayout()
+    {
+        if (buildCardPanel == null) return;
+
+        RectTransform panelRect = buildCardPanel.transform as RectTransform;
+
+        if (panelRect != null)
+        {
+            panelRect.anchorMin = new Vector2(0.5f, 0.5f);
+            panelRect.anchorMax = new Vector2(0.5f, 0.5f);
+            panelRect.pivot = new Vector2(0.5f, 0.5f);
+            panelRect.anchoredPosition = Vector2.zero;
+            panelRect.localScale = Vector3.one;
+            panelRect.sizeDelta = cardPanelSize;
+        }
+
+        ScrollRect scrollRect = buildCardPanel.GetComponentInChildren<ScrollRect>(true);
+
+        if (scrollRect != null)
+        {
+            RectTransform scrollTransform = scrollRect.transform as RectTransform;
+
+            if (scrollTransform != null)
+            {
+                scrollTransform.anchorMin = new Vector2(0.5f, 0.5f);
+                scrollTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                scrollTransform.pivot = new Vector2(0.5f, 0.5f);
+                scrollTransform.anchoredPosition = new Vector2(0f, -25f);
+                scrollTransform.sizeDelta = cardAreaSize;
+            }
+
+            scrollRect.horizontal = false;
+            scrollRect.vertical = false;
+
+            if (scrollRect.horizontalScrollbar != null)
+                scrollRect.horizontalScrollbar.gameObject.SetActive(false);
+
+            if (scrollRect.viewport != null)
+                scrollRect.viewport.sizeDelta = Vector2.zero;
+
+            scrollRect.enabled = false;
+        }
+
+        HorizontalLayoutGroup layout = cardContent != null
+            ? cardContent.GetComponent<HorizontalLayoutGroup>()
+            : null;
+
+        if (layout != null)
+        {
+            layout.spacing = cardSpacing;
+            layout.padding = new RectOffset(0, 0, 0, 0);
+            layout.childAlignment = TextAnchor.MiddleCenter;
+        }
+
+        RectTransform closeRect = closeButton != null
+            ? closeButton.transform as RectTransform
+            : null;
+
+        if (closeRect != null)
+        {
+            closeRect.anchorMin = Vector2.one;
+            closeRect.anchorMax = Vector2.one;
+            closeRect.pivot = Vector2.one;
+            closeRect.anchoredPosition = new Vector2(-15f, -15f);
+        }
+
+        if (titleText != null)
+        {
+            RectTransform titleRect = titleText.rectTransform;
+            titleRect.anchorMin = new Vector2(0f, 1f);
+            titleRect.anchorMax = new Vector2(1f, 1f);
+            titleRect.pivot = new Vector2(0.5f, 1f);
+            titleRect.anchoredPosition = new Vector2(0f, -15f);
+            titleRect.sizeDelta = new Vector2(-100f, 50f);
+        }
+    }
+
+    void ConfigureKeyboardOnlyButton(Button button, int shortcutNumber)
+    {
+        if (button == null) return;
+
+        button.onClick.RemoveAllListeners();
+        button.enabled = false;
+
+        if (shortcutNumber <= 0) return;
+
+        TMP_Text label = button.GetComponentInChildren<TMP_Text>(true);
+        string prefix = shortcutNumber + ". ";
+
+        if (label != null && label.text.StartsWith(prefix))
+            label.text = label.text.Substring(prefix.Length);
+    }
+
     void ClearCards()
     {
         if (cardContent == null) return;
@@ -209,23 +353,6 @@ public class BuildQuickUI : MonoBehaviour
         {
             Destroy(cardContent.GetChild(i).gameObject);
         }
-    }
-
-    void CreateSideSpacer(string objectName, float width)
-    {
-        if (cardContent == null) return;
-
-        GameObject spacer = new GameObject(objectName);
-        spacer.transform.SetParent(cardContent, false);
-
-        RectTransform rect = spacer.AddComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(width, 350f);
-
-        LayoutElement layoutElement = spacer.AddComponent<LayoutElement>();
-        layoutElement.preferredWidth = width;
-        layoutElement.preferredHeight = 350f;
-        layoutElement.minWidth = width;
-        layoutElement.minHeight = 350f;
     }
 
     void UpdateButtonVisual()
@@ -252,36 +379,73 @@ public class BuildQuickUI : MonoBehaviour
     {
         if (item == null) return;
 
-        Debug.Log("º≥ƒ° º±≈√: " + item.itemName);
+        Debug.Log("Î∞∞Ïπò ÏÑ†ÌÉù: " + item.itemName);
 
-        if (item.buildPrefab == null || item.cost == null || !item.cost.IsValid) return;
-        var placement = FindFirstObjectByType<BuildingSystem>();
+        if (item.buildPrefab == null || !EnsureRuntimeCost(item)) return;
+
+        BuildingSystem placement = FindFirstObjectByType<BuildingSystem>();
         if (placement == null) return;
+
         buildingSystemObject = placement.gameObject;
         CloseUI();
         placement.StartPlacement(item);
     }
 
+    bool EnsureRuntimeCost(BuildItem item)
+    {
+        if (item.cost != null && item.cost.IsValid) return true;
+
+        if (item.cost == null)
+        {
+            item.cost = new BuildCost();
+        }
+
+        string text = item.costText ?? string.Empty;
+        item.cost.wood = ReadCost(text, "Î™©Ïû¨");
+        item.cost.metal = ReadCost(text, "Ï≤†");
+        item.cost.rareMetal = ReadCost(text, "Î∂ÄÌíà");
+        item.cost.food = ReadCost(text, "ÏãùÎüâ");
+        item.cost.configured = true;
+        return item.cost.IsValid;
+    }
+
+    int ReadCost(string text, string label)
+    {
+        Match match = Regex.Match(text, Regex.Escape(label) + @"\s*(\d+)");
+        return match.Success && int.TryParse(match.Groups[1].Value, out int value) ? value : 0;
+    }
+
     void SetPlayerControl(bool value)
     {
-        if (disableWhileOpen == null) return;
-
-        for (int i = 0; i < disableWhileOpen.Length; i++)
+        if (!value)
         {
-            if (disableWhileOpen[i] != null)
+            if (playerController != null && !playerControllerStateCaptured)
             {
-                var control = disableWhileOpen[i];
-                if (!value)
-                {
-                    if (!previousControlStates.ContainsKey(control)) previousControlStates[control] = control.enabled;
-                    control.enabled = false;
-                }
-                else if (previousControlStates.TryGetValue(control, out bool wasEnabled))
-                {
-                    control.enabled = wasEnabled;
-                    previousControlStates.Remove(control);
-                }
+                playerControllerWasEnabled = playerController.enabled;
+                playerControllerStateCaptured = true;
+                playerController.enabled = false;
             }
+
+            if (cameraFollow != null && !cameraFollowStateCaptured)
+            {
+                cameraFollowWasEnabled = cameraFollow.enabled;
+                cameraFollowStateCaptured = true;
+                cameraFollow.enabled = false;
+            }
+
+            return;
+        }
+
+        if (playerController != null && playerControllerStateCaptured)
+        {
+            playerController.enabled = playerControllerWasEnabled;
+            playerControllerStateCaptured = false;
+        }
+
+        if (cameraFollow != null && cameraFollowStateCaptured)
+        {
+            cameraFollow.enabled = cameraFollowWasEnabled;
+            cameraFollowStateCaptured = false;
         }
     }
 }

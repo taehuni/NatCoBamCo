@@ -1,71 +1,39 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class ResearchInteract : MonoBehaviour, IInteractionTarget
+public class ResearchInteract : MonoBehaviour
 {
     public ResearchUI researchUI;
-    public string playerTag = "Player";
 
-    private bool isPlayerNear = false;
-
-    private PlayerController interactionPlayer;
-    private PlayerInteractUI playerUI;
-    public KeyCode InteractionKey => KeyCode.E;
-    public bool CanBeginInteraction => researchUI != null && researchUI.researchPanel != null;
-    public bool InteractionInProgress => false;
-    public bool IsPlayerInInteractionRange(PlayerController player) =>
-        isPlayerNear && interactionPlayer != null && interactionPlayer == player;
-
-    void OnEnable() => InteractionSelection.Register(this);
-
-    void OnDisable()
+    void Awake()
     {
-        if (playerUI != null) playerUI.HideButton(this);
-        InteractionSelection.Unregister(this);
+        ResolveResearchUI();
     }
 
-    void Update()
+    void OnMouseDown()
     {
-        if (isPlayerNear && playerUI != null) playerUI.ShowButton("ø¨±∏º“(E)", this);
-        if (isPlayerNear && Input.GetKeyDown(KeyCode.E) &&
-            InteractionSelection.TryBegin(this, interactionPlayer))
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
         {
-            Debug.Log("E≈∞ ¿‘∑¬µ  - ø¨±∏º“ UI ø≠±‚ Ω√µµ");
+            return;
+        }
 
-            if (researchUI != null)
-            {
-                researchUI.OpenUI();
-            }
-            else
-            {
-                Debug.LogError("ResearchUI∞° ø¨∞·µ«¡ˆ æ æ“Ω¿¥œ¥Ÿ.");
-            }
+        ResolveResearchUI();
+
+        if (researchUI != null)
+        {
+            researchUI.OpenUI();
+        }
+        else
+        {
+            Debug.LogError("ResearchUIÍ∞Ä Ïû•Î©¥Ïóê ÏóÜÏäµÎãàÎã§.");
         }
     }
 
-    void OnTriggerEnter(Collider other)
+    void ResolveResearchUI()
     {
-        Debug.Log("Trigger Enter: " + other.name);
-
-        if (other.CompareTag(playerTag))
+        if (researchUI == null)
         {
-            Debug.Log("«√∑π¿ÃæÓ∞° ø¨±∏º“ π¸¿ßø° µÈæÓø»");
-            isPlayerNear = true;
-            interactionPlayer = other.GetComponentInParent<PlayerController>();
-            playerUI = other.GetComponentInParent<PlayerInteractUI>();
-        }
-    }
-
-    void OnTriggerExit(Collider other)
-    {
-        Debug.Log("Trigger Exit: " + other.name);
-
-        if (other.CompareTag(playerTag))
-        {
-            Debug.Log("«√∑π¿ÃæÓ∞° ø¨±∏º“ π¸¿ßø°º≠ ≥™∞®");
-            isPlayerNear = false;
-            if (playerUI != null) playerUI.HideButton(this);
-            interactionPlayer = null;
-            playerUI = null;
+            researchUI = FindFirstObjectByType<ResearchUI>(FindObjectsInactive.Include);
         }
     }
 }

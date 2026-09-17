@@ -72,7 +72,10 @@ public class BuildingSystem : MonoBehaviour
 
         if (isBuildMode)
         {
-            HandleBuildingSelection(); //건축 선택
+            if (Time.frameCount != placementStartedFrame)
+            {
+                HandleBuildingSelection(); //건축 선택
+            }
 
             if (Input.GetKeyDown(KeyCode.R))
             {
@@ -81,10 +84,18 @@ public class BuildingSystem : MonoBehaviour
 
             UpdatePreview(); // Recheck the rotated footprint before accepting a click.
 
-            if (Input.GetMouseButtonDown(0) && canBuild && Time.frameCount != placementStartedFrame &&
-                (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject()))
+            bool mouseConfirm = Input.GetMouseButtonDown(0) &&
+                (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject());
+            bool keyboardConfirm = Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter);
+
+            if ((mouseConfirm || keyboardConfirm) && canBuild && Time.frameCount != placementStartedFrame)
             {
                 TryBuild(); //건조시도
+            }
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                CancelPlacement();
             }
         }
 
@@ -101,25 +112,6 @@ public class BuildingSystem : MonoBehaviour
     //모드전환 건조 - 삭제
     void HandleModeSwitch()
     {
-        if (Input.GetKeyDown(KeyCode.B))  //b키 누르면 건조모드 전환
-        {
-            isBuildMode = !isBuildMode;
-
-            if (isBuildMode)
-            {
-                currentBuildItem = FindBuildItem(currentBuildingPrefab);
-                placementStartedFrame = Time.frameCount;
-                isRemoveMode = false; //삭제 모드 끄기
-                ClearRemoveTarget(); //삭제 모드 재질 전화 끄기
-                CreatePreview(); //미리보기 만들어
-            }
-            else
-            {
-                currentRotationY = 0f; //회전 초기화
-                DestroyPreview(); //미리보기 끄기
-            }
-        }
-
         if (Input.GetKeyDown(KeyCode.X)) //x키 누르면 삭제 모드 전환
         {
             isRemoveMode = !isRemoveMode;
@@ -464,7 +456,7 @@ public class BuildingSystem : MonoBehaviour
         Destroy(staging);
         lastBuildFrame = Time.frameCount;
         Physics.SyncTransforms();
-        UpdatePreview();
+        CancelPlacement();
     }
 
     //간조 위치 높이 계산함수
