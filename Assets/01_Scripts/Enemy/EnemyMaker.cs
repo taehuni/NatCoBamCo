@@ -18,6 +18,7 @@ public class EnemyMaker : MonoBehaviour
 
     private int currentWave = 0;
     private int spawnedThisWave = 0;
+    private int waveDay = -1;
 
     private bool spawningWave = false;
     private bool waitingNextWave = false;
@@ -27,6 +28,11 @@ public class EnemyMaker : MonoBehaviour
     {
         if (GameManager.Instance == null)
             return;
+
+        if (waveDay != GameManager.Instance.currentDay)
+        {
+            ResetWavesForDay(GameManager.Instance.currentDay);
+        }
 
         // Defense가 아니면 아무것도 하지 않음
         if (GameManager.Instance.currentPhase !=
@@ -51,9 +57,9 @@ public class EnemyMaker : MonoBehaviour
         }
 
 
-        // 현재 웨이브를 아직 시작하지 않았다면
+        // 첫 웨이브만 바로 시작하고, 이후에는 전멸 확인과 대기 시간을 거친다.
         if (!spawningWave &&
-            currentWave < totalWaves)
+            currentWave == 0 && totalWaves > 0)
         {
             StartNextWave();
         }
@@ -68,6 +74,17 @@ public class EnemyMaker : MonoBehaviour
 
         // 현재 웨이브의 모든 적이 죽었는지 확인
         CheckWaveClear();
+    }
+
+    void ResetWavesForDay(int day)
+    {
+        waveDay = day;
+        currentWave = 0;
+        spawnedThisWave = 0;
+        spawnTimer = 0f;
+        waveTimer = 0f;
+        spawningWave = false;
+        waitingNextWave = false;
     }
 
     /**적 생성*/
