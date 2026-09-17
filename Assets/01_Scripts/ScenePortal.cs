@@ -1,14 +1,30 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class ScenePortal : MonoBehaviour
+public class ScenePortal : MonoBehaviour, IInteractionTarget, IInteractable
 {
     public float detectRange = 2f;
     public LayerMask playerLayer;
     public string targetSceneName;
+    public KeyCode interactKey = KeyCode.E;
 
     private bool playerInRange;
     private PlayerInteractUI playerUI;
+
+    private PlayerController interactionPlayer;
+    public KeyCode InteractionKey => interactKey;
+    public bool CanBeginInteraction => !string.IsNullOrEmpty(targetSceneName) && UnityEngine.Application.CanStreamedLevelBeLoaded(targetSceneName);
+    public bool InteractionInProgress => false;
+    public bool IsPlayerInInteractionRange(PlayerController player) =>
+        InteractionSelection.IsInRange(this, player, detectRange, playerLayer);
+
+    void OnEnable() => InteractionSelection.Register(this);
+
+    void OnDisable()
+    {
+        ClearPlayerInteraction();
+        InteractionSelection.Unregister(this);
+    }
 
     void Start()
     {
@@ -16,19 +32,27 @@ public class ScenePortal : MonoBehaviour
 
     void Update()
     {
-        玩家靠近检测();
+        CheckPlayerInRange();
 
-        if (playerInRange && Input.GetKeyDown(KeyCode.E))
+        if (playerInRange && Input.GetKeyDown(interactKey))
         {
-            LoadTargetScene();
+            Interact();
         }
     }
 
-    void 玩家靠近检测()
+    public void Interact()
+    {
+        if (!isActiveAndEnabled || !playerInRange ||
+            !InteractionSelection.TryBegin(this, interactionPlayer)) return;
+        LoadTargetScene();
+    }
+
+    void CheckPlayerInRange()
     {
         Collider[] players = Physics.OverlapSphere(transform.position, detectRange, playerLayer);
 
         playerInRange = players.Length > 0;
+        interactionPlayer = playerInRange ? players[0].GetComponentInParent<PlayerController>() : null;
 
         if (playerInRange)
         {
@@ -36,17 +60,21 @@ public class ScenePortal : MonoBehaviour
 
             if (playerUI != null)
             {
-                playerUI.ShowButton("전송하기(E)");
+                playerUI.ShowButton($"전송하기({interactKey})", this);
             }
         }
         else
         {
-            if (playerUI != null)
-            {
-                playerUI.HideButton();
-                playerUI = null;
-            }
+            ClearPlayerInteraction();
         }
+    }
+
+    void ClearPlayerInteraction()
+    {
+        if (playerUI != null) playerUI.HideButton(this);
+        playerUI = null;
+        playerInRange = false;
+        interactionPlayer = null;
     }
 
     void LoadTargetScene()
@@ -57,6 +85,8 @@ public class ScenePortal : MonoBehaviour
             return;
         }
 
+        if (!CanBeginInteraction) return;
+        ClearPlayerInteraction();
         SceneManager.LoadScene(targetSceneName);
     }
 

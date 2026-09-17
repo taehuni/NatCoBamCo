@@ -78,6 +78,33 @@ public class PlayerController : MonoBehaviour
         controller.Move(finalMove * Time.deltaTime);
     }
 
+    // 传送由玩家移动脚本处理：临时关闭碰撞控制器，并清空上一场景的跳跃/下落速度。
+    // 전송은 플레이어 이동 스크립트에서 처리한다. 충돌 컨트롤러를 잠시 끄고 이전 씬의 점프/낙하 속도를 초기화한다.
+    public void TeleportTo(Vector3 position, Quaternion rotation)
+    {
+        // 场景加载事件可能早于 Start，因此这里也允许获取控制器。
+        // 씬 로드 이벤트가 Start보다 먼저 올 수 있으므로 여기서도 컨트롤러를 가져올 수 있게 한다.
+        if (controller == null)
+        {
+            controller = GetComponent<CharacterController>();
+        }
+
+        bool wasEnabled = controller != null && controller.enabled;
+
+        if (wasEnabled)
+        {
+            controller.enabled = false;
+        }
+
+        transform.SetPositionAndRotation(position, rotation);
+        verticalVelocity = 0f;
+
+        if (wasEnabled)
+        {
+            controller.enabled = true;
+        }
+    }
+
     public void PlayerRun()
     {
         if (Input.GetKey(KeyCode.LeftShift))

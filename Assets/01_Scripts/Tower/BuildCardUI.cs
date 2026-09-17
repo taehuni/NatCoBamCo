@@ -24,7 +24,7 @@ public class BuildCardUI : MonoBehaviour
             nameText.text = item.itemName;
 
         if (costText != null)
-            costText.text = item.costText;
+            costText.text = item.cost != null ? item.cost.DisplayText() : item.costText;
 
         if (descriptionText != null)
             descriptionText.text = item.descriptionText;
@@ -46,8 +46,11 @@ public class BuildCardUI : MonoBehaviour
         if (placeButtonText != null)
             placeButtonText.text = "¼³Ä¡";
 
+        if (placeButtonText != null && item.buildPrefab == null) placeButtonText.text = "\uC900\uBE44 \uC911";
+
         if (placeButton != null)
         {
+            placeButton.interactable = item.buildPrefab != null && item.cost != null && item.cost.IsValid;
             placeButton.onClick.RemoveAllListeners();
             placeButton.onClick.AddListener(OnClickPlace);
         }

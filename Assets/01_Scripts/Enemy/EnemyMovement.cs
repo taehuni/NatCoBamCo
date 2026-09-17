@@ -42,6 +42,22 @@ public class EnemyMovement : MonoBehaviour
         }
     }
 
+    // 只报告当前路径是否走完。新目的地的路径还在计算时不能提前判定到达。
+    // 현재 경로를 끝까지 이동했는지만 반환한다. 새 목적지의 경로를 계산 중일 때는 도착으로 판단하지 않는다.
+    public bool HasReachedDestination
+    {
+        get
+        {
+            return IsReady && !Agent.pathPending &&
+                !float.IsInfinity(Agent.remainingDistance) &&
+                Agent.remainingDistance <= Mathf.Max(Agent.stoppingDistance, 0.1f);
+        }
+    }
+
+    // 巡逻必须走完完整路径，不能把断路处当作到达巡逻点。
+    // 순찰은 완전한 경로의 끝에 도착해야 하며, 끊긴 경로의 끝을 순찰 지점 도착으로 처리하지 않는다.
+    public bool HasReachedCompleteDestination => HasReachedDestination && Agent.pathStatus == NavMeshPathStatus.PathComplete;
+
     // NavMeshAgent 的半径，表示敌人在寻路系统里大概占多大空间。
     // NavMeshAgent의 반지름. 길찾기 시스템에서 적이 차지하는 대략적인 공간 크기.
     public float Radius
@@ -100,9 +116,16 @@ public class EnemyMovement : MonoBehaviour
     // 목표 위치로 이동: 먼저 목표점을 NavMesh 위의 점으로 보정한 뒤 SetDestination을 호출.
     public void MoveToPosition(Vector3 position, float navMeshSampleRange, float stoppingDistance)
     {
+        TryMoveToPosition(position, navMeshSampleRange, stoppingDistance);
+    }
+
+    // 返回移动请求是否成功，方便巡逻区分“已下达新目的地”和“仍保留旧路径”。
+    // 이동 요청의 성공 여부를 반환해 순찰이 새 목적지 설정과 이전 경로 유지를 구분할 수 있게 한다.
+    public bool TryMoveToPosition(Vector3 position, float navMeshSampleRange, float stoppingDistance)
+    {
         if (!IsReady)
         {
-            return;
+            return false;
         }
 
         Vector3 navMeshPosition;
@@ -111,7 +134,7 @@ public class EnemyMovement : MonoBehaviour
         // 목표점이 NavMesh 위에 없을 수 있으므로 먼저 주변의 가장 가까운 이동 가능 지점을 찾음.
         if (!TryGetNavMeshPoint(position, navMeshSampleRange, out navMeshPosition))
         {
-            return;
+            return false;
         }
 
         // 设置停止距离、恢复自动转向、恢复移动，然后真正发出移动命令。
@@ -119,7 +142,7 @@ public class EnemyMovement : MonoBehaviour
         Agent.stoppingDistance = Mathf.Max(0f, stoppingDistance);
         SetAutoRotation(true);
         Agent.isStopped = false;
-        Agent.SetDestination(navMeshPosition);
+        return Agent.SetDestination(navMeshPosition);
     }
 
     // 停止移动，但不销毁 Agent，也不清空目标数据。
@@ -186,6 +209,17 @@ public class EnemyMovement : MonoBehaviour
         }
 
         transform.rotation = Quaternion.LookRotation(direction.normalized);
+    }
+
+    // 按 0 到 1 的进度左右环顾；巡逻和追丢目标分别管理自己的计时。
+    // 0~1 진행률에 따라 좌우를 살핀다. 순찰과 타깃을 놓친 뒤의 탐색은 각자 시간을 관리한다.
+    public void LookAround(Vector3 startDirection, float progress, float maxAngle)
+    {
+        Stop();
+        SetAutoRotation(false);
+        float angle = -Mathf.Sin(Mathf.Clamp01(progress) * Mathf.PI * 2f) * Mathf.Clamp(maxAngle, 0f, 180f);
+        Vector3 direction = Quaternion.AngleAxis(angle, Vector3.up) * startDirection;
+        FacePointInstant(transform.position + direction);
     }
 
     // 在 sourcePoint 周围 sampleRange 范围内寻找最近的 NavMesh 可走点。

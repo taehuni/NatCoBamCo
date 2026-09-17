@@ -13,8 +13,13 @@ public class EnemyAttack : MonoBehaviour
     public float attackDamage;
     public float attackCooldown;
 
+    [Header("Ranged Attack Data / 원거리 공격 데이터")]
+    public Transform firePos;
+    public EnemyRangedProjectile rangedProjectilePrefab;
+
     private EnemyMovement movement;
     private float nextAttackTime;
+    private bool hasWarnedMissingRangedSetup;
 
     public void Initialize(EnemyAI enemyAI, EnemyMovement movement)
     {
@@ -46,13 +51,54 @@ public class EnemyAttack : MonoBehaviour
             return;
         }
 
-        // 对建筑造成伤害。
-        // 건물에 피해를 준다.
-        building.GetDamage(attackDamage);
+        // 通过建筑的 IDamageable 接口造成伤害。
+        // 건물의 IDamageable 인터페이스로 피해를 준다.
+        IDamageable damageable = building.Damageable;
+
+        if (damageable == null)
+        {
+            return;
+        }
+
+        damageable.TakeDamage(attackDamage);
         Debug.Log(gameObject.name + " attacked " + building.gameObject.name + " for " + attackDamage + " damage");
 
         // 记录下一次允许攻击的时间。
         // 다음 공격이 가능한 시간을 기록한다.
+        nextAttackTime = Time.time + attackCooldown;
+    }
+
+    // 远程攻击建筑：在 FirePos 生成投射物，伤害在投射物抵达目标后结算。
+    // 원거리 건물 공격: FirePos에서 투사체를 생성하고, 투사체가 목표에 도착했을 때 피해를 적용한다.
+    public void AttackRangedBuilding(DamageableBuilding building)
+    {
+        if (building == null)
+        {
+            return;
+        }
+
+        if (movement != null)
+        {
+            movement.Stop();
+        }
+
+        if (Time.time < nextAttackTime)
+        {
+            return;
+        }
+
+        if (!CanSpawnRangedProjectile())
+        {
+            return;
+        }
+
+        EnemyRangedProjectile projectile = Instantiate(
+            rangedProjectilePrefab,
+            firePos.position,
+            firePos.rotation
+        );
+
+        projectile.Initialize(building, attackDamage);
         nextAttackTime = Time.time + attackCooldown;
     }
 
@@ -79,13 +125,78 @@ public class EnemyAttack : MonoBehaviour
             return;
         }
 
-        // 对 Core 造成伤害。
-        // Core에 피해를 준다.
-        core.GetDamage(attackDamage);
+        // 直接获取 Core 所在物体上的 IDamageable，再通过接口造成伤害。
+        // Core가 있는 오브젝트에서 IDamageable을 가져와 인터페이스로 피해를 준다.
+        IDamageable damageable = core.GetComponent<IDamageable>();
+
+        if (damageable == null)
+        {
+            return;
+        }
+
+        damageable.TakeDamage(attackDamage);
         Debug.Log(gameObject.name + " attacked " + core.gameObject.name + " for " + attackDamage + " damage");
 
         // 更新下一次攻击时间。
         // 다음 공격 시간을 갱신한다.
         nextAttackTime = Time.time + attackCooldown;
+    }
+
+    // 远程攻击 Core：和攻击建筑共用同一个投射物预制体与攻击冷却。
+    // 원거리 Core 공격: 건물 공격과 같은 투사체 프리팹 및 공격 쿨다운을 사용한다.
+    public void AttackRangedCore(Core core)
+    {
+        if (core == null)
+        {
+            return;
+        }
+
+        if (movement != null)
+        {
+            movement.Stop();
+        }
+
+        if (Time.time < nextAttackTime)
+        {
+            return;
+        }
+
+        if (!CanSpawnRangedProjectile())
+        {
+            return;
+        }
+
+        EnemyRangedProjectile projectile = Instantiate(
+            rangedProjectilePrefab,
+            firePos.position,
+            firePos.rotation
+        );
+
+        projectile.Initialize(core, attackDamage);
+        nextAttackTime = Time.time + attackCooldown;
+    }
+
+    // 检查远程攻击需要的引用是否已经在 Inspector 中设置。
+    // 원거리 공격에 필요한 참조가 Inspector에 설정되어 있는지 확인한다.
+    bool CanSpawnRangedProjectile()
+    {
+        if (firePos != null && rangedProjectilePrefab != null)
+        {
+            hasWarnedMissingRangedSetup = false;
+            return true;
+        }
+
+        // Update 会反复尝试攻击，所以只提示一次，避免 Console 被同一条警告刷满。
+        // Update에서 공격을 반복 시도하므로 같은 경고가 Console을 가득 채우지 않도록 한 번만 출력한다.
+        if (!hasWarnedMissingRangedSetup)
+        {
+            Debug.LogWarning(
+                gameObject.name +
+                " cannot perform ranged attack. Assign Fire Pos and Ranged Projectile Prefab on EnemyAttack."
+            );
+            hasWarnedMissingRangedSetup = true;
+        }
+
+        return false;
     }
 }

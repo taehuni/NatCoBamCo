@@ -71,19 +71,6 @@ public class ResearchUI : MonoBehaviour
 
     void Update()
     {
-        // EŰ�� ������ UI ���� / �ݱ�
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            if (isOpen)
-            {
-                CloseUI();
-            }
-            else
-            {
-                OpenUI();
-            }
-        }
-
         if (!isOpen) return;
 
         // 1��: �� ��

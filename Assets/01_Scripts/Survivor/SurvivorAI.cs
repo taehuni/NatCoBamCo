@@ -16,6 +16,13 @@ public class SurvivorAI : MonoBehaviour
         Researcher
     }
 
+    // 태훈 추가: 구출 전/후 상태 (나중에 애니메이션 분기용으로 사용)
+    public enum SurvivorState
+    {
+        Trapped,   // 구출되기 전 - 대기/갇힘
+        Rescued    // 구출된 후 - 자유이동/작업
+    }
+
     [Header("기본 정보")]
     public string survivorName = "이름 없는 생존자";
     public SurvivorRole role;
@@ -29,6 +36,9 @@ public class SurvivorAI : MonoBehaviour
     [Header("상태")]
     public bool isInjured;
     public float recoveryTimeLeft;
+
+    // 태훈 추가: 구출 여부 상태. SurvivorRescueEvent 가 구출되는 순간 Rescued 로 바꿔줌
+    public SurvivorState state = SurvivorState.Trapped;
 
     [Header("고정 위치 (채집가 -> 거주구역, 연구원 -> 연구실)")]
     [Tooltip("비어있으면 SurvivorManager.AddSurvivor() 가 역할에 맞는 건물을 찾아서 자동으로 채워줌")]
@@ -56,15 +66,10 @@ public class SurvivorAI : MonoBehaviour
         TickRecovery(Time.deltaTime);
     }
 
-    // 채집가/연구원 전용: 정해진 자리로 이동. 정비공은 SurvivorMechanicBehaviour 가 매번 다른 타워로 보내므로 호출 안 함.
-    // SurvivorManager.AddSurvivor() 에서 homePoint 를 채운 직후 호출된다.
+    // 정해진 자리로 이동. SurvivorManager.AddSurvivor() 에서 homePoint 를 채운 직후 호출된다.
+    // 태훈 수정: 정비공도 낮에는 거주구역으로 이동해야 해서 Mechanic 예외 제거 (밤에는 SurvivorMechanicBehaviour 가 이동을 가로챔)
     public void GoHome()
     {
-        if (role == SurvivorRole.Mechanic)
-        {
-            return;
-        }
-
         if (homePoint == null)
         {
             Debug.Log($"{survivorName} 배치할 위치(homePoint)가 없습니다");

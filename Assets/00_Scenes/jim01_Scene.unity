@@ -5432,6 +5432,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   collectTime: 3
+  resourceType: 0
+  amount: 10
 --- !u!65 &774840975
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -380,16 +381,38 @@ public class BuildQuickUI : MonoBehaviour
 
         Debug.Log("배치 선택: " + item.itemName);
 
-        CloseUI();
+        if (item.buildPrefab == null || !EnsureRuntimeCost(item)) return;
 
-        if (buildingSystemObject != null && item.buildPrefab != null)
+        BuildingSystem placement = FindFirstObjectByType<BuildingSystem>();
+        if (placement == null) return;
+
+        buildingSystemObject = placement.gameObject;
+        CloseUI();
+        placement.StartPlacement(item);
+    }
+
+    bool EnsureRuntimeCost(BuildItem item)
+    {
+        if (item.cost != null && item.cost.IsValid) return true;
+
+        if (item.cost == null)
         {
-            buildingSystemObject.SendMessage(
-                "StartPlacement",
-                item.buildPrefab,
-                SendMessageOptions.DontRequireReceiver
-            );
+            item.cost = new BuildCost();
         }
+
+        string text = item.costText ?? string.Empty;
+        item.cost.wood = ReadCost(text, "목재");
+        item.cost.metal = ReadCost(text, "철");
+        item.cost.rareMetal = ReadCost(text, "부품");
+        item.cost.food = ReadCost(text, "식량");
+        item.cost.configured = true;
+        return item.cost.IsValid;
+    }
+
+    int ReadCost(string text, string label)
+    {
+        Match match = Regex.Match(text, Regex.Escape(label) + @"\s*(\d+)");
+        return match.Success && int.TryParse(match.Groups[1].Value, out int value) ? value : 0;
     }
 
     void SetPlayerControl(bool value)

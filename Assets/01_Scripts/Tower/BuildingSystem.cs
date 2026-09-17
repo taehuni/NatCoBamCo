@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class BuildingSystem : MonoBehaviour
 {
@@ -7,6 +9,9 @@ public class BuildingSystem : MonoBehaviour
     public GameObject towerPrefab; //타워 소재
     public GameObject electricTowerPrefab; //전기타워 소재
     private GameObject currentBuildingPrefab; //현재 건조할 건축
+    private BuildItem currentBuildItem;
+    private int placementStartedFrame = -1;
+    private int lastBuildFrame = -1;
     private GameObject previewBuilding; //미리보기 temp
     public float buildDistance = 10f; //건조 범위
 
@@ -28,7 +33,6 @@ public class BuildingSystem : MonoBehaviour
     private BuildingObject currentRemoveTarget; //현재 삭제할 대상
     private Renderer[] removeTargetRenderers; //대상의 renderers
     private Material[][] removeTargetOriginalMaterials; //원래 대상의 materials
-    private int placementStartedFrame = -1;
 
 
 
@@ -42,29 +46,49 @@ public class BuildingSystem : MonoBehaviour
         currentBuildingPrefab = wallPrefab; //default wall시작
     }
 
+    void OnEnable() => SceneManager.sceneLoaded += OnSceneLoaded;
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        CancelPlacement();
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode) => CancelPlacement();
+
+    public void CancelPlacement()
+    {
+        isBuildMode = false;
+        isRemoveMode = false;
+        canBuild = false;
+        currentRotationY = 0f;
+        DestroyPreview();
+        ClearRemoveTarget();
+    }
+
     void Update()
     {
         HandleModeSwitch(); //모드 전화
 
         if (isBuildMode)
         {
-            // BuildQuickUI에서 숫자로 항목을 고른 같은 프레임에는
-            // 아래의 기존 숫자 단축키가 선택을 덮어쓰지 않게 한다.
             if (Time.frameCount != placementStartedFrame)
             {
                 HandleBuildingSelection(); //건축 선택
             }
-
-            UpdatePreview(); //미리보기
 
             if (Input.GetKeyDown(KeyCode.R))
             {
                 RotatePreview(); //미리보기 회전
             }
 
-            if ((Input.GetMouseButtonDown(0) ||
-                 Input.GetKeyDown(KeyCode.Return) ||
-                 Input.GetKeyDown(KeyCode.KeypadEnter)) && canBuild)
+            UpdatePreview(); // Recheck the rotated footprint before accepting a click.
+
+            bool mouseConfirm = Input.GetMouseButtonDown(0) &&
+                (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject());
+            bool keyboardConfirm = Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter);
+
+            if ((mouseConfirm || keyboardConfirm) && canBuild && Time.frameCount != placementStartedFrame)
             {
                 TryBuild(); //건조시도
             }
@@ -103,33 +127,6 @@ public class BuildingSystem : MonoBehaviour
                 ClearRemoveTarget(); //임시 저장한 삭제대상 초기화
             }
         }
-    }
-
-    // BuildQuickUI에서 선택한 실제 프리팹으로 즉시 배치 모드를 시작한다.
-    public void StartPlacement(GameObject prefab)
-    {
-        if (prefab == null)
-        {
-            Debug.LogWarning("배치할 건축물 프리팹이 연결되지 않았습니다.");
-            return;
-        }
-
-        currentBuildingPrefab = prefab;
-        isBuildMode = true;
-        isRemoveMode = false;
-        placementStartedFrame = Time.frameCount;
-        currentRotationY = 0f;
-        ClearRemoveTarget();
-        DestroyPreview();
-        CreatePreview();
-    }
-
-    public void CancelPlacement()
-    {
-        isBuildMode = false;
-        currentRotationY = 0f;
-        canBuild = false;
-        DestroyPreview();
     }
 
     //삭제 대상 재질 변경함수
@@ -250,6 +247,7 @@ public class BuildingSystem : MonoBehaviour
         }
 
         currentBuildingPrefab = prefab;
+        currentBuildItem = FindBuildItem(prefab);
 
         if (isBuildMode)
         {
@@ -257,6 +255,39 @@ public class BuildingSystem : MonoBehaviour
             CreatePreview();
         }
     }
+
+    BuildItem FindBuildItem(GameObject prefab)
+    {
+        var menu = FindFirstObjectByType<BuildQuickUI>();
+        if (menu == null || prefab == null) return null;
+        foreach (var list in new[] { menu.wallItems, menu.towerItems, menu.buildingItems })
+            foreach (var item in list)
+                if (item != null && item.buildPrefab == prefab) return item;
+        return null;
+    }
+
+    public bool StartPlacement(BuildItem item)
+    {
+        if (item == null || item.buildPrefab == null || item.cost == null || !item.cost.IsValid) return false;
+        ClearRemoveTarget();
+        isRemoveMode = false;
+        isBuildMode = true;
+        currentBuildItem = item;
+        currentBuildingPrefab = item.buildPrefab;
+        currentRotationY = 0f;
+        canBuild = false;
+        placementStartedFrame = Time.frameCount;
+        DestroyPreview();
+        CreatePreview();
+        return true;
+    }
+
+    // Preserve callers that select a prefab, including the keyboard shortcuts.
+    public void StartPlacement(GameObject prefab) => StartPlacement(FindBuildItem(prefab));
+
+    bool CanAffordCurrentBuilding() => currentBuildItem != null && currentBuildItem.cost != null &&
+        currentBuildItem.cost.IsValid && ResourceInventory.Instance != null &&
+        ResourceInventory.Instance.CanAfford(currentBuildItem.cost.ToResources());
 
 
     //그리드 계산 함수
@@ -291,22 +322,44 @@ public class BuildingSystem : MonoBehaviour
             return;
         }
 
-        previewBuilding = Instantiate(currentBuildingPrefab);
+        // Instantiate inactive so a preview never registers interactions or runs gameplay OnEnable.
+        var staging = new GameObject("BuildPreviewStaging");
+        staging.SetActive(false);
+        previewBuilding = Instantiate(currentBuildingPrefab, staging.transform);
+        foreach (var behaviour in previewBuilding.GetComponentsInChildren<MonoBehaviour>(true))
+            behaviour.enabled = false;
+        foreach (var obstacle in previewBuilding.GetComponentsInChildren<UnityEngine.AI.NavMeshObstacle>(true))
+            obstacle.enabled = false;
+        foreach (var body in previewBuilding.GetComponentsInChildren<Rigidbody>(true))
+            body.isKinematic = true;
+        foreach (var part in previewBuilding.GetComponentsInChildren<Transform>(true))
+        {
+            part.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+            part.gameObject.tag = "Untagged";
+        }
+        foreach (var health in previewBuilding.GetComponentsInChildren<DamageableBuilding>(true))
+        {
+            health.Health.SetHealthValues(0f, 0f);
+            Destroy(health);
+        }
 
-        Collider[] colliders = previewBuilding.GetComponentsInChildren<Collider>();
+        Collider[] colliders = previewBuilding.GetComponentsInChildren<Collider>(true);
 
         for (int i = 0; i < colliders.Length; i++)
         {
             colliders[i].enabled = false;
         }
 
-        // 미리보기에서는 공격, 회복, 연구 등 실제 건물 기능을 실행하지 않는다.
-        Behaviour[] behaviours = previewBuilding.GetComponentsInChildren<Behaviour>(true);
+        //전기 타워 미리보기 때 기능 비활성화
+        ElectricTower[] electricTowers = previewBuilding.GetComponentsInChildren<ElectricTower>();
 
-        for (int i = 0; i < behaviours.Length; i++)
+        for (int i = 0; i < electricTowers.Length; i++)
         {
-            behaviours[i].enabled = false;
+            electricTowers[i].enabled = false;
         }
+        previewBuilding.SetActive(false);
+        previewBuilding.transform.SetParent(null, true);
+        Destroy(staging);
     }
 
     //미리보기 삭제
@@ -314,6 +367,7 @@ public class BuildingSystem : MonoBehaviour
     {
         if (previewBuilding != null)
         {
+            previewBuilding.SetActive(false);
             Destroy(previewBuilding);
         }
         previewBuilding = null;
@@ -322,8 +376,9 @@ public class BuildingSystem : MonoBehaviour
     //실시간 미리보기
     void UpdatePreview()
     {
-        if (previewBuilding == null)
+        if (previewBuilding == null || mainCam == null)
         {
+            canBuild = false;
             return;
         }
 
@@ -344,7 +399,7 @@ public class BuildingSystem : MonoBehaviour
                 previewBuilding.transform.position = currentBuildPosition;
                 previewBuilding.transform.rotation = Quaternion.Euler(0f, currentRotationY, 0f);
 
-                canBuild = !IsPositionBlocked();
+                canBuild = !IsPositionBlocked() && CanAffordCurrentBuilding();
 
                 UpdatePreviewMaterial();
             }
@@ -381,15 +436,31 @@ public class BuildingSystem : MonoBehaviour
     //간조 시도
     void TryBuild()
     {
+        if (!isBuildMode || previewBuilding == null || Time.frameCount == lastBuildFrame) return;
+        Physics.SyncTransforms();
+        UpdatePreview();
+        if (!canBuild || !CanAffordCurrentBuilding()) return;
+
         Quaternion buildRotation = Quaternion.Euler(0f, currentRotationY, 0f);
-        Instantiate(currentBuildingPrefab, currentBuildPosition, buildRotation);
+        var staging = new GameObject("BuildPlacementStaging");
+        staging.SetActive(false);
+        var building = Instantiate(currentBuildingPrefab, currentBuildPosition, buildRotation, staging.transform);
+        if (building == null || !ResourceInventory.Instance.TrySpend(currentBuildItem.cost.ToResources()))
+        {
+            Destroy(staging);
+            return;
+        }
+        building.transform.SetParent(null, true);
+        Destroy(staging);
+        lastBuildFrame = Time.frameCount;
+        Physics.SyncTransforms();
         CancelPlacement();
     }
 
     //간조 위치 높이 계산함수
     float GetBuildingHeightOffset()
     {
-        Renderer renderer = previewBuilding.GetComponentInChildren<Renderer>();
+        Renderer renderer = previewBuilding.GetComponentInChildren<Renderer>(true);
 
         if (renderer == null)
         {

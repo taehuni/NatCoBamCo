@@ -43,21 +43,42 @@ public class EnemyTargetSelector : MonoBehaviour
                 return FindNearestBuildingByLayer(wallLayer, detectRange, enemyAI, movement, attackSlotManager, buildingMovePointSampleRange);
 
             case EnemyAI.EnemyClass.Ranged:
-                // 远程型优先找塔，找不到塔再找墙。
-                // Ranged 타입은 타워를 먼저 찾고, 없으면 벽을 찾는다.
-                GameObject tower = FindNearestBuildingByLayer(towerLayer, detectRange, enemyAI, movement, attackSlotManager, buildingMovePointSampleRange);
+                // 远程型优先寻找感知范围内的塔，而且不要求目标塔的 NavMesh 路径完整。
+                // 即使走不到塔旁边，只要塔进入射程，抛物线投射物仍然可以攻击它。
+                // 원거리형은 감지 범위 안의 타워를 우선 찾으며 목표 타워까지의 NavMesh 경로가 완전할 필요가 없다.
+                // 타워 옆까지 걸어갈 수 없어도 사거리 안에 들어오면 포물선 투사체로 공격할 수 있다.
+                GameObject tower = FindNearestBuildingByDistance(towerLayer, detectRange);
 
                 if (tower != null)
                 {
                     return tower;
                 }
 
-                return FindNearestBuildingByLayer(wallLayer, detectRange, enemyAI, movement, attackSlotManager, buildingMovePointSampleRange);
+                // 没有塔时不要主动锁定附近任意墙，否则入口旁边的诱饵墙也会被当成优先目标。
+                // 返回 null 后，敌人会继续前往 Core；只有路径确实被堵住时，堵路验证才会锁定真正的墙或塔。
+                // 타워가 없을 때 주변의 아무 벽이나 고정하면 입구 옆의 미끼 벽까지 우선 타깃이 될 수 있으므로 선택하지 않는다.
+                // null을 반환하면 Core로 계속 이동하며, 실제로 경로가 막혔을 때만 경로 차단 검증으로 진짜 벽이나 타워를 고정한다.
+                return null;
         }
 
         // Standard 类型没有额外优先目标，默认继续朝 Core 走。
         // Standard 타입은 별도 우선 타깃이 없으므로 기본적으로 Core로 이동한다.
         return null;
+    }
+
+    // 不要求路径完整，只按敌人到建筑表面的实际距离选择最近建筑。
+    // 경로 완전 여부를 요구하지 않고 적에서 건물 표면까지의 실제 거리로 가장 가까운 건물을 선택한다.
+    GameObject FindNearestBuildingByDistance(LayerMask layer, float detectRange)
+    {
+        Collider[] targets = Physics.OverlapSphere(transform.position, detectRange, layer);
+        DamageableBuilding building = FindNearestBuildingFromColliders(targets, transform.position);
+
+        if (building == null || building.hp <= 0f)
+        {
+            return null;
+        }
+
+        return building.gameObject;
     }
 
     public GameObject FindPlayerTarget(LayerMask playerLayer, float detectRange)
@@ -78,6 +99,30 @@ public class EnemyTargetSelector : MonoBehaviour
             PlayerController player = targets[i].GetComponentInParent<PlayerController>();
 
             if (player != null)
+            {
+                return player.gameObject;
+            }
+        }
+
+        return null;
+    }
+
+    // 资源地区使用带视野过滤的入口，基地敌人继续使用原来的优先目标规则。
+    // 자원 지역에서는 시야로 필터링하는 함수를 사용하고, 기지의 적은 기존 우선 타깃 규칙을 유지한다.
+    public GameObject FindVisiblePlayerTarget(LayerMask playerLayer, float detectRange, EnemyVision vision)
+    {
+        if (vision == null || detectRange <= 0f)
+        {
+            return null;
+        }
+
+        // 球形查询只收集附近候选者；通过扇形角度和遮挡检查后才算真正看到。
+        // 구형 검색은 주변 후보만 수집한다. 부채꼴 시야각과 가림 검사를 통과해야 실제로 본 것으로 판단한다.
+        Collider[] targets = Physics.OverlapSphere(transform.position, detectRange, playerLayer, QueryTriggerInteraction.Ignore);
+        for (int i = 0; i < targets.Length; i++)
+        {
+            PlayerController player = targets[i].GetComponentInParent<PlayerController>();
+            if (player != null && vision.CanSeeTarget(player.gameObject, detectRange))
             {
                 return player.gameObject;
             }
@@ -212,7 +257,7 @@ public class EnemyTargetSelector : MonoBehaviour
             // Collider가 건물의 자식 오브젝트에 있을 수 있으므로 부모에서 DamageableBuilding을 찾는다.
             DamageableBuilding building = colliders[i].GetComponentInParent<DamageableBuilding>();
 
-            if (building == null)
+            if (building == null || building.hp <= 0f)
             {
                 continue;
             }

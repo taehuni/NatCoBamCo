@@ -19,6 +19,7 @@ public class BuildItem
 
     [Header("설치 프리팹")]
     public GameObject buildPrefab;
+    public BuildCost cost;
 
     [Header("UI 텍스트")]
     [TextArea]
