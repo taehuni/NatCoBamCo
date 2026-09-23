@@ -15,7 +15,19 @@ public class EnemyMovement : MonoBehaviour
     public float moveSpeed;
 
     private NavMeshAgent agent;
+    private EnemyLinkTraversal linkTraversal;
     private float defaultStoppingDistance;
+
+    // 跳落期间由 Link 模块独占移动，地面行为等落地后继续。
+    // 도약 중에는 Link 모듈만 이동을 제어하고 지상 행동은 착지 후 계속한다.
+    public bool IsTraversingLink
+    {
+        get
+        {
+            if (linkTraversal == null) linkTraversal = GetComponent<EnemyLinkTraversal>();
+            return linkTraversal != null && linkTraversal.IsControllingMovement;
+        }
+    }
 
     // 缓存 NavMeshAgent 引用。第一次访问时 GetComponent，之后直接复用。
     // NavMeshAgent 참조를 캐싱. 처음 접근할 때 GetComponent를 하고 이후에는 재사용.
@@ -48,7 +60,7 @@ public class EnemyMovement : MonoBehaviour
     {
         get
         {
-            return IsReady && !Agent.pathPending &&
+            return IsReady && !IsTraversingLink && !Agent.isOnOffMeshLink && !Agent.pathPending &&
                 !float.IsInfinity(Agent.remainingDistance) &&
                 Agent.remainingDistance <= Mathf.Max(Agent.stoppingDistance, 0.1f);
         }
@@ -123,7 +135,7 @@ public class EnemyMovement : MonoBehaviour
     // 이동 요청의 성공 여부를 반환해 순찰이 새 목적지 설정과 이전 경로 유지를 구분할 수 있게 한다.
     public bool TryMoveToPosition(Vector3 position, float navMeshSampleRange, float stoppingDistance)
     {
-        if (!IsReady)
+        if (!IsReady || IsTraversingLink)
         {
             return false;
         }
@@ -149,7 +161,7 @@ public class EnemyMovement : MonoBehaviour
     // 이동을 멈춤. Agent를 제거하거나 목표 데이터를 지우지는 않음.
     public void Stop()
     {
-        if (!IsReady)
+        if (!IsReady || IsTraversingLink)
         {
             return;
         }
@@ -161,7 +173,7 @@ public class EnemyMovement : MonoBehaviour
     // NavMeshAgent가 적의 회전을 자동으로 제어할지 설정.
     public void SetAutoRotation(bool useAutoRotation)
     {
-        if (Agent == null)
+        if (Agent == null || IsTraversingLink)
         {
             return;
         }
@@ -173,6 +185,7 @@ public class EnemyMovement : MonoBehaviour
     // 특정 지점을 향해 천천히 회전. 공격 시 적이 목표를 바라보게 할 때 사용.
     public void FacePoint(Vector3 point, float turnSpeed)
     {
+        if (IsTraversingLink) return;
         Vector3 direction = point - transform.position;
         direction.y = 0f;
 
@@ -200,6 +213,7 @@ public class EnemyMovement : MonoBehaviour
     // 특정 지점을 즉시 바라봄. 부드러운 회전은 하지 않음.
     public void FacePointInstant(Vector3 point)
     {
+        if (IsTraversingLink) return;
         Vector3 direction = point - transform.position;
         direction.y = 0f;
 
@@ -240,6 +254,38 @@ public class EnemyMovement : MonoBehaviour
         return false;
     }
 
+    // 先找目标脚下真实地面，再小范围对齐 NavMesh；是否允许追踪由行为脚本决定。
+    // 타깃 발밑 실제 지면을 찾은 뒤 좁은 범위로 NavMesh에 맞춘다. 추적 허용 여부는 행동 스크립트가 결정한다.
+    public bool TryGetTargetGroundPosition(GameObject target, float groundSearchDistance, out Vector3 position)
+    {
+        position = target.transform.position;
+        if (Agent == null) return false;
+        bool foundBody = false;
+        Bounds bounds = default;
+        foreach (Collider body in target.GetComponentsInChildren<Collider>())
+        {
+            if (!body.enabled || body.isTrigger) continue;
+            if (!foundBody) { bounds = body.bounds; foundBody = true; }
+            else bounds.Encapsulate(body.bounds);
+        }
+        Vector3 feet = foundBody ? new Vector3(bounds.center.x, bounds.min.y, bounds.center.z) : position;
+        if (linkTraversal == null) linkTraversal = GetComponent<EnemyLinkTraversal>();
+        int mask = linkTraversal != null ? linkTraversal.EnvironmentMask : Physics.DefaultRaycastLayers;
+        RaycastHit ground = default;
+        float nearest = float.PositiveInfinity;
+        foreach (RaycastHit hit in Physics.RaycastAll(feet + Vector3.up * 0.1f, Vector3.down,
+            Mathf.Max(0.1f, groundSearchDistance) + 0.1f, mask, QueryTriggerInteraction.Ignore))
+        {
+            if (hit.transform.IsChildOf(target.transform) || hit.transform.IsChildOf(transform)) continue;
+            if (hit.distance < nearest) { ground = hit; nearest = hit.distance; }
+        }
+        if (ground.collider == null || ground.normal.y < Mathf.Cos(NavMesh.GetSettingsByID(Agent.agentTypeID).agentSlope * Mathf.Deg2Rad)) return false;
+        var filter = new NavMeshQueryFilter { agentTypeID = Agent.agentTypeID, areaMask = Agent.areaMask };
+        if (!NavMesh.SamplePosition(ground.point, out NavMeshHit nav, 0.3f, filter) || Mathf.Abs(nav.position.y - ground.point.y) > 0.2f) return false;
+        position = nav.position;
+        return true;
+    }
+
     // 简化版 TryGetPath：不需要外部拿到 navMeshDestination 时使用。
     // 간단 버전 TryGetPath: 외부에서 navMeshDestination이 필요 없을 때 사용.
     public bool TryGetPath(
@@ -267,7 +313,7 @@ public class EnemyMovement : MonoBehaviour
         lastReachablePoint = transform.position;
         navMeshDestination = destination;
 
-        if (!IsReady)
+        if (!IsReady || IsTraversingLink)
         {
             return false;
         }
