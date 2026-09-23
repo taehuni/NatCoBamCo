@@ -42,7 +42,7 @@ public class EnemyPatrolBehaviour : MonoBehaviour
     // 별도 Update를 사용하지 않아 순찰과 관찰, 추적이 동시에 이동 명령을 내리지 않게 한다.
     public void Tick(float navMeshSampleRange, float lookAroundAngle, float deltaTime)
     {
-        if (!isActiveAndEnabled || movement == null)
+        if (!isActiveAndEnabled || movement == null || movement.IsTraversingLink)
         {
             return;
         }
@@ -77,7 +77,8 @@ public class EnemyPatrolBehaviour : MonoBehaviour
         }
 
         Vector3 destination = CurrentPatrolPoint.position;
-        if (!hasMoveRequest || (destination - requestedPoint).sqrMagnitude > 0.001f)
+        if (!hasMoveRequest || (destination - requestedPoint).sqrMagnitude > 0.001f ||
+            (!movement.Agent.hasPath && !movement.Agent.pathPending && !movement.HasReachedCompleteDestination))
         {
             hasMoveRequest = movement.TryMoveToPosition(destination, navMeshSampleRange, Mathf.Max(0.05f, arrivalDistance));
             requestedPoint = destination;

@@ -5,6 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(EnemyTargetSelector))]
 [RequireComponent(typeof(EnemyVision))]
 [RequireComponent(typeof(EnemyPatrolBehaviour))]
+[RequireComponent(typeof(EnemyLinkTraversal))]
 public class EnemyPlayerChaseBehaviour : MonoBehaviour
 {
     // 资源地区的日常行为类型，与普通、高速、坦克等战斗种类分开。
@@ -25,6 +26,7 @@ public class EnemyPlayerChaseBehaviour : MonoBehaviour
     [Header("Player Detection / 플레이어 감지")]
     [Tooltip("플레이어를 처음 감지할 수 있는 최대 거리입니다. 거리별 감지 속도 계산의 상한값으로도 사용합니다.")]
     public float findRange = 8f; // 感知范围 / 감지 범위
+    [Tooltip("추적을 시작한 뒤 이 거리 밖으로 나가면 타깃을 해제합니다. 적과 플레이어 중심 사이의 3D 거리이며, 방향과 벽의 가림은 무시합니다.")]
     public float losePlayerRange = 12f; // 丢失范围 / 추적 해제 범위
     [Min(0f)]
     [Tooltip("Find Range 거리에서 감지 진행률이 0%에서 100%가 될 때까지 걸리는 시간입니다. 플레이어가 가까울수록 더 빠르게 누적됩니다.")]
@@ -42,15 +44,9 @@ public class EnemyPlayerChaseBehaviour : MonoBehaviour
     [Min(0f)]
     [Tooltip("추적을 시작하기 전에 플레이어를 놓쳤을 때 마지막으로 바라보던 방향을 유지하는 시간입니다. 이 동안에도 플레이어 감지는 계속합니다.")]
     public float lookHoldDuration = 1.5f;
-    [Min(0f)]
-    [Tooltip("추적 중 플레이어를 놓치면 마지막으로 본 위치로 이동한 뒤, 이 시간 동안 제자리에서 주위를 살펴보고 추적을 포기합니다.")]
-    public float lostTargetWaitTime = 3f;
     [Range(0f, 180f)]
-    [Tooltip("주위를 살필 때 도착 당시의 방향을 기준으로 왼쪽과 오른쪽으로 각각 회전하는 최대 각도입니다.")]
+    [Tooltip("순찰 지점에서 주위를 살필 때 도착 당시의 방향을 기준으로 좌우로 회전하는 최대 각도입니다.")]
     public float lookAroundAngle = 120f;
-    [Min(0.1f)]
-    [Tooltip("마지막으로 본 위치까지 이동을 시도하는 최대 시간입니다. 해당 위치에 도달할 수 없을 때 계속 이동을 시도하는 것을 방지합니다.")]
-    public float lastSeenMoveTimeout = 5f;
 
     [Header("Movement / 이동")]
     public float navMeshSampleRange = 5f; // 把目标点修正到附近 NavMesh 的范围 / 목표 지점을 근처 NavMesh로 보정하는 범위
@@ -60,7 +56,7 @@ public class EnemyPlayerChaseBehaviour : MonoBehaviour
     public bool showDetectionGizmos = true;
     [Tooltip("켜면 선택한 적만 표시하고, 끄면 선택하지 않은 적도 표시합니다.")]
     public bool drawGizmosOnlyWhenSelected = false;
-    [Tooltip("추적 중 시야 거리의 상한을 노란색 부채꼴로 추가 표시합니다. 청록색은 최초 감지 범위, 녹색은 즉시 추적 범위입니다.")]
+    [Tooltip("추적 해제 거리를 적 중심의 노란색 구로 표시합니다. 청록색 부채꼴은 최초 감지 범위, 녹색 부채꼴은 즉시 추적 범위입니다.")]
     public bool showChaseRangeGizmo = true;
 
     private EnemyAI enemyAI;
@@ -79,12 +75,7 @@ public class EnemyPlayerChaseBehaviour : MonoBehaviour
     private float nextSearchTime; // 下次感知时间 / 다음 감지 시간
     private float lookHoldTimer;
     private bool isChasing;
-    private Vector3 lastSeenPosition;
-    private bool isMovingToLastSeenPosition;
-    private bool isWaitingAtLastSeenPosition;
-    private float lastSeenMoveTimer;
-    private float lostTargetWaitTimer;
-    private Vector3 lookAroundStartDirection;
+    private Vector3 chasePosition;
 
     public bool IsChasing => isChasing;
     public bool IsHoldingDirection => !isChasing && detectedPlayer == null && lookHoldTimer > 0f;
@@ -99,6 +90,7 @@ public class EnemyPlayerChaseBehaviour : MonoBehaviour
         // 이 행동이 이미 부착된 기존 오브젝트도 지원한다. 이동 모듈은 EnemyAI.Awake에서 초기화된다.
         vision = GetOrAddComponent<EnemyVision>();
         patrol = GetOrAddComponent<EnemyPatrolBehaviour>();
+        GetOrAddComponent<EnemyLinkTraversal>();
         patrol.Initialize(movement);
         initialPosition = transform.position;
     }
@@ -110,7 +102,7 @@ public class EnemyPlayerChaseBehaviour : MonoBehaviour
             return;
         }
 
-        if (enemyAI.IsParalyzed())
+        if (enemyAI.IsParalyzed() || movement.IsTraversingLink)
         {
             return;
         }
@@ -178,12 +170,12 @@ public class EnemyPlayerChaseBehaviour : MonoBehaviour
             if (detectionTimer >= detectionTime)
             {
                 targetPlayer = detectedPlayer;
-                lastSeenPosition = targetPlayer.transform.position;
+                chasePosition = transform.position;
                 detectionTimer = 0f;
                 lookHoldTimer = 0f;
                 isChasing = true;
                 isReturningToInitialPosition = false;
-                movement.MoveToPosition(lastSeenPosition, navMeshSampleRange);
+                HandlePlayerChase();
             }
         }
         else
@@ -286,6 +278,8 @@ public class EnemyPlayerChaseBehaviour : MonoBehaviour
         return Mathf.Max(0f, detectionTime) * distanceRatio;
     }
 
+    // 锁定后只按距离决定是否继续追逐，不再检查视野方向和墙体遮挡。
+    // 타깃 고정 후에는 거리만으로 추적 유지 여부를 판단하며 시야 방향과 벽의 가림은 확인하지 않는다.
     void HandlePlayerChase()
     {
         if (targetPlayer == null || !targetPlayer.activeInHierarchy)
@@ -294,67 +288,22 @@ public class EnemyPlayerChaseBehaviour : MonoBehaviour
             return;
         }
 
-        // 追逐也遵守视野和遮挡规则。只有真正看到时，才更新目标位置。
-        // 추적 중에도 시야와 가림 규칙을 적용한다. 실제로 보일 때만 대상 위치를 갱신한다.
-        if (vision.CanSeeTarget(targetPlayer, losePlayerRange))
-        {
-            if (EnemyTargetUtility.GetDistanceToTarget(transform.position, targetPlayer) >= losePlayerRange)
-            {
-                ClearTargetPlayer();
-                return;
-            }
-
-            lastSeenPosition = targetPlayer.transform.position;
-            isMovingToLastSeenPosition = false;
-            isWaitingAtLastSeenPosition = false;
-            movement.MoveToPosition(lastSeenPosition, navMeshSampleRange);
-            return;
-        }
-
-        if (isWaitingAtLastSeenPosition)
-        {
-            LookAround();
-            return;
-        }
-
-        if (!isMovingToLastSeenPosition)
-        {
-            isMovingToLastSeenPosition = true;
-            lastSeenMoveTimer = Mathf.Max(0.1f, lastSeenMoveTimeout);
-            movement.MoveToPosition(lastSeenPosition, navMeshSampleRange);
-            return;
-        }
-
-        lastSeenMoveTimer -= Time.deltaTime;
-        if (movement.HasReachedDestination || lastSeenMoveTimer <= 0f)
-        {
-            isWaitingAtLastSeenPosition = true;
-            lostTargetWaitTimer = Mathf.Max(0f, lostTargetWaitTime);
-            lookAroundStartDirection = transform.forward;
-            StopAndHoldDirection();
-            return;
-        }
-
-        // 保持原来的已知目的地，也能在麻痹结束后继续移动，不读取墙后玩家的新位置。
-        // 마지막으로 확인한 목적지를 유지해 마비가 풀리면 이동을 재개하며, 벽 뒤 플레이어의 새 위치는 읽지 않는다.
-        movement.MoveToPosition(lastSeenPosition, navMeshSampleRange);
-    }
-
-    // 在最后看见的位置原地左顾、右盼，再转回到达时的朝向。
-    // 마지막으로 본 위치에서 제자리로 좌우를 살핀 뒤 도착 당시의 방향으로 돌아온다.
-    // 是否重新看见玩家由 HandlePlayerChase 统一判断，因此环顾也不会看穿墙。
-    // 플레이어를 다시 발견했는지는 HandlePlayerChase에서 판단하므로 주위를 살필 때도 벽 너머를 볼 수 없다.
-    void LookAround()
-    {
-        StopAndHoldDirection();
-        lostTargetWaitTimer = Mathf.Max(0f, lostTargetWaitTimer - Time.deltaTime);
-        float progress = lostTargetWaitTime <= 0f ? 1f : 1f - lostTargetWaitTimer / lostTargetWaitTime;
-        movement.LookAround(lookAroundStartDirection, progress, lookAroundAngle);
-
-        if (lostTargetWaitTimer <= 0f)
+        float distance = Vector3.Distance(transform.position, targetPlayer.transform.position);
+        if (distance > losePlayerRange)
         {
             ClearTargetPlayer();
+            return;
         }
+
+        // 持续更新玩家脚下的可走地面，跳下平台或躲到墙后也继续跟踪。
+        // 플랫폼에서 뛰어내리거나 벽 뒤에 숨어도 플레이어 발밑의 이동 가능한 지면을 계속 갱신한다.
+        if (movement.TryGetTargetGroundPosition(targetPlayer, navMeshSampleRange, out Vector3 ground))
+        {
+            chasePosition = ground;
+        }
+        // 暂时找不到有效落点时继续走向上一次有效地面，下帧重新检查。
+        // 유효한 착지점을 잠시 찾지 못하면 이전 지면으로 이동하며 다음 프레임에 다시 확인한다.
+        movement.MoveToPosition(chasePosition, navMeshSampleRange);
     }
 
     // 停止位移并关闭 NavMesh 的自动转向；不再转向已经不可见的玩家。
@@ -385,10 +334,6 @@ public class EnemyPlayerChaseBehaviour : MonoBehaviour
         nextSearchTime = 0f;
         lookHoldTimer = 0f;
         isChasing = false;
-        isMovingToLastSeenPosition = false;
-        isWaitingAtLastSeenPosition = false;
-        lastSeenMoveTimer = 0f;
-        lostTargetWaitTimer = 0f;
         if (movement != null)
         {
             StopAndHoldDirection();
@@ -410,32 +355,32 @@ public class EnemyPlayerChaseBehaviour : MonoBehaviour
         navMeshSampleRange = Mathf.Max(0.1f, navMeshSampleRange);
         returnArrivalDistance = Mathf.Max(0.05f, returnArrivalDistance);
 #if UNITY_EDITOR
-        QueuePatrolComponentCheck();
+        QueueRequiredComponentCheck();
 #endif
     }
 
 #if UNITY_EDITOR
-    private bool patrolComponentCheckQueued;
+    private bool requiredComponentCheckQueued;
 
-    // 已存在的场景对象也自动补齐巡逻组件；延后处理，避免在 OnValidate 中直接增删组件。
-    // 기존 씬 오브젝트에도 순찰 컴포넌트를 자동 추가한다. OnValidate에서 바로 컴포넌트를 변경하지 않도록 지연 처리한다.
-    void QueuePatrolComponentCheck()
+    // 已存在的场景对象也自动补齐巡逻和跳落组件，延后处理以避开 OnValidate。
+    // 기존 씬 오브젝트에도 순찰과 도약 컴포넌트를 자동 추가하며 OnValidate 밖에서 지연 처리한다.
+    void QueueRequiredComponentCheck()
     {
-        if (Application.isPlaying || patrolComponentCheckQueued)
+        if (Application.isPlaying || requiredComponentCheckQueued)
         {
             return;
         }
-        patrolComponentCheckQueued = true;
-        UnityEditor.EditorApplication.delayCall += EnsurePatrolComponentInEditor;
+        requiredComponentCheckQueued = true;
+        UnityEditor.EditorApplication.delayCall += EnsureRequiredComponentsInEditor;
     }
 
-    void EnsurePatrolComponentInEditor()
+    void EnsureRequiredComponentsInEditor()
     {
         if (this == null)
         {
             return;
         }
-        patrolComponentCheckQueued = false;
+        requiredComponentCheckQueued = false;
         if (UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode ||
             UnityEditor.EditorUtility.IsPersistent(this) || !gameObject.scene.IsValid())
         {
@@ -444,6 +389,10 @@ public class EnemyPlayerChaseBehaviour : MonoBehaviour
         if (GetComponent<EnemyPatrolBehaviour>() == null)
         {
             UnityEditor.Undo.AddComponent<EnemyPatrolBehaviour>(gameObject);
+        }
+        if (GetComponent<EnemyLinkTraversal>() == null)
+        {
+            UnityEditor.Undo.AddComponent<EnemyLinkTraversal>(gameObject);
         }
     }
 #endif
@@ -477,9 +426,11 @@ public class EnemyPlayerChaseBehaviour : MonoBehaviour
             return;
         }
 
+        Color previousColor = Gizmos.color;
         if (showChaseRangeGizmo)
         {
-            currentVision.DrawFieldOfView(losePlayerRange, Color.yellow);
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, losePlayerRange);
         }
         currentVision.DrawFieldOfView(findRange, Color.cyan);
         float nearRange = Mathf.Clamp(instantDetectionRange, 0f, Mathf.Max(0f, findRange));
@@ -488,14 +439,13 @@ public class EnemyPlayerChaseBehaviour : MonoBehaviour
             currentVision.DrawFieldOfView(nearRange, Color.green);
         }
 
-        Color previousColor = Gizmos.color;
         if (Application.isPlaying && isChasing)
         {
-            // 标记记忆位置，不绘制墙后玩家的新位置。
-            // 기억한 위치를 표시하고, 벽 뒤 플레이어의 새 위치는 그리지 않는다.
+            // 标记当前追逐的地面位置，锁定后允许持续跟踪墙后的玩家。
+            // 현재 추적 중인 지면 위치를 표시한다. 타깃 고정 후에는 벽 뒤 플레이어도 계속 추적한다.
             Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(lastSeenPosition, 0.2f);
-            Gizmos.DrawLine(transform.position, lastSeenPosition);
+            Gizmos.DrawWireSphere(chasePosition, 0.2f);
+            Gizmos.DrawLine(transform.position, chasePosition);
         }
         Gizmos.color = previousColor;
 
@@ -512,8 +462,8 @@ public class EnemyPlayerChaseBehaviour : MonoBehaviour
         }
         if (showChaseRangeGizmo)
         {
-            UnityEditor.Handles.Label(origin + forward * losePlayerRange,
-                $"Chase sight: {losePlayerRange:0.#}");
+            UnityEditor.Handles.Label(transform.position + forward * losePlayerRange,
+                $"Chase radius: {losePlayerRange:0.#}");
         }
 
         if (Application.isPlaying)
@@ -524,10 +474,6 @@ public class EnemyPlayerChaseBehaviour : MonoBehaviour
             string state;
             if (enemyAI != null && enemyAI.IsParalyzed())
                 state = "Paralyzed";
-            else if (isWaitingAtLastSeenPosition)
-                state = $"Look around: {lostTargetWaitTimer:0.0}s";
-            else if (isMovingToLastSeenPosition)
-                state = "Move to last seen position";
             else if (isChasing)
                 state = "Chasing";
             else if (IsHoldingDirection)
