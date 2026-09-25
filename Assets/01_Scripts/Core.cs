@@ -5,6 +5,17 @@ public class Core : MonoBehaviour, IDamageable
     public float curHp = 100f; // 현재 체력 설정
     public float maxHp = 100f; // 최대 체력 설정
     public float defensePower = 0f;
+    private bool defeatReported;
+
+    void Start()
+    {
+        if (GameManager.Instance != null) GameManager.Instance.RestoreCoreHealth(this);
+    }
+
+    void OnDestroy()
+    {
+        if (GameManager.Instance != null) GameManager.Instance.RememberCoreHealth(this);
+    }
 
     void Update()
     {
@@ -15,10 +26,12 @@ public class Core : MonoBehaviour, IDamageable
     // 통합 피해 입구: IDamageable로 피해를 받고 기존 방어 계산을 유지한다.
     public void TakeDamage(float damage)
     {
+        if (defeatReported || (GameManager.Instance != null && GameManager.Instance.IsGameOver)) return;
         // 방어력을 고려한 데미지 계산 (방어력이 데미지를 상쇄)
         float finalDamage = Mathf.Max(0, damage - defensePower);
         curHp -= finalDamage;
         Debug.Log($"Core가 {finalDamage}의 데미지를 입었습니다! 남은 체력: {curHp}");
+        GameOver();
     }
 
     // 保留旧调用入口，实际受伤逻辑统一交给 TakeDamage。
@@ -30,6 +43,7 @@ public class Core : MonoBehaviour, IDamageable
 
     public void Heal(float healAmount)
     {
+        if (defeatReported) return;
         if (curHp == maxHp)
         {
             return;
@@ -49,9 +63,11 @@ public class Core : MonoBehaviour, IDamageable
 
     void GameOver()
     {
-        if(curHp <= 0)
+        if (curHp <= 0 && !defeatReported && GameManager.Instance != null)
         {
-            Debug.Log("Game Over");
+            curHp = 0;
+            defeatReported = true;
+            GameManager.Instance.EndGame();
         }
     }
 }

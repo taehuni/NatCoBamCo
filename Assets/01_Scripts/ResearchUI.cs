@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+[DefaultExecutionOrder(-90)]
 public class ResearchUI : MonoBehaviour
 {
     [Header("��ü UI")]
@@ -32,6 +33,8 @@ public class ResearchUI : MonoBehaviour
 
     private ResearchCategory currentCategory = ResearchCategory.Wall;
     private bool isOpen = false;
+    public bool IsOpen => isOpen;
+    private float timeScaleBeforeOpen = 1f;
     private PlayerController playerController;
     private CameraFollow cameraFollow;
     private bool playerControllerWasEnabled;
@@ -94,7 +97,7 @@ public class ResearchUI : MonoBehaviour
 
     public void OpenUI()
     {
-        if (researchPanel == null) return;
+        if (researchPanel == null || isOpen || !InteractionSelection.TryOpenMenu(this)) return;
 
         researchPanel.SetActive(true);
         researchPanel.transform.SetAsLastSibling();
@@ -105,6 +108,7 @@ public class ResearchUI : MonoBehaviour
 
         if (pauseGameWhileOpen)
         {
+            timeScaleBeforeOpen = Time.timeScale;
             Time.timeScale = 0f;
         }
 
@@ -114,20 +118,26 @@ public class ResearchUI : MonoBehaviour
 
     public void CloseUI()
     {
-        if (researchPanel == null) return;
+        if (!isOpen) return;
 
-        researchPanel.SetActive(false);
+        if (researchPanel != null) researchPanel.SetActive(false);
         isOpen = false;
+        InteractionSelection.CloseMenu(this);
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
         if (pauseGameWhileOpen)
         {
-            Time.timeScale = 1f;
+            Time.timeScale = timeScaleBeforeOpen;
         }
 
         SetPlayerControl(true);
+    }
+
+    void OnDisable()
+    {
+        if (isOpen) CloseUI();
     }
 
     public void ShowCategory(ResearchCategory category)

@@ -40,7 +40,7 @@ public class DailyResourceSpawner : MonoBehaviour
     public string Id => spawnerId;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetSession()
+    public static void ResetSession()
     {
         states.Clear();
         seedSource = new System.Random();

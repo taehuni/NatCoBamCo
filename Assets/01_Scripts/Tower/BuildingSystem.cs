@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
+[DefaultExecutionOrder(-80)]
 public class BuildingSystem : MonoBehaviour
 {
     public Camera mainCam;
@@ -68,15 +69,19 @@ public class BuildingSystem : MonoBehaviour
 
     void Update()
     {
+        if (InteractionSelection.WorldInputBlocked || Time.timeScale <= 0f) return;
         HandleModeSwitch(); //모드 전화
+
+        if (Input.GetKeyDown(KeyCode.Escape) && (isBuildMode || isRemoveMode))
+        {
+            CancelPlacement();
+            InteractionSelection.BlockWorldInputThisFrame();
+            return;
+        }
+        if (InteractionSelection.WorldInputBlocked) return;
 
         if (isBuildMode)
         {
-            if (Time.frameCount != placementStartedFrame)
-            {
-                HandleBuildingSelection(); //건축 선택
-            }
-
             if (Input.GetKeyDown(KeyCode.R))
             {
                 RotatePreview(); //미리보기 회전
@@ -93,10 +98,6 @@ public class BuildingSystem : MonoBehaviour
                 TryBuild(); //건조시도
             }
 
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                CancelPlacement();
-            }
         }
 
         if (isRemoveMode) //건조 삭제 모드
@@ -112,21 +113,16 @@ public class BuildingSystem : MonoBehaviour
     //모드전환 건조 - 삭제
     void HandleModeSwitch()
     {
-        if (Input.GetKeyDown(KeyCode.X)) //x키 누르면 삭제 모드 전환
-        {
-            isRemoveMode = !isRemoveMode;
+        if (Input.GetKeyDown(KeyCode.G)) ToggleRemovalMode();
+    }
 
-            if (isRemoveMode)
-            {
-                isBuildMode = false; //건조 모드 끄기
-                currentRotationY = 0f; //회전 초기화
-                DestroyPreview(); //미리보기 끄기
-            }
-            else
-            {
-                ClearRemoveTarget(); //임시 저장한 삭제대상 초기화
-            }
-        }
+    public void ToggleRemovalMode()
+    {
+        if (InteractionSelection.IsMenuOpen) return;
+        bool enableRemoval = !isRemoveMode;
+        CancelPlacement();
+        isRemoveMode = enableRemoval;
+        InteractionSelection.BlockWorldInputThisFrame();
     }
 
     //삭제 대상 재질 변경함수
@@ -219,43 +215,6 @@ public class BuildingSystem : MonoBehaviour
     }
 
 
-    //건조 한 대상 선택
-    void HandleBuildingSelection()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            SelectBuilding(wallPrefab);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            SelectBuilding(towerPrefab);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            SelectBuilding(electricTowerPrefab);
-        }
-    }
-
-    //선택함수
-    void SelectBuilding(GameObject prefab)
-    {
-        if (prefab == null)
-        {
-            return;
-        }
-
-        currentBuildingPrefab = prefab;
-        currentBuildItem = FindBuildItem(prefab);
-
-        if (isBuildMode)
-        {
-            DestroyPreview();
-            CreatePreview();
-        }
-    }
-
     BuildItem FindBuildItem(GameObject prefab)
     {
         var menu = FindFirstObjectByType<BuildQuickUI>();
@@ -282,7 +241,7 @@ public class BuildingSystem : MonoBehaviour
         return true;
     }
 
-    // Preserve callers that select a prefab, including the keyboard shortcuts.
+    // Preserve external callers that select a prefab.
     public void StartPlacement(GameObject prefab) => StartPlacement(FindBuildItem(prefab));
 
     bool CanAffordCurrentBuilding() => currentBuildItem != null && currentBuildItem.cost != null &&
@@ -457,6 +416,8 @@ public class BuildingSystem : MonoBehaviour
         lastBuildFrame = Time.frameCount;
         Physics.SyncTransforms();
         CancelPlacement();
+        // The placement click must not fire the weapon after build mode closes.
+        InteractionSelection.BlockWorldInputThisFrame();
     }
 
     //간조 위치 높이 계산함수

@@ -23,6 +23,8 @@ public class ResourceNode : MonoBehaviour, IInteractionTarget
 
     // 태훈 추가: 씬을 다시 로드해도(파밍씬 재입장) 이미 채집한 노드가 초기화되어 재등장하지 않도록 static으로 기억
     private static readonly HashSet<string> collectedNodeIds = new HashSet<string>();
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    public static void ResetSession() => collectedNodeIds.Clear();
     private string NodeId => $"{gameObject.scene.name}:{gameObject.name}:{transform.position}";
 
     private PlayerController interactionPlayer;

@@ -28,6 +28,11 @@ public class GameHUDStatusUI : MonoBehaviour
     public Slider healthSlider;
     public TMP_Text healthText;
     public TMP_Text fireModeText;
+    public TMP_Text controlHintText;
+    [Header("패배 화면")]
+    public GameObject defeatPanel;
+    public TMP_Text defeatMessageText;
+    public Button restartButton;
     [Min(0)] public int food;
 
     [Header("낮 / 밤")]
@@ -49,6 +54,9 @@ public class GameHUDStatusUI : MonoBehaviour
     private Material runtimeWaveMaterial;
     private float nextStatusRefresh;
     private int waveCount;
+    private BuildingSystem building;
+    private BuildQuickUI buildMenu;
+    private ResearchUI researchMenu;
 
     void Awake()
     {
@@ -68,6 +76,9 @@ public class GameHUDStatusUI : MonoBehaviour
     {
         if (bindGameData)
         {
+            RefreshDefeat();
+            if (GameManager.Instance != null && GameManager.Instance.IsGameOver) return;
+            RefreshControlHints();
             if (inventory != ResourceInventory.Instance) BindInventory();
             // Health and phase have no events. Poll at 5 Hz, including paused menus.
             if (Time.unscaledTime >= nextStatusRefresh)
@@ -89,6 +100,8 @@ public class GameHUDStatusUI : MonoBehaviour
     void OnEnable()
     {
         if (!bindGameData) return;
+        if (restartButton != null) restartButton.onClick.AddListener(RestartGame);
+        RefreshDefeat();
         SceneManager.sceneLoaded += OnSceneLoaded;
         BindScene();
     }
@@ -100,6 +113,7 @@ public class GameHUDStatusUI : MonoBehaviour
 
     void OnDisable()
     {
+        if (restartButton != null) restartButton.onClick.RemoveListener(RestartGame);
         SceneManager.sceneLoaded -= OnSceneLoaded;
         if (inventory != null) inventory.Changed -= ReadResources;
         inventory = null;
@@ -116,6 +130,9 @@ public class GameHUDStatusUI : MonoBehaviour
     {
         player = GetComponentInParent<PlayerController>();
         shooter = player != null ? player.GetComponent<PlayerShoot>() : null;
+        building = player != null ? player.GetComponent<BuildingSystem>() : null;
+        buildMenu = player != null ? player.GetComponentInChildren<BuildQuickUI>(true) : null;
+        researchMenu = player != null ? player.GetComponentInChildren<ResearchUI>(true) : null;
         makers = FindObjectsByType<EnemyMaker>(FindObjectsSortMode.None);
         BindInventory();
         nextStatusRefresh = 0f;
@@ -127,6 +144,41 @@ public class GameHUDStatusUI : MonoBehaviour
         inventory = ResourceInventory.Instance;
         if (inventory != null) inventory.Changed += ReadResources;
         ReadResources();
+    }
+
+    void RefreshControlHints()
+    {
+        if (researchMenu != null && researchMenu.IsOpen)
+            SetLabel(controlHintText, "[1/2] 연구 탭\n[좌클릭] 연구 · [Esc] 닫기");
+        else if (buildMenu != null && buildMenu.IsOpen)
+            SetLabel(controlHintText, "[1-3] 항목 선택\n[F/Esc] 닫기 · [G] 철거");
+        else if (building != null && building.isBuildMode)
+            SetLabel(controlHintText, "[좌클릭/Enter] 설치 · [R] 회전\n[F] 건설 목록 · [G] 철거\n[Esc] 취소");
+        else if (building != null && building.isRemoveMode)
+            SetLabel(controlHintText, "[좌클릭] 철거 · [F] 건설\n[G/Esc] 취소");
+        else
+        {
+            bool canReady = GameManager.Instance != null && GameManager.Instance.CanReadyForDefense;
+            SetLabel(controlHintText, "[F] 건설 · [G] 철거\n[E] 상호작용 · [V] 사격 모드" +
+                (canReady ? "\n[Q] 준비 완료" : ""));
+        }
+    }
+
+    void RefreshDefeat()
+    {
+        var manager = GameManager.Instance;
+        bool defeated = manager != null && manager.IsGameOver;
+        if (defeatPanel != null && defeatPanel.activeSelf != defeated) defeatPanel.SetActive(defeated);
+        if (!defeated) return;
+        SetLabel(controlHintText, "");
+        SetLabel(defeatMessageText, !string.IsNullOrEmpty(manager.RestartError) ? manager.RestartError :
+            manager.IsRestarting ? "다시 시작하는 중…" : "쉘터가 파괴되었습니다");
+        if (restartButton != null) restartButton.interactable = !manager.IsRestarting;
+    }
+
+    public void RestartGame()
+    {
+        if (bindGameData && GameManager.Instance != null) GameManager.Instance.RestartGame();
     }
 
     void ReadResources()

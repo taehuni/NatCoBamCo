@@ -4,10 +4,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+[DefaultExecutionOrder(-90)]
 public class BuildQuickUI : MonoBehaviour
 {
     [Header("단축키")]
-    public KeyCode openKey = KeyCode.B;
+    public KeyCode openKey = KeyCode.F;
 
     [Header("전체 UI")]
     public GameObject buildQuickPanel;
@@ -42,6 +43,7 @@ public class BuildQuickUI : MonoBehaviour
     [Min(0f)] public float cardSpacing = 20f;
 
     private bool isOpen = false;
+    public bool IsOpen => isOpen;
     private BuildCategory currentCategory = BuildCategory.Wall;
     private PlayerController playerController;
     private CameraFollow cameraFollow;
@@ -89,6 +91,14 @@ public class BuildQuickUI : MonoBehaviour
 
         if (!isOpen) return;
 
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            CloseUI();
+            var placement = buildingSystemObject != null ? buildingSystemObject.GetComponent<BuildingSystem>() : null;
+            if (placement != null) placement.ToggleRemovalMode();
+            return;
+        }
+
         int pressedNumber = GetPressedNumber();
 
         if (categoryPanel != null && categoryPanel.activeSelf)
@@ -111,12 +121,15 @@ public class BuildQuickUI : MonoBehaviour
 
     public void OpenUI()
     {
-        if (buildQuickPanel == null) return;
+        if (buildQuickPanel == null || isOpen || !InteractionSelection.TryOpenMenu(this)) return;
+
+        var placement = buildingSystemObject != null ? buildingSystemObject.GetComponent<BuildingSystem>() : null;
+        if (placement != null) placement.CancelPlacement();
 
         buildQuickPanel.SetActive(true);
         isOpen = true;
 
-        // N을 누르면 항상 카테고리 선택창부터 보이게 함
+        // 건설 메뉴는 항상 카테고리 선택창부터 연다.
         if (categoryPanel != null)
             categoryPanel.SetActive(true);
 
@@ -132,15 +145,21 @@ public class BuildQuickUI : MonoBehaviour
 
     public void CloseUI()
     {
-        if (buildQuickPanel == null) return;
+        if (!isOpen) return;
 
-        buildQuickPanel.SetActive(false);
+        if (buildQuickPanel != null) buildQuickPanel.SetActive(false);
         isOpen = false;
+        InteractionSelection.CloseMenu(this);
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
         SetPlayerControl(true);
+    }
+
+    void OnDisable()
+    {
+        if (isOpen) CloseUI();
     }
 
     public void ShowCategory(BuildCategory category)

@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -6,6 +7,14 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     private float timer;
+    private float? savedCoreHealth;
+    [SerializeField] private string restartSceneName = "01_Main";
+    public bool IsGameOver => currentPhase == GamePhase.Defeated;
+    public bool IsRestarting { get; private set; }
+    public string RestartError { get; private set; }
+    public bool CanReadyForDefense => !IsRestarting &&
+        currentPhase == GamePhase.Gathering &&
+        SceneManager.GetActiveScene().name == "01_Main";
 
     [Header("게임 시간")]
     public float gatheringTime = 60f; //테스트용 채집 시간 이후 제거
@@ -26,7 +35,8 @@ public class GameManager : MonoBehaviour
         Gathering,
         NightStart,
         Defense,
-        DefenseEnd
+        DefenseEnd,
+        Defeated
     }
 
     public GamePhase currentPhase;
@@ -72,6 +82,20 @@ public class GameManager : MonoBehaviour
         FindMainLight();
 
         ApplyCurrentLight();
+    }
+
+    internal void RememberCoreHealth(Core core)
+    {
+        // Restart unloads the old core after its saved state has been cleared.
+        if (IsRestarting || core == null || core.gameObject.scene.name != "01_Main") return;
+        savedCoreHealth = Mathf.Clamp(core.curHp, 0f, core.maxHp);
+    }
+
+    internal void RestoreCoreHealth(Core core)
+    {
+        if (IsRestarting || !savedCoreHealth.HasValue || core == null ||
+            core.gameObject.scene.name != "01_Main") return;
+        core.curHp = Mathf.Clamp(savedCoreHealth.Value, 0f, core.maxHp);
     }
 
     private void FindMainLight()
@@ -123,6 +147,7 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
+        if (IsGameOver || IsRestarting) return;
         timer += Time.deltaTime;
 
         CheckPhaseTimer();
@@ -136,9 +161,11 @@ public class GameManager : MonoBehaviour
         {
             case GamePhase.Gathering:
 
-                if (Input.GetKeyDown(KeyCode.Q)) //이후 조건 변화. 현재는 디버그용 스킵.
+                // Q: Main에서 준비 완료. 메뉴나 건설/철거 조작 중에는 밤을 시작하지 않는다.
+                if (Input.GetKeyDown(KeyCode.Q) &&
+                    InteractionSelection.CanUseWorldActions(FindFirstObjectByType<PlayerController>()))
                 {
-                    ChangePhase(GamePhase.NightStart);
+                    SkipGathering();
                 }
 
                 break;
@@ -166,6 +193,12 @@ public class GameManager : MonoBehaviour
 
     public void ChangePhase(GamePhase newPhase)
     {
+        if (IsGameOver || IsRestarting) return;
+        if (newPhase == GamePhase.Defeated)
+        {
+            EndGame();
+            return;
+        }
         currentPhase = newPhase;
 
         // 페이즈가 바뀌면 타이머 초기화
@@ -246,10 +279,10 @@ public class GameManager : MonoBehaviour
 
 
 
-    // 채집을 스킵하고 바로 밤으로
+    // Main에서 준비를 마치고 밤으로
     public void SkipGathering()
     {
-        if (currentPhase != GamePhase.Gathering)
+        if (!CanReadyForDefense)
             return;
 
         ChangePhase(GamePhase.NightStart);
@@ -287,6 +320,113 @@ public class GameManager : MonoBehaviour
             return;
 
         mainLight.color = nightLightColor;
+    }
+
+    public void EndGame()
+    {
+        if (IsGameOver || IsRestarting) return;
+        currentPhase = GamePhase.Defeated;
+        timer = 0f;
+        RestartError = null;
+
+        // Close menus before freezing: ResearchUI restores its previous time scale.
+        foreach (var menu in FindObjectsByType<BuildQuickUI>(FindObjectsSortMode.None)) menu.CloseUI();
+        foreach (var menu in FindObjectsByType<ResearchUI>(FindObjectsSortMode.None)) menu.CloseUI();
+        foreach (var building in FindObjectsByType<BuildingSystem>(FindObjectsSortMode.None))
+        {
+            building.CancelPlacement();
+            building.enabled = false;
+        }
+        foreach (var player in FindObjectsByType<PlayerController>(FindObjectsSortMode.None)) player.enabled = false;
+        foreach (var camera in FindObjectsByType<CameraFollow>(FindObjectsSortMode.None)) camera.enabled = false;
+        foreach (var shooter in FindObjectsByType<PlayerShoot>(FindObjectsSortMode.None))
+        {
+            shooter.StopAllCoroutines();
+            shooter.enabled = false;
+        }
+        foreach (var enemy in FindObjectsByType<EnemyAI>(FindObjectsSortMode.None))
+        {
+            enemy.StopAllCoroutines();
+            enemy.enabled = false;
+        }
+        foreach (var building in FindObjectsByType<BuildingObject>(FindObjectsSortMode.None))
+            foreach (var behaviour in building.GetComponentsInChildren<MonoBehaviour>())
+            {
+                behaviour.StopAllCoroutines();
+                behaviour.enabled = false;
+            }
+
+        Time.timeScale = 0f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+
+    public void RestartGame()
+    {
+        if (!IsGameOver || IsRestarting) return;
+        if (string.IsNullOrWhiteSpace(restartSceneName) || !Application.CanStreamedLevelBeLoaded(restartSceneName))
+        {
+            RestartError = "다시 시작할 수 없습니다.";
+            Debug.LogWarning("Restart scene is missing from the build scene list.", this);
+            return;
+        }
+        IsRestarting = true;
+        RestartError = null;
+        StartCoroutine(RestartSession());
+    }
+
+    IEnumerator RestartSession()
+    {
+        AsyncOperation operation = null;
+        try
+        {
+            operation = SceneManager.LoadSceneAsync(restartSceneName, LoadSceneMode.Single);
+            if (operation != null) operation.allowSceneActivation = false;
+        }
+        catch (System.Exception exception)
+        {
+            Debug.LogException(exception, this);
+        }
+        if (operation == null)
+        {
+            IsRestarting = false;
+            RestartError = "다시 시작할 수 없습니다.";
+            yield break;
+        }
+
+        // Keep the previous session until the new scene is ready to activate.
+        while (operation.progress < 0.9f) yield return null;
+        foreach (var player in FindObjectsByType<PlayerScenePersistence>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            DestroySessionObject(player.gameObject);
+        foreach (var inventory in FindObjectsByType<ResourceInventory>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            DestroySessionObject(inventory.gameObject);
+        foreach (var buildings in FindObjectsByType<BuiltBuildingPersistence>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            DestroySessionObject(buildings.gameObject);
+        // Destroy must finish before new singleton instances execute Awake.
+        yield return null;
+        ResourceNode.ResetSession();
+        DailyResourceSpawner.ResetSession();
+        InteractionSelection.ResetSession();
+        savedCoreHealth = null;
+        currentDay = 1;
+        timer = 0f;
+        operation.allowSceneActivation = true;
+        yield return operation;
+
+        currentPhase = GamePhase.DayStart;
+        IsRestarting = false;
+        Time.timeScale = 1f;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        FindMainLight();
+        ChangePhase(GamePhase.DayStart);
+    }
+
+    void DestroySessionObject(GameObject target)
+    {
+        if (target == null || target == gameObject) return;
+        target.SetActive(false);
+        Destroy(target);
     }
 
     void ClearEnemies()

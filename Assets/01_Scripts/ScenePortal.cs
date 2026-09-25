@@ -13,7 +13,12 @@ public class ScenePortal : MonoBehaviour, IInteractionTarget, IInteractable
 
     private PlayerController interactionPlayer;
     public KeyCode InteractionKey => interactKey;
-    public bool CanBeginInteraction => !string.IsNullOrEmpty(targetSceneName) && UnityEngine.Application.CanStreamedLevelBeLoaded(targetSceneName);
+    private bool IsDefenseExitBlocked => gameObject.scene.name == "01_Main" &&
+        targetSceneName == "02_Collection" && GameManager.Instance != null &&
+        (GameManager.Instance.currentPhase == GameManager.GamePhase.NightStart ||
+         GameManager.Instance.currentPhase == GameManager.GamePhase.Defense);
+    public bool CanBeginInteraction => !IsDefenseExitBlocked &&
+        !string.IsNullOrEmpty(targetSceneName) && UnityEngine.Application.CanStreamedLevelBeLoaded(targetSceneName);
     public bool InteractionInProgress => false;
     public bool IsPlayerInInteractionRange(PlayerController player) =>
         InteractionSelection.IsInRange(this, player, detectRange, playerLayer);
@@ -60,7 +65,9 @@ public class ScenePortal : MonoBehaviour, IInteractionTarget, IInteractable
 
             if (playerUI != null)
             {
-                playerUI.ShowButton($"전송하기({interactKey})", this);
+                playerUI.ShowButton(IsDefenseExitBlocked
+                    ? "방어 중에는 이동할 수 없습니다"
+                    : $"전송하기({interactKey})", this);
             }
         }
         else

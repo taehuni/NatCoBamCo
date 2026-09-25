@@ -56,9 +56,15 @@ public class PlayerShoot : MonoBehaviour
 
     void Update()
     {
-        if (buildingSystem != null &&
-        (buildingSystem.isBuildMode || buildingSystem.isRemoveMode))
+        if (InteractionSelection.WorldInputBlocked || Time.timeScale <= 0f ||
+            (buildingSystem != null && (buildingSystem.isBuildMode || buildingSystem.isRemoveMode)))
         {
+            if (isBursting)
+            {
+                StopAllCoroutines();
+                isBursting = false;
+                switchModeAfterBurst = false;
+            }
             return;
         }
 
@@ -152,6 +158,12 @@ public class PlayerShoot : MonoBehaviour
 
         for (int i = 0; i < currentWeapon.burstCount; i++)
         {
+            if (InteractionSelection.WorldInputBlocked || Time.timeScale <= 0f ||
+                (buildingSystem != null && (buildingSystem.isBuildMode || buildingSystem.isRemoveMode)))
+            {
+                switchModeAfterBurst = false;
+                break;
+            }
             FireOneShot();
 
             if (i < currentWeapon.burstCount - 1)

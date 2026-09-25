@@ -26,14 +26,47 @@ public static class InteractionSelection
     private static readonly Dictionary<PlayerController, Collider[]> playerColliders =
         new Dictionary<PlayerController, Collider[]>();
     private static int frame = -1;
+    private static MonoBehaviour menuOwner;
+    private static int blockedInputFrame = -1;
+
+    public static bool IsMenuOpen => menuOwner != null;
+    private static bool SessionBlocked => GameManager.Instance != null &&
+        (GameManager.Instance.IsGameOver || GameManager.Instance.IsRestarting);
+    public static bool WorldInputBlocked => SessionBlocked || IsMenuOpen || blockedInputFrame == Time.frameCount;
+
+    public static bool TryOpenMenu(MonoBehaviour owner)
+    {
+        if (SessionBlocked || owner == null || (menuOwner != null && menuOwner != owner)) return false;
+        menuOwner = owner;
+        BlockWorldInputThisFrame();
+        return true;
+    }
+
+    public static void CloseMenu(MonoBehaviour owner)
+    {
+        if (menuOwner != owner) return;
+        menuOwner = null;
+        BlockWorldInputThisFrame();
+    }
+
+    public static void BlockWorldInputThisFrame() => blockedInputFrame = Time.frameCount;
+
+    public static bool CanUseWorldActions(PlayerController player)
+    {
+        if (WorldInputBlocked || Time.timeScale <= 0f || player == null || !player.isActiveAndEnabled) return false;
+        var building = player.GetComponent<BuildingSystem>();
+        return building == null || (!building.isBuildMode && !building.isRemoveMode);
+    }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void Reset()
+    public static void ResetSession()
     {
         targets.Clear();
         presses.Clear();
         playerColliders.Clear();
         frame = -1;
+        menuOwner = null;
+        blockedInputFrame = -1;
     }
 
     public static void Register(MonoBehaviour target)
@@ -73,6 +106,7 @@ public static class InteractionSelection
 
     public static bool TryBegin(MonoBehaviour target, PlayerController player)
     {
+        if (!CanUseWorldActions(player)) return false;
         if (target == null || player == null || !(target is IInteractionTarget action)) return false;
         RefreshFrame();
         var key = (player, action.InteractionKey);
@@ -96,7 +130,8 @@ public static class InteractionSelection
         return true;
     }
 
-    public static MonoBehaviour GetDisplayTarget(PlayerController player) => Choose(player, null, true);
+    public static MonoBehaviour GetDisplayTarget(PlayerController player) =>
+        CanUseWorldActions(player) ? Choose(player, null, true) : null;
 
     private static MonoBehaviour Choose(PlayerController player, KeyCode? key, bool showUnavailable)
     {

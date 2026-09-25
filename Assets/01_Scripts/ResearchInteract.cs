@@ -1,32 +1,54 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
 
-public class ResearchInteract : MonoBehaviour
+[DefaultExecutionOrder(-70)]
+public class ResearchInteract : MonoBehaviour, IInteractionTarget
 {
     public ResearchUI researchUI;
+    public float detectRange = 4f;
+    private PlayerController player;
+    private PlayerInteractUI playerUI;
+
+    public KeyCode InteractionKey => KeyCode.E;
+    public bool CanBeginInteraction => researchUI != null && !researchUI.IsOpen;
+    public bool InteractionInProgress => false;
+    public bool IsPlayerInInteractionRange(PlayerController candidate) =>
+        InteractionSelection.IsInRange(this, candidate, detectRange, ~0);
+
+    void OnEnable() => InteractionSelection.Register(this);
+
+    void OnDisable()
+    {
+        if (playerUI != null) playerUI.HideButton(this);
+        InteractionSelection.Unregister(this);
+        player = null;
+        playerUI = null;
+    }
 
     void Awake()
     {
         ResolveResearchUI();
     }
 
-    void OnMouseDown()
+    void Update()
     {
-        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        if (player == null)
         {
-            return;
+            player = FindFirstObjectByType<PlayerController>();
+            playerUI = player != null ? player.GetComponent<PlayerInteractUI>() : null;
         }
-
         ResolveResearchUI();
+        bool inRange = player != null && IsPlayerInInteractionRange(player);
+        if (playerUI != null)
+        {
+            if (inRange && CanBeginInteraction) playerUI.ShowButton("연구소(E)", this);
+            else playerUI.HideButton(this);
+        }
+        if (inRange && Input.GetKeyDown(KeyCode.E)) Interact();
+    }
 
-        if (researchUI != null)
-        {
-            researchUI.OpenUI();
-        }
-        else
-        {
-            Debug.LogError("ResearchUI가 장면에 없습니다.");
-        }
+    public void Interact()
+    {
+        if (InteractionSelection.TryBegin(this, player)) researchUI.OpenUI();
     }
 
     void ResolveResearchUI()

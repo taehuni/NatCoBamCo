@@ -3014,7 +3014,7 @@ MonoBehaviour:
   fireInterval: 0.1
   burstCount: 3
   curFireMode: 0
-  availableFireModes: 
+  availableFireModes: 000000000100000002000000
 --- !u!136 &451769432
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -10365,7 +10365,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69a209ce2316e844582b7bc888772761, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildQuickUI
-  openKey: 110
+  openKey: 102
   buildQuickPanel: {fileID: 367835050}
   categoryPanel: {fileID: 830678152}
   buildCardPanel: {fileID: 1785008553}
@@ -10393,7 +10393,7 @@ MonoBehaviour:
   - category: 0
     itemName: "\uCCA0\uC81C \uBCBD"
     icon: {fileID: 0}
-    buildPrefab: {fileID: 0}
+    buildPrefab: {fileID: 5168382328145279519, guid: 901c3eccc9888a949a227d6466e8715b, type: 3}
     cost:
       configured: 1
       wood: 15
@@ -10406,7 +10406,7 @@ MonoBehaviour:
   - category: 0
     itemName: "\uAC15\uD654 \uBCBD"
     icon: {fileID: 0}
-    buildPrefab: {fileID: 0}
+    buildPrefab: {fileID: 3973580339669826659, guid: 49bcc694f5cb91b4b90e094cec0ca22d, type: 3}
     cost:
       configured: 1
       wood: 0
@@ -11534,6 +11534,7 @@ GameObject:
   - component: {fileID: 2008320122}
   - component: {fileID: 2008320121}
   - component: {fileID: 2008320120}
+  - component: {fileID: 2008320125}
   m_Layer: 0
   m_Name: Lab
   m_TagString: Untagged
@@ -11646,6 +11647,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2008320125
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008320119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 973f3434fcd7b8c44af6486a6408e4e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ResearchInteract
+  researchUI: {fileID: 2136160041}
+  detectRange: 4
 --- !u!1 &2011967597
 GameObject:
   m_ObjectHideFlags: 0
@@ -12038,6 +12053,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b09d0f1d0d9b1945ab6047fdb26d2db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  restartSceneName: 01_Main
   gatheringTime: 60
   defenseTime: 10
   currentDay: 1
