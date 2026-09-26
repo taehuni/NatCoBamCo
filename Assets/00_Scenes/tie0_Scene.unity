@@ -1088,6 +1088,12 @@ MonoBehaviour:
     itemName: "\uB098\uBB34 \uBCBD"
     icon: {fileID: 0}
     buildPrefab: {fileID: 0}
+    cost:
+      configured: 0
+      wood: 0
+      metal: 0
+      rareMetal: 0
+      food: 0
     costText: "\uC18C\uBAA8 \uC790\uC6D0: \uBAA9\uC7AC 20"
     descriptionText: "\uBE60\uB974\uAC8C \uC124\uCE58\uD560 \uC218 \uC788\uB294 \uAE30\uBCF8
       \uBC29\uC5B4\uBCBD\uC785\uB2C8\uB2E4."
@@ -1095,6 +1101,12 @@ MonoBehaviour:
     itemName: "\uCCA0\uC81C \uBCBD"
     icon: {fileID: 0}
     buildPrefab: {fileID: 0}
+    cost:
+      configured: 0
+      wood: 0
+      metal: 0
+      rareMetal: 0
+      food: 0
     costText: "\uC18C\uBAA8 \uC790\uC6D0: \uCCA0 40 / \uBAA9\uC7AC 15"
     descriptionText: "\uBCF4\uC2A4 \uACF5\uACA9\uC744 \uBC84\uD2F0\uAE30 \uC704\uD55C
       \uACE0\uB0B4\uAD6C\uB3C4 \uBC29\uC5B4\uBCBD\uC785\uB2C8\uB2E4."
@@ -1102,6 +1114,12 @@ MonoBehaviour:
     itemName: "\uAC15\uD654 \uBCBD"
     icon: {fileID: 0}
     buildPrefab: {fileID: 0}
+    cost:
+      configured: 0
+      wood: 0
+      metal: 0
+      rareMetal: 0
+      food: 0
     costText: "\uC18C\uBAA8 \uC790\uC6D0: \uCCA0 70 / \uBD80\uD488 30"
     descriptionText: "\uBCF4\uC2A4 \uACF5\uACA9\uC744 \uBC84\uD2F0\uAE30 \uC704\uD55C
       \uACE0\uB0B4\uAD6C\uB3C4 \uBC29\uC5B4\uBCBD\uC785\uB2C8\uB2E4."
@@ -1110,6 +1128,12 @@ MonoBehaviour:
     itemName: "\uAE30\uAD00\uCD1D \uD0C0\uC6CC"
     icon: {fileID: 0}
     buildPrefab: {fileID: 0}
+    cost:
+      configured: 0
+      wood: 0
+      metal: 0
+      rareMetal: 0
+      food: 0
     costText: "\uC18C\uBAA8 \uC790\uC6D0: \uCCA0 60 / \uBD80\uD488 35"
     descriptionText: "\uBE60\uB978 \uC5F0\uC0AC\uB85C \uC77C\uBC18 \uC880\uBE44\uB97C
       \uCC98\uB9AC\uD558\uB294 \uD0C0\uC6CC\uC785\uB2C8\uB2E4."
@@ -1117,6 +1141,12 @@ MonoBehaviour:
     itemName: "\uC800\uACA9 \uD0C0\uC6CC"
     icon: {fileID: 0}
     buildPrefab: {fileID: 0}
+    cost:
+      configured: 0
+      wood: 0
+      metal: 0
+      rareMetal: 0
+      food: 0
     costText: "\uC18C\uBAA8 \uC790\uC6D0: \uCCA0 80 / \uBD80\uD488 45"
     descriptionText: "\uAC15\uD55C \uB2E8\uC77C \uD53C\uD574\uB85C \uBCF4\uC2A4\uC640
       \uACE0\uCCB4\uB825 \uC801\uC744 \uACF5\uACA9\uD569\uB2C8\uB2E4."
@@ -1124,6 +1154,12 @@ MonoBehaviour:
     itemName: "\uC804\uAE30 \uD0C0\uC6CC"
     icon: {fileID: 0}
     buildPrefab: {fileID: 0}
+    cost:
+      configured: 0
+      wood: 0
+      metal: 0
+      rareMetal: 0
+      food: 0
     costText: "\uC18C\uBAA8 \uC790\uC6D0: \uCCA0 65 / \uBD80\uD488 40"
     descriptionText: "\uBC94\uC704 \uB0B4 \uC801\uC758 \uC774\uB3D9 \uC18D\uB3C4\uB97C
       \uAC10\uC18C\uC2DC\uD0B5\uB2C8\uB2E4."
@@ -1132,6 +1168,12 @@ MonoBehaviour:
     itemName: "\uC5F0\uAD6C\uC18C"
     icon: {fileID: 0}
     buildPrefab: {fileID: 0}
+    cost:
+      configured: 0
+      wood: 0
+      metal: 0
+      rareMetal: 0
+      food: 0
     costText: "\uC18C\uBAA8 \uC790\uC6D0: \uCCA0 80 / \uBD80\uD488 50"
     descriptionText: "\uBCBD\uACFC \uD0C0\uC6CC\uB97C \uC5C5\uADF8\uB808\uC774\uB4DC\uD560
       \uC218 \uC788\uB294 \uAC74\uBB3C\uC785\uB2C8\uB2E4."
@@ -1139,6 +1181,12 @@ MonoBehaviour:
     itemName: "\uC758\uB8CC\uC18C"
     icon: {fileID: 0}
     buildPrefab: {fileID: 0}
+    cost:
+      configured: 0
+      wood: 0
+      metal: 0
+      rareMetal: 0
+      food: 0
     costText: "\uC18C\uBAA8 \uC790\uC6D0: \uBAA9\uC7AC 40 / \uBD80\uD488 30"
     descriptionText: "\uD50C\uB808\uC774\uC5B4\uC758 \uCCB4\uB825\uC744 \uD68C\uBCF5\uD560
       \uC218 \uC788\uB294 \uAC74\uBB3C\uC785\uB2C8\uB2E4."
@@ -1146,12 +1194,20 @@ MonoBehaviour:
     itemName: "\uC815\uBE44\uC18C"
     icon: {fileID: 0}
     buildPrefab: {fileID: 0}
+    cost:
+      configured: 0
+      wood: 0
+      metal: 0
+      rareMetal: 0
+      food: 0
     costText: "\uC18C\uBAA8 \uC790\uC6D0: \uCCA0 60 / \uBD80\uD488 45"
     descriptionText: "\uBC29\uC5B4\uBCBD\uACFC \uD0C0\uC6CC\uB97C \uC218\uB9AC\uD558\uB294
       \uAC74\uBB3C\uC785\uB2C8\uB2E4."
   buildingSystemObject: {fileID: 0}
-  disableWhileOpen: []
-  unlockCursorWhenOpen: 1
+  cardPanelSize: {x: 900, y: 560}
+  cardAreaSize: {x: 840, y: 450}
+  cardSize: {x: 230, y: 390}
+  cardSpacing: 20
 --- !u!1 &119101368
 GameObject:
   m_ObjectHideFlags: 0
@@ -2311,6 +2367,7 @@ MonoBehaviour:
   collectTime: 3
   resourceType: 0
   amount: 10
+  dailySpawner: {fileID: 0}
 --- !u!65 &276713511
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -16280,7 +16337,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshSurface
   m_SerializedVersion: 0
-  m_AgentTypeID: 0
+  m_AgentTypeID: 1479372276
   m_CollectObjects: 0
   m_Size: {x: 10, y: 10, z: 10}
   m_Center: {x: 0, y: 2, z: 0}
@@ -18241,7 +18298,7 @@ NavMeshAgent:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2690628025231652709}
   m_Enabled: 1
-  m_AgentTypeID: 0
+  m_AgentTypeID: 1479372276
   m_Radius: 0.5
   m_Speed: 3.5
   m_Acceleration: 12

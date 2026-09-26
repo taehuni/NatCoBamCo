@@ -67,7 +67,7 @@ public class EnemyStatusEffects : MonoBehaviour
         // 마비가 끝나면 이동을 다시 허용한다.
         isParalyzed = false;
 
-        if (agent != null && agent.enabled)
+        if (CanChangeAgentStopState())
         {
             agent.isStopped = false;
         }
@@ -161,7 +161,7 @@ public class EnemyStatusEffects : MonoBehaviour
 
         // 停止 NavMeshAgent，让敌人原地不动。
         // NavMeshAgent를 멈춰서 적이 제자리에서 움직이지 않게 한다.
-        if (agent != null && agent.enabled)
+        if (CanChangeAgentStopState())
         {
             agent.isStopped = true;
         }
@@ -177,6 +177,14 @@ public class EnemyStatusEffects : MonoBehaviour
         }
 
         agent.speed = GetBaseMoveSpeed();
+    }
+
+    // 空中麻痹仍计时，但不能打断下落；落地时跳落模块会检查当前麻痹状态。
+    // 공중에서도 마비 시간은 진행하지만 낙하를 중단하지 않는다. 착지 시 도약 모듈이 마비 상태를 확인한다.
+    bool CanChangeAgentStopState()
+    {
+        return agent != null && agent.enabled && agent.isOnNavMesh &&
+            (movement == null || !movement.IsTraversingLink);
     }
 
     float GetBaseMoveSpeed()

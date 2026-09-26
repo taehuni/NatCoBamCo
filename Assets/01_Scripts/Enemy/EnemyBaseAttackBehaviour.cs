@@ -89,7 +89,7 @@ public class EnemyBaseAttackBehaviour : MonoBehaviour
             return;
         }
 
-        if (enemyAI.IsParalyzed())
+        if (enemyAI.IsParalyzed() || movement.IsTraversingLink)
         {
             return;
         }
