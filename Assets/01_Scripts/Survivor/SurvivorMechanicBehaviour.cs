@@ -12,12 +12,13 @@ public class SurvivorMechanicBehaviour : MonoBehaviour
     public float repairRange = 2f;
 
     [Header("밤 여부")]
-    [Tooltip("TODO: 낮/밤 시스템 담당자가 밤이 시작될 때 SetNight(true), 낮이 시작될 때 SetNight(false) 를 호출해줘야 함. 지금은 임시로 인스펙터에서 체크 가능.")]
+    [Tooltip("실제 게임에서는 GameManager의 밤 상태를 사용한다. GameManager가 없는 테스트 씬에서는 SetNight로 설정한다.")]
     public bool isNight;
 
     private SurvivorAI survivorAI;
     private SurvivorMovement movement;
     private DamageableBuilding currentTarget;
+    private bool controlsMovement;
 
     void Awake()
     {
@@ -27,20 +28,31 @@ public class SurvivorMechanicBehaviour : MonoBehaviour
 
     void Update()
     {
-        if (!isNight || survivorAI == null || !survivorAI.IsAvailable)
+        var game = GameManager.Instance;
+        if (game != null)
+            SetNight(game.currentPhase == GameManager.GamePhase.NightStart ||
+                game.currentPhase == GameManager.GamePhase.Defense);
+
+        if (!isNight || survivorAI == null || !survivorAI.IsAvailable ||
+            survivorAI.role != SurvivorAI.SurvivorRole.Mechanic ||
+            survivorAI.state != SurvivorAI.SurvivorState.Rescued ||
+            (game != null && (game.IsGameOver || game.IsRestarting)))
         {
+            ReleaseMovement();
             return;
         }
 
-        // 태훈 추가: 구출되기 전에는 타워 수리하러 가지 않음
-        if (survivorAI.state != SurvivorAI.SurvivorState.Rescued)
+        if (Time.timeScale <= 0f || !movement.IsReady) return;
+
+        if (!controlsMovement)
         {
-            return;
+            movement.Stop(); // 낮의 배회 목적지로 계속 걷지 않도록 이동을 넘겨받는다.
+            controlsMovement = true;
         }
 
-        if (currentTarget == null || !currentTarget.gameObject.activeInHierarchy ||
-            currentTarget.hp >= currentTarget.maxHp)
+        if (!CanRepair(currentTarget))
         {
+            movement.Stop();
             currentTarget = FindMostDamagedTower();
         }
 
@@ -49,16 +61,23 @@ public class SurvivorMechanicBehaviour : MonoBehaviour
             return;
         }
 
-        Vector3 repairPoint = EnemyTargetUtility.GetClosestPointToTarget(transform.position, currentTarget.gameObject);
-        movement.MoveToPosition(repairPoint);
-
         float distance = EnemyTargetUtility.GetDistanceToTarget(transform.position, currentTarget.gameObject);
 
         if (distance <= repairRange)
         {
+            movement.Stop();
             currentTarget.Repair(survivorAI.repairPower * Time.deltaTime);
         }
+        else
+        {
+            Vector3 repairPoint = EnemyTargetUtility.GetClosestPointToTarget(transform.position, currentTarget.gameObject);
+            movement.MoveToPosition(repairPoint);
+        }
     }
+
+    bool CanRepair(DamageableBuilding building) => building != null &&
+        building.isActiveAndEnabled && building.Health.NeedsRepair &&
+        (towerLayer.value & (1 << building.gameObject.layer)) != 0;
 
     DamageableBuilding FindMostDamagedTower()
     {
@@ -71,7 +90,7 @@ public class SurvivorMechanicBehaviour : MonoBehaviour
         {
             DamageableBuilding building = towers[i].GetComponentInParent<DamageableBuilding>();
 
-            if (building == null)
+            if (!CanRepair(building))
             {
                 continue;
             }
@@ -92,7 +111,17 @@ public class SurvivorMechanicBehaviour : MonoBehaviour
     public void SetNight(bool night)
     {
         isNight = night;
+        if (!night) ReleaseMovement();
     }
+
+    void ReleaseMovement()
+    {
+        currentTarget = null;
+        if (controlsMovement && movement != null) movement.Stop();
+        controlsMovement = false;
+    }
+
+    void OnDisable() => ReleaseMovement();
 
     void OnDrawGizmosSelected()
     {

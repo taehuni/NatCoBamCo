@@ -6,6 +6,8 @@ public class Tower : MonoBehaviour
     public float attackInterval = 1f;
     public int damage = 10;
     public LayerMask enemyLayer;
+    public int level = 1;
+    public int maxLevel = 4;
 
     private float nextAttackTime;
     private EnemyAI currentTarget;
@@ -48,7 +50,15 @@ public class Tower : MonoBehaviour
 
     }
 
-    //후에 추가될 업그레이드 기능
+    // 연구 완료 시 기존 타워와 이후 건설하는 타워에 동일한 단계를 적용한다.
+    public void LevelUp()
+    {
+        if (level >= maxLevel) return;
+        level++;
+        UpgradeDamage(5);
+        UpgradeDelay(0.1f);
+    }
+
     void UpgradeDamage(int damage)
     {
         this.damage += damage;
@@ -56,7 +66,7 @@ public class Tower : MonoBehaviour
 
     void UpgradeDelay(float delay)
     {
-        nextAttackTime -= delay; //후에 %형식으로 조정 예정
+        attackInterval = Mathf.Max(0.1f, attackInterval - delay);
     }
 
     //기즈모 그리기

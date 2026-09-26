@@ -409,6 +409,7 @@ public class BuildingSystem : MonoBehaviour
             Destroy(staging);
             return;
         }
+        GetComponentInChildren<ResearchUI>(true)?.ApplyResearchTo(building);
         BuiltBuildingPersistence.Register(building);
         // Also allow placement in unsaved test scenes that cannot be retained by path.
         if (building.transform.parent == staging.transform) building.transform.SetParent(null, true);

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement; // 태훈 추가: 씬 전환 감지용
+using UnityEngine.AI;
 
 // 생존자 로스터 관리 싱글턴. 씬에 빈 오브젝트 하나 만들어서 붙이면 됨.
 //
@@ -15,13 +16,22 @@ public class SurvivorManager : MonoBehaviour
     [Header("생존자 목록")]
     public List<SurvivorAI> roster = new List<SurvivorAI>();
 
-    // 태훈 추가: 한 번 자리 잡은(정착한) 생존자는 다른 씬을 왕복해도 다시 안 건드림 (안 그러면 파밍씬 재입장 때 거기로 또 배치돼버림)
-    private readonly HashSet<SurvivorAI> settled = new HashSet<SurvivorAI>();
+    [Header("합류할 씬 (비어 있으면 거주 시설이 있는 씬)")]
+    public string shelterSceneName;
+
+    private readonly Dictionary<SurvivorAI, (Vector3 position, Quaternion rotation)> shelterPositions =
+        new Dictionary<SurvivorAI, (Vector3, Quaternion)>();
+    private float nextPlacementRetry;
+    private int shelterSceneHandle = -1;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetSingleton() => Instance = null;
 
     void Awake()
     {
         if (Instance != null && Instance != this)
         {
+            gameObject.SetActive(false);
             Destroy(gameObject);
             return;
         }
@@ -35,66 +45,147 @@ public class SurvivorManager : MonoBehaviour
     // 태훈 추가: 씬이 바뀌면 이전 씬의 homePoint(파괴됨)를 새 씬 기준으로 다시 찾아서 이동시킴
     void OnEnable()
     {
+        if (Instance != this) return;
         SceneManager.sceneLoaded += OnSceneLoaded;
+        SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
 
     void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        SceneManager.sceneUnloaded -= OnSceneUnloaded;
+    }
+
+    void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
+
+    void Update()
+    {
+        if (Time.unscaledTime < nextPlacementRetry ||
+            (GameManager.Instance != null && (GameManager.Instance.IsGameOver || GameManager.Instance.IsRestarting))) return;
+        nextPlacementRetry = Time.unscaledTime + 1f;
+        var scene = SceneManager.GetActiveScene();
+        if (!IsShelterScene(scene)) return;
+        shelterSceneHandle = scene.handle;
+        for (int i = 0; i < roster.Count; i++)
+            if (roster[i] != null && (!roster[i].gameObject.activeSelf || roster[i].homePoint == null))
+                PlaceSurvivor(roster[i], scene, i);
+    }
+
+    void OnSceneUnloaded(Scene scene)
+    {
+        if (scene.handle != shelterSceneHandle) return;
+        shelterSceneHandle = -1;
+        foreach (var survivor in roster)
+        {
+            if (survivor == null || !survivor.gameObject.activeSelf) continue;
+            shelterPositions[survivor] = (survivor.transform.position, survivor.transform.rotation);
+            survivor.gameObject.SetActive(false);
+            survivor.homePoint = null;
+        }
     }
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log("생존자 매니저 : 씬 로딩 완료 - " + scene.name);
-
-        foreach (SurvivorAI survivor in roster)
+        if (Instance != this || mode != LoadSceneMode.Single) return;
+        if (scene.name == "00_Intro")
         {
-            if (survivor == null || settled.Contains(survivor))
-            {
-                continue;
-            }
-
-            survivor.gameObject.SetActive(true); // 태훈 추가: 구출 직후 숨겨뒀던 생존자를 새 씬에서 다시 보이게 함
-            survivor.homePoint = FindHomePointForRole(survivor.role);
-            survivor.GoHome();
-            settled.Add(survivor);
+            SurvivorRescueEvent.ResetSession();
+            gameObject.SetActive(false);
+            Destroy(gameObject);
+            return;
+        }
+        bool isShelter = IsShelterScene(scene);
+        if (isShelter) shelterSceneHandle = scene.handle;
+        for (int i = 0; i < roster.Count; i++)
+        {
+            var survivor = roster[i];
+            if (survivor == null) continue;
+            if (isShelter) PlaceSurvivor(survivor, scene, i);
+            else survivor.gameObject.SetActive(false);
         }
     }
 
-    public void AddSurvivor(SurvivorAI survivor)
+    public bool AddSurvivor(SurvivorAI survivor)
     {
         if (survivor == null || roster.Contains(survivor))
         {
-            return;
+            return false;
         }
-
-        if (survivor.homePoint == null)
-        {
-            survivor.homePoint = FindHomePointForRole(survivor.role);
-        }
-
+        survivor.gameObject.SetActive(false);
+        survivor.homePoint = null;
+        survivor.state = SurvivorAI.SurvivorState.Rescued;
         roster.Add(survivor);
 
         // 태훈 추가: 매니저(DontDestroyOnLoad) 밑으로 옮겨서 생존자 본체도 씬 전환 시 같이 유지되게 함
         survivor.transform.SetParent(transform);
 
-        survivor.GoHome();
-
         Debug.Log($"{survivor.survivorName} 생존자 합류 ({survivor.role})");
+        return true;
     }
 
-    // 채집가 -> ResidenceBuilding 위치, 연구원 -> ResearchLab 위치, 정비공 -> 없음(직접 이동하므로 불필요)
-    Transform FindHomePointForRole(SurvivorAI.SurvivorRole role)
-    {
-        if (role == SurvivorAI.SurvivorRole.Researcher)
-        {
-            ResearchLab lab = FindObjectOfType<ResearchLab>();
-            return lab != null ? lab.transform : null;
-        }
+    bool IsShelterScene(Scene scene) => !string.IsNullOrEmpty(shelterSceneName)
+        ? scene.name == shelterSceneName
+        : FindHomePointForRole(SurvivorAI.SurvivorRole.Gatherer, scene) != null ||
+          FindHomePointForRole(SurvivorAI.SurvivorRole.Researcher, scene) != null;
 
-        // 태훈 수정: 정비공도 낮에는 거주구역 근처를 배회하도록 홈포인트 부여 (원래는 Gatherer만 해당, Mechanic은 null)
-        ResidenceBuilding residence = FindObjectOfType<ResidenceBuilding>();
-        return residence != null ? residence.transform : null;
+    // Only use facilities in the newly loaded scene, not retained inactive objects.
+    Transform FindHomePointForRole(SurvivorAI.SurvivorRole role, Scene scene)
+    {
+        foreach (var root in scene.GetRootGameObjects())
+        {
+            if (role == SurvivorAI.SurvivorRole.Researcher)
+            {
+                var lab = root.GetComponentInChildren<ResearchLab>();
+                if (lab != null) return lab.transform;
+            }
+            else
+            {
+                var residence = root.GetComponentInChildren<ResidenceBuilding>();
+                if (residence != null) return residence.transform;
+            }
+        }
+        return null;
+    }
+
+    void PlaceSurvivor(SurvivorAI survivor, Scene scene, int index)
+    {
+        var home = FindHomePointForRole(survivor.role, scene);
+        var movement = survivor.GetComponent<SurvivorMovement>();
+        if (home == null || movement == null || movement.Agent == null) return;
+        var agent = movement.Agent;
+        var filter = new NavMeshQueryFilter { agentTypeID = agent.agentTypeID, areaMask = agent.areaMask };
+        Vector3 position = home.position;
+        Quaternion rotation = survivor.transform.rotation;
+        NavMeshHit hit;
+        bool found = false;
+        if (shelterPositions.TryGetValue(survivor, out var saved))
+        {
+            found = NavMesh.SamplePosition(saved.position, out hit, 2f, filter);
+            if (found) position = hit.position;
+            rotation = saved.rotation;
+        }
+        for (int attempt = 0; !found && attempt < 12; attempt++)
+        {
+            float angle = (index * 120f + attempt * 30f) * Mathf.Deg2Rad;
+            var candidate = home.position + new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * 4f;
+            found = NavMesh.SamplePosition(candidate, out hit, 2f, filter);
+            if (found) position = hit.position;
+        }
+        if (!found) return; // Retry when the destination NavMesh or facility becomes available.
+        agent.enabled = false;
+        survivor.transform.SetPositionAndRotation(position, rotation);
+        survivor.homePoint = home;
+        survivor.gameObject.SetActive(true);
+        agent.enabled = true;
+        if (!agent.isOnNavMesh || !agent.Warp(position))
+        {
+            survivor.gameObject.SetActive(false);
+            return;
+        }
+        movement.MoveToPosition(position);
     }
 
     // 채집가가 로스터에 있고 부상이 아니면 합산 (자원 획득량 배율 보너스)
@@ -104,7 +195,8 @@ public class SurvivorManager : MonoBehaviour
 
         foreach (SurvivorAI s in roster)
         {
-            if (s.role == SurvivorAI.SurvivorRole.Gatherer && s.IsAvailable)
+            if (s != null && s.state == SurvivorAI.SurvivorState.Rescued &&
+                s.role == SurvivorAI.SurvivorRole.Gatherer && s.IsAvailable)
             {
                 total += s.gatherBonus;
             }
@@ -120,7 +212,8 @@ public class SurvivorManager : MonoBehaviour
 
         foreach (SurvivorAI s in roster)
         {
-            if (s.role == SurvivorAI.SurvivorRole.Researcher && s.IsAvailable)
+            if (s != null && s.state == SurvivorAI.SurvivorState.Rescued &&
+                s.role == SurvivorAI.SurvivorRole.Researcher && s.IsAvailable)
             {
                 reduction += s.researchSpeedBonus;
             }

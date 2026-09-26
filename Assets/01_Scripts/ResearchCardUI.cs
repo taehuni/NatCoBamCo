@@ -16,18 +16,27 @@ public class ResearchCardUI : MonoBehaviour
 
     private ResearchItem currentItem;
     private ResearchUI researchUI;
+    private float nextButtonRefresh;
+
+    void Update()
+    {
+        if (Time.unscaledTime < nextButtonRefresh) return;
+        nextButtonRefresh = Time.unscaledTime + 0.2f;
+        RefreshButton();
+    }
 
     public void Setup(ResearchItem item, ResearchUI ui)
     {
         currentItem = item;
         researchUI = ui;
 
-        nameText.text = item.itemName + " Lv." + item.level;
-        costText.text = item.costText;
-        currentStatText.text = item.currentStatText;
-        nextStatText.text = item.nextStatText;
-        specialEffectText.text = item.specialEffectText;
-
+        bool configured = item.IsConfigured;
+        nameText.text = item.itemName + (configured ? $" {item.level}/{item.MaxResearchLevel}" : "");
+        costText.text = configured ? item.cost.DisplayText().Replace("소모 자원: ", "").Replace("희귀 금속", "희귀금속") : "준비 중";
+        item.GetStatDescriptions(out var current, out var next);
+        currentStatText.text = configured ? "현재 " + current : "효과 연결 예정";
+        nextStatText.text = configured ? "연구 후 " + next : "";
+        specialEffectText.text = configured ? GetEffectSummary(item) : "";
         if (itemImage != null)
         {
             if (item.icon != null)
@@ -42,10 +51,7 @@ public class ResearchCardUI : MonoBehaviour
             }
         }
 
-        if (upgradeButtonText != null)
-        {
-            upgradeButtonText.text = "업그레이드";
-        }
+        RefreshButton();
 
         if (upgradeButton != null)
         {
@@ -53,6 +59,28 @@ public class ResearchCardUI : MonoBehaviour
             upgradeButton.onClick.AddListener(OnClickUpgrade);
         }
     }
+
+    void RefreshButton()
+    {
+        if (currentItem == null || researchUI == null) return;
+        if (upgradeButton != null) upgradeButton.interactable = researchUI.CanUpgrade(currentItem);
+        if (upgradeButtonText != null)
+            upgradeButtonText.text = researchUI.GetResearchButtonText(currentItem);
+        if (specialEffectText != null && currentItem.IsConfigured)
+        {
+            if (researchUI.ActiveResearch == currentItem)
+                specialEffectText.text = $"남은 {researchUI.RemainingResearchTime:0.0}초\n" +
+                    (Time.timeScale <= 0f ? "메뉴 닫으면 진행" : "완료 시 전체 강화");
+            else if (currentItem.level >= currentItem.MaxResearchLevel)
+                specialEffectText.text = GetEffectSummary(currentItem);
+            else
+                specialEffectText.text = $"소요 {researchUI.GetResearchDuration(currentItem):0.#}초 · 전체 강화\n이후 건설에도 적용";
+        }
+    }
+
+    static string GetEffectSummary(ResearchItem item) => item.IsWallReinforcement
+        ? "모든 방어벽 강화\n이후 건설에도 적용"
+        : "동일 종류 전체 강화\n이후 건설에도 적용";
 
     void OnClickUpgrade()
     {

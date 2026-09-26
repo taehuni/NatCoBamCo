@@ -402,10 +402,13 @@ public class GameManager : MonoBehaviour
             DestroySessionObject(inventory.gameObject);
         foreach (var buildings in FindObjectsByType<BuiltBuildingPersistence>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             DestroySessionObject(buildings.gameObject);
+        foreach (var survivors in FindObjectsByType<SurvivorManager>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            DestroySessionObject(survivors.gameObject);
         // Destroy must finish before new singleton instances execute Awake.
         yield return null;
         ResourceNode.ResetSession();
         DailyResourceSpawner.ResetSession();
+        SurvivorRescueEvent.ResetSession();
         InteractionSelection.ResetSession();
         savedCoreHealth = null;
         currentDay = 1;

@@ -14,6 +14,8 @@ public class PlayerController : MonoBehaviour
     public Camera mainCam; //메인 카메라
     [Header("플레이어 사격")]
     public PlayerShoot playerShoot;
+    [Header("플레이어 외형")]
+    public Animator visualAnimator;
     
     private float verticalVelocity;
     private CharacterController controller; //자기의 CharacterController
@@ -78,6 +80,12 @@ public class PlayerController : MonoBehaviour
         finalMove.y = verticalVelocity;
 
         controller.Move(finalMove * Time.deltaTime);
+        if (visualAnimator != null)
+        {
+            Vector3 planarVelocity = controller.velocity;
+            planarVelocity.y = 0f;
+            visualAnimator.SetFloat("MoveSpeed", planarVelocity.magnitude, 0.1f, Time.deltaTime);
+        }
     }
 
     // 传送由玩家移动脚本处理：临时关闭碰撞控制器，并清空上一场景的跳跃/下落速度。

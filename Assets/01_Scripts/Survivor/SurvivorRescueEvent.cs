@@ -7,7 +7,7 @@ using UnityEngine;
 // Survivor_Mechanic/Gatherer/Researcher 프리팹처럼 SurvivorAI 가 이미 붙어있는 오브젝트에 이 컴포넌트를 같이 붙여서 사용.
 // 흐름: 플레이어 접근 -> 주변 몬스터(enemyLayer) 존재 확인 -> 없으면 E키로 구조
 //      -> SurvivorAI.state 를 Rescued 로 변경 -> SurvivorManager 에 합류
-public class SurvivorRescueEvent : MonoBehaviour, IInteractionTarget
+public class SurvivorRescueEvent : MonoBehaviour, IInteractionTarget, IInteractable
 {
     [Header("상호작용")]
     public float detectRange = 4f;
@@ -16,6 +16,8 @@ public class SurvivorRescueEvent : MonoBehaviour, IInteractionTarget
     [Header("생존자 정보")]
     [Tooltip("비어있으면 SurvivorAI 에 이미 설정된 이름을 그대로 사용")]
     public string survivorName;
+    [Tooltip("씬 재방문 시 같은 구출 대상을 식별하는 고정 ID")]
+    public string rescueId;
 
     [Header("경비 몬스터 체크")]
     public float guardCheckRange = 6f;
@@ -27,16 +29,35 @@ public class SurvivorRescueEvent : MonoBehaviour, IInteractionTarget
 
     // 태훈 추가: 씬을 다시 로드해도(파밍씬 재입장) 이미 구출한 생존자가 트랩 상태로 재등장(=중복)하지 않도록 static으로 기억
     private static readonly HashSet<string> rescuedIds = new HashSet<string>();
-    private string RescueId => $"{gameObject.scene.name}:{gameObject.name}:{transform.position}";
+    private string cachedRescueId;
+    private string RescueId => cachedRescueId;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    public static void ResetSession() => rescuedIds.Clear();
+
+    void Awake()
+    {
+        cachedRescueId = !string.IsNullOrEmpty(rescueId) ? gameObject.scene.path + ":" + rescueId :
+            $"{gameObject.scene.path}:{gameObject.name}:{transform.position}";
+    }
 
     private PlayerController interactionPlayer;
     public KeyCode InteractionKey => KeyCode.E;
-    public bool CanBeginInteraction => !rescued && GetComponent<SurvivorAI>() != null && GuardsCleared();
+    public bool CanBeginInteraction => !rescued && !rescuedIds.Contains(RescueId) &&
+        SurvivorManager.Instance != null && GetComponent<SurvivorAI>() != null && GuardsCleared();
     public bool InteractionInProgress => false;
     public bool IsPlayerInInteractionRange(PlayerController player) =>
         InteractionSelection.IsInRange(this, player, detectRange, playerLayer);
 
-    void OnEnable() => InteractionSelection.Register(this);
+    void OnEnable()
+    {
+        if (rescuedIds.Contains(RescueId))
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+        InteractionSelection.Register(this);
+    }
 
     void OnDisable()
     {
@@ -44,6 +65,8 @@ public class SurvivorRescueEvent : MonoBehaviour, IInteractionTarget
         if (playerUI != null) playerUI.HideButton(this);
         InteractionSelection.Unregister(this);
         interactionPlayer = null;
+        playerInRange = false;
+        playerUI = null;
     }
 
     void Start()
@@ -58,7 +81,14 @@ public class SurvivorRescueEvent : MonoBehaviour, IInteractionTarget
     {
         CheckPlayerNear();
 
-        if (playerInRange && Input.GetKeyDown(KeyCode.E) && InteractionSelection.TryBegin(this, interactionPlayer))
+        if (playerInRange && Input.GetKeyDown(KeyCode.E)) Interact();
+    }
+
+    public void Interact()
+    {
+        if (!isActiveAndEnabled) return;
+        CheckPlayerNear();
+        if (playerInRange && InteractionSelection.TryBegin(this, interactionPlayer))
         {
             Rescue();
         }
@@ -77,7 +107,11 @@ public class SurvivorRescueEvent : MonoBehaviour, IInteractionTarget
 
             if (playerUI != null)
             {
-                if (GuardsCleared())
+                if (SurvivorManager.Instance == null)
+                {
+                    playerUI.ShowButton("지금은 구조할 수 없습니다", this);
+                }
+                else if (GuardsCleared())
                 {
                     playerUI.ShowButton("생존자 구조(E)", this);
                 }
@@ -106,7 +140,7 @@ public class SurvivorRescueEvent : MonoBehaviour, IInteractionTarget
 
     void Rescue()
     {
-        rescued = true;
+        if (!CanBeginInteraction) return;
 
         // 태훈 수정: SurvivorManager.AddSurvivor() 가 이 오브젝트를 자기 밑(DontDestroyOnLoad)으로 재부모화하기 전에
         // RescueId를 먼저 계산해둠 (재부모화 후에 계산하면 gameObject.scene 이 바뀌어서 씬 재입장 시 비교가 안 맞음)
@@ -125,12 +159,9 @@ public class SurvivorRescueEvent : MonoBehaviour, IInteractionTarget
             survivorAI.survivorName = survivorName;
         }
 
-        survivorAI.state = SurvivorAI.SurvivorState.Rescued;
-
-        if (SurvivorManager.Instance != null)
-        {
-            SurvivorManager.Instance.AddSurvivor(survivorAI);
-        }
+        if (!SurvivorManager.Instance.AddSurvivor(survivorAI)) return;
+        rescued = true;
+        enabled = false; // A rescued resident must never offer the rescue interaction again.
 
         Debug.Log($"{survivorAI.survivorName} 구조 완료");
 

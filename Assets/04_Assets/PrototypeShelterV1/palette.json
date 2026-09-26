@@ -1,0 +1,82 @@
+{
+  "Concrete": {
+    "hex": "AAB0AA",
+    "metallic": 0,
+    "roughness": 0.88
+  },
+  "DarkConcrete": {
+    "hex": "525C59",
+    "metallic": 0,
+    "roughness": 0.9
+  },
+  "Olive": {
+    "hex": "586651",
+    "metallic": 0.22,
+    "roughness": 0.68
+  },
+  "Steel": {
+    "hex": "35423F",
+    "metallic": 0.65,
+    "roughness": 0.4
+  },
+  "Black": {
+    "hex": "20292B",
+    "metallic": 0.2,
+    "roughness": 0.72
+  },
+  "Rust": {
+    "hex": "8E5138",
+    "metallic": 0.35,
+    "roughness": 0.75
+  },
+  "Safety": {
+    "hex": "DFAF45",
+    "metallic": 0.15,
+    "roughness": 0.6
+  },
+  "Cloth": {
+    "hex": "626A53",
+    "metallic": 0,
+    "roughness": 0.94
+  },
+  "Pants": {
+    "hex": "353E3E",
+    "metallic": 0,
+    "roughness": 0.92
+  },
+  "Leather": {
+    "hex": "4A352C",
+    "metallic": 0,
+    "roughness": 0.85
+  },
+  "Skin": {
+    "hex": "B79270",
+    "metallic": 0,
+    "roughness": 0.8
+  },
+  "Glass": {
+    "hex": "527D86",
+    "metallic": 0.6,
+    "roughness": 0.22
+  },
+  "Glow": {
+    "hex": "8FE0CD",
+    "metallic": 0.2,
+    "roughness": 0.28
+  },
+  "Ivory": {
+    "hex": "D7D0B6",
+    "metallic": 0,
+    "roughness": 0.75
+  },
+  "Brick": {
+    "hex": "885443",
+    "metallic": 0,
+    "roughness": 0.92
+  },
+  "Wood": {
+    "hex": "8B7455",
+    "metallic": 0,
+    "roughness": 0.88
+  }
+}
