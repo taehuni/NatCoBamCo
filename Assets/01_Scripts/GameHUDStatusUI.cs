@@ -23,7 +23,12 @@ public class GameHUDStatusUI : MonoBehaviour
 
     [Header("낮 / 밤")]
     public SmoothCompassUI compassUI;
+    public Slider dayCycleSlider;
+    public Image dayCycleFill;
+    public TMP_Text dayNightIconText;
     public TMP_Text dayNightButtonText;
+    public GameObject dayIconObject;
+    public GameObject nightIconObject;
 
     [Header("남은 적")]
     public Image enemyRemainingFill;
@@ -105,21 +110,68 @@ public class GameHUDStatusUI : MonoBehaviour
             staminaRingFill.fillAmount = ratio;
 
         if (staminaText != null)
-            staminaText.text = $"스태미나  {currentStamina} / {maxStamina}";
+            staminaText.text = $"{currentStamina} / {maxStamina}";
     }
 
     void RefreshResources()
     {
-        if (woodText != null) woodText.text = $"나무  {wood}";
-        if (metalText != null) metalText.text = $"철  {metal}";
-        if (partsText != null) partsText.text = $"고급재  {parts}";
+        SetResourceValue(woodText, wood);
+        SetResourceValue(metalText, metal);
+        SetResourceValue(partsText, parts);
+    }
+
+    void SetResourceValue(TMP_Text valueText, int value)
+    {
+        if (valueText == null) return;
+
+        valueText.text = value.ToString();
+        valueText.gameObject.SetActive(true);
+
+        Transform backdrop = valueText.transform.parent != null
+            ? valueText.transform.parent.Find("ValueBackdrop")
+            : null;
+
+        if (backdrop != null)
+            backdrop.gameObject.SetActive(false);
     }
 
     void RefreshDayNight()
     {
-        if (dayNightButtonText == null) return;
+        // U자 Slider는 항상 전체 선을 표시하고,
+        // 낮/밤 상태는 중앙 버튼의 아이콘과 텍스트로 구분한다.
+        float cycleProgress = 1f;
 
-        dayNightButtonText.text = lastNightState ? "달" : "해";
+        if (dayCycleSlider != null)
+        {
+            dayCycleSlider.minValue = 0f;
+            dayCycleSlider.maxValue = 1f;
+            dayCycleSlider.SetValueWithoutNotify(cycleProgress);
+        }
+
+        if (dayCycleFill != null && dayCycleFill.material != null &&
+            dayCycleFill.material.HasProperty(ProgressProperty))
+            dayCycleFill.material.SetFloat(ProgressProperty, cycleProgress);
+
+        if (dayNightIconText != null)
+            dayNightIconText.text = lastNightState ? "☾" : "☀";
+
+        if (dayNightButtonText != null)
+            dayNightButtonText.text = lastNightState ? "밤" : "낮";
+
+        if (dayIconObject != null)
+            dayIconObject.SetActive(!lastNightState);
+
+        if (nightIconObject != null)
+            nightIconObject.SetActive(lastNightState);
+    }
+
+    public void ToggleDayNight()
+    {
+        if (compassUI == null) return;
+
+        compassUI.isNight = !compassUI.isNight;
+        lastNightState = compassUI.isNight;
+        RefreshDayNight();
     }
 
     void RefreshEnemyRemaining()
