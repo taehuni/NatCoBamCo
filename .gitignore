@@ -105,3 +105,18 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Local art authoring, downloaded references and modeling experiments.
+# Runtime models/materials under Assets remain versioned when referenced.
+/ArtSource/
+/Tools/Art/
+/output/
+/tmp/
+
+# Unused source animations and superseded texture trials; retain locally.
+/Assets/04_Assets/VarcoSurvivorV1/Animation/RifleReferences/
+/Assets/04_Assets/VarcoSurvivorV1/Animation/RifleReferences.meta
+/Assets/04_Assets/UrbanShelterV2/Textures/Brick_BaseColor.png*
+/Assets/04_Assets/UrbanShelterV2/Textures/Brick_Normal.png*
+/Assets/04_Assets/UrbanShelterV2/Textures/Concrete_BaseColor.png*
+/Assets/04_Assets/UrbanShelterV2/Textures/Concrete_Normal.png*
