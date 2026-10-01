@@ -343,9 +343,13 @@ public class BuildQuickUI : MonoBehaviour
             titleRect.anchorMin = new Vector2(0f, 1f);
             titleRect.anchorMax = new Vector2(1f, 1f);
             titleRect.pivot = new Vector2(0.5f, 1f);
-            titleRect.anchoredPosition = new Vector2(0f, -15f);
-            titleRect.sizeDelta = new Vector2(-100f, 50f);
+            titleRect.anchoredPosition = new Vector2(0f, -12f);
+            titleRect.sizeDelta = new Vector2(-140f, 44f);
+            titleText.transform.SetAsLastSibling();
         }
+
+        if (closeButton != null)
+            closeButton.transform.SetAsLastSibling();
     }
 
     void ConfigureKeyboardOnlyButton(Button button, int shortcutNumber)
@@ -376,8 +380,8 @@ public class BuildQuickUI : MonoBehaviour
 
     void UpdateButtonVisual()
     {
-        Color selected = new Color(0.2f, 0.8f, 0.6f, 1f);
-        Color normal = Color.white;
+        Color selected = new Color32(164, 78, 52, 255);   // weathered brick / rust
+        Color normal = new Color32(58, 66, 68, 245);      // painted steel
 
         SetButtonColor(wallButton, currentCategory == BuildCategory.Wall, selected, normal);
         SetButtonColor(towerButton, currentCategory == BuildCategory.Tower, selected, normal);

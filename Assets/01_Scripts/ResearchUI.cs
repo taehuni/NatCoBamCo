@@ -174,6 +174,22 @@ public class ResearchUI : MonoBehaviour
             card.Setup(list[i], this);
         }
 
+        Canvas.ForceUpdateCanvases();
+
+        RectTransform contentRect = cardContent as RectTransform;
+        if (contentRect != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(contentRect);
+
+        ScrollRect cardScroll = researchPanel != null
+            ? researchPanel.GetComponentInChildren<ScrollRect>(true)
+            : null;
+
+        if (cardScroll != null)
+        {
+            cardScroll.StopMovement();
+            cardScroll.horizontalNormalizedPosition = 0f;
+        }
+
         UpdateTabVisual();
     }
 
@@ -190,8 +206,8 @@ public class ResearchUI : MonoBehaviour
 
     void UpdateTabVisual()
     {
-        Color selectedColor = new Color(0.2f, 0.8f, 0.6f, 1f);
-        Color normalColor = Color.white;
+        Color selectedColor = new Color32(103, 119, 82, 255); // mossed utility green
+        Color normalColor = new Color32(58, 66, 68, 245);     // painted steel
 
         Image wallImage = null;
         Image towerImage = null;
